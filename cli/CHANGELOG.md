@@ -1,5 +1,35 @@
 # aimd
 
+## 0.1.8
+
+### Patch Changes
+
+- add compile command
+
+## 0.1.7
+
+### Patch Changes
+
+- add support for vars in run command
+
+## 0.1.6
+
+### Patch Changes
+
+- update runtime
+
+## 0.1.5
+
+### Patch Changes
+
+- add wasm
+
+## 0.1.4
+
+### Patch Changes
+
+- :wq
+
 ## 0.1.3
 
 ### Patch Changes

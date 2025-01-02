@@ -1,3 +1,16 @@
+Execute the runtime in a Node.js application.
+
+
+```markdown
+aim/
+├── routes/ # AIM routes
+│ ├── doc1.md
+│ └── doc3.md
+└── .env # Environment variables
+```
+
+
+```javascript
 import * as readline from 'readline';
 import { aim } from "@aim-sdk/runtime";
 import fs from 'fs';
@@ -46,3 +59,33 @@ aimDocument
     console.error('Execution failed:', error);
     handleExit(1);
   });
+```
+
+```markdown
+---
+title: Test
+input:
+  - name: message
+    description: The message to process
+    required: true
+    schema:
+      type: string
+  - name: count
+    description: Number of items to return
+    required: false
+    schema:
+      type: integer
+      default: 10
+---
+
+create a prompt to create an image in dali style of a {{input.message}}
+
+::ai{#response model="meta-llama/llama-3.2-3b-instruct:free@openrouter"}
+
+$response
+
+::replicate{#image model="black-forest-labs/flux-schnell"}
+
+$image
+
+```

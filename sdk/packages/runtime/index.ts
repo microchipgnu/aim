@@ -26,7 +26,19 @@ export async function aim(strings: TemplateStringsArray, ...values: any[]) {
         warnings: [],
         execute: async (options: Partial<RuntimeOptions> = {}) => {
             const abortController = new AbortController();
-            const variables = options.input || options.variables || {};
+            
+            // Get input variables from document frontmatter
+            const inputVariables = document.frontmatter?.input || [];
+            const variables: Record<string, any> = {};
+
+            // First try to get values from options.input or options.variables
+            const inputValues = options.input || options.variables || {};
+
+            // Map input variables using provided values or defaults from schema
+            for (const variable of inputVariables) {
+                const value = inputValues[variable.name];
+                variables[variable.name] = value ?? variable.schema?.default;
+            }
             
             return execute(document.blocks, {
                 onLog: options.onLog || (() => {}),

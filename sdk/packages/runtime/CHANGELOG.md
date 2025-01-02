@@ -1,5 +1,11 @@
 # @aim-sdk/runtime
 
+## 0.1.4
+
+### Patch Changes
+
+- support variable parsing in aim
+
 ## 0.1.3
 
 ### Patch Changes

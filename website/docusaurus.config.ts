@@ -10,15 +10,15 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
+  url: 'https://aim.microchipgnu.pt',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'aim-org', // Usually your GitHub org/user name.
-  projectName: 'aim-sdk', // Usually your repo name.
+  organizationName: 'microchipgnu', // Usually your GitHub org/user name.
+  projectName: 'aim', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -82,7 +82,7 @@ const config: Config = {
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/aim-org',
+          href: 'https://github.com/microchipgnu/aim',
           label: 'GitHub',
           position: 'right',
         },
@@ -118,12 +118,12 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/aim-org',
+              href: 'https://github.com/microchipgnu/aim',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} aim`,
+      copyright: `Copyright © ${new Date().getFullYear()} AIM`,
     },
     prism: {
       theme: prismThemes.jettwaveLight,
