@@ -1,0 +1,50 @@
+{
+  "name": "@aim-sdk/compiler",
+  "version": "0.1.3",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "effector": "^23.2.3",
+    "js-yaml": "^4.1.0",
+    "marked": "^15.0.2",
+    "rehype-format": "^5.0.1",
+    "rehype-stringify": "^10.0.1",
+    "remark-breaks": "^4.0.0",
+    "remark-directive": "^3.0.0",
+    "remark-directive-rehype": "^0.4.2",
+    "remark-frontmatter": "^5.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && bun build ./index.ts --outdir ./dist --target node"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}
