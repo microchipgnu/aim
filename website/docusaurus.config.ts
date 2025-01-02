@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'AIM',
-  tagline: 'Markdown is all you need, just shape it.',
+  tagline: 'The AI Markup Language',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -69,10 +69,10 @@ const config: Config = {
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'AIM',
-      logo: {
-        alt: 'AIM Logo',
-        src: 'img/logo.svg',
-      },
+      // logo: {
+      //   alt: 'AIM Logo',
+      //   src: 'img/logo.svg',
+      // },
       items: [
         {
           type: 'docSidebar',
@@ -95,8 +95,24 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Docs',
+              label: 'Getting Started',
               to: '/docs/intro',
+            },
+            {
+              label: 'AIM Syntax',
+              to: '/docs/syntax',
+            },
+            {
+              label: 'Runtime',
+              to: '/docs/sdk/runtime',
+            },
+            {
+              label: 'Compiler',
+              to: '/docs/sdk/compiler',
+            },
+            {
+              label: 'Server',
+              to: '/docs/sdk/server',
             },
           ],
         },

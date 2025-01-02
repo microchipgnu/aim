@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 import { JSX } from 'react';
+import { Code, Bot, Images, Wrench, FileText } from 'lucide-react';
 
 type FeatureItem = {
   title: string;
@@ -11,32 +12,52 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Intuitive Flow Creation',
+    Svg: Code,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Build powerful AI workflows with a developer-friendly syntax. Manage prompts, 
+        switch models, and collaborate seamlessly.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Advanced Capabilities',
+    Svg: Bot,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Leverage loops, branching, and structured generation. Connect to APIs and 
+        execute live code for maximum flexibility.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Multimodal Support',
+    Svg: Images,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Seamlessly integrate text, images, audio, and video in your AI workflows. 
+        Switch between data types with ease.
+      </>
+    ),
+  },
+  {
+    title: 'Prebuilt Tools',
+    Svg: Wrench,
+    description: (
+      <>
+        Access a suite of AI tools including speech synthesis, search, RAG, image 
+        generation, and web scraping.
+      </>
+    ),
+  },
+  {
+    title: 'Turing Complete Markdown',
+    Svg: FileText,
+    description: (
+      <>
+        Transform Markdown into a full programming language with variables, functions,
+        loops and conditionals while maintaining its simple syntax.
       </>
     ),
   },
@@ -45,12 +66,16 @@ const FeatureList: FeatureItem[] = [
 function Feature({title, Svg, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
+      <div className={styles.featureCard}>
+        <div className={styles.featureIcon}>
+          <Svg role="img" />
+        </div>
+        <div className={styles.featureContent}>
+          <Heading as="h3" className={styles.featureTitle}>
+            {title}
+          </Heading>
+          <p className={styles.featureDescription}>{description}</p>
+        </div>
       </div>
     </div>
   );
