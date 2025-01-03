@@ -1,5 +1,11 @@
 # @aim-sdk/compiler
 
+## 0.1.4
+
+### Patch Changes
+
+- add js sandbox
+
 ## 0.1.3
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @aim-sdk/runtime
 
+## 0.1.5
+
+### Patch Changes
+
+- add js sandbox
+- Updated dependencies
+  - @aim-sdk/compiler@0.1.4
+
 ## 0.1.4
 
 ### Patch Changes

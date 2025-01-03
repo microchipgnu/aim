@@ -179,6 +179,23 @@ function remarkAIM() {
       const blockId = node.attributes?.id || nanoid()
       const processedAttributes = processAttributes(node.attributes)
 
+      // Add language to attributes for code blocks
+      if (node.type === 'code') {
+        let language = node.lang;
+        if (!language) {
+          // Try to detect language from content
+          const content = node.value || '';
+          if (content.includes('console.log') || content.includes('const ') || content.includes('let ') || content.includes('function')) {
+            language = 'javascript';
+          } else if (content.includes('print(') || content.includes('def ') || content.includes('import ')) {
+            language = 'python';
+          } else {
+            language = 'text';
+          }
+        }
+        processedAttributes.language = language;
+      }
+
       // Create the node first to register it in parser state
       let createdNode: AIMNode
       
