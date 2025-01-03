@@ -6,13 +6,13 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #4a5568;
-  --ifm-color-primary-dark: #404b5c;
-  --ifm-color-primary-darker: #3d4757;
-  --ifm-color-primary-darkest: #2d3748;
-  --ifm-color-primary-light: #546174;
-  --ifm-color-primary-lighter: #576579;
-  --ifm-color-primary-lightest: #697a91;
+  --ifm-color-primary: #64748b;
+  --ifm-color-primary-dark: #576579;
+  --ifm-color-primary-darker: #546174;
+  --ifm-color-primary-darkest: #4a5568;
+  --ifm-color-primary-light: #697a91;
+  --ifm-color-primary-lighter: #8293a9;
+  --ifm-color-primary-lightest: #8c9caf;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.05);
   --ifm-font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;

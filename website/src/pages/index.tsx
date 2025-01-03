@@ -8,8 +8,7 @@ import Heading from '@theme/Heading';
 import styles from './index.module.css';
 import { JSX } from 'react';
 import React from 'react';
-
-function CodeSnippet() {
+export function CodeSnippet() {
   const [isRunning, setIsRunning] = React.useState(false);
   const [currentLine, setCurrentLine] = React.useState(0);
   const [showCode, setShowCode] = React.useState(true);
@@ -34,13 +33,10 @@ function CodeSnippet() {
       setCurrentLine(prev => {
         if (prev >= lines.length - 1) {
           clearInterval(interval);
-          // Start progress bar animation to 100%
           setProgressWidth(100);
           
-          // After reaching 100%, start decreasing back to 0%
           setTimeout(() => {
             setProgressWidth(0);
-            // After decreasing, show code again
             setTimeout(() => {
               setShowCode(true);
               setIsRunning(false);
@@ -51,7 +47,6 @@ function CodeSnippet() {
           
           return prev;
         }
-        // Calculate progress based on current line
         setProgressWidth((prev + 1) * (100 / lines.length));
         return prev + 1;
       });
@@ -67,10 +62,10 @@ function CodeSnippet() {
 
   return (
     <div className={styles.codeSnippet} style={{
-      backgroundColor: '#1e1e1e',
+      backgroundColor: 'var(--ifm-background-surface-color)',
       borderRadius: '10px', 
       overflow: 'hidden',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+      boxShadow: '0 8px 16px var(--ifm-color-emphasis-100)',
       fontFamily: '"Fira Code", "Consolas", monospace',
       textAlign: 'left',
       margin: '20px auto',
@@ -79,18 +74,19 @@ function CodeSnippet() {
       width: '100%',
       maxWidth: '600px',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      border: '1px solid var(--ifm-color-emphasis-300)'
     }}>
       <div className={styles.codeHeader} style={{
         padding: '8px 12px',
-        backgroundColor: '#252526',
+        backgroundColor: 'var(--ifm-background-surface-color)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottom: '1px solid #333'
+        borderBottom: '1px solid var(--ifm-color-emphasis-300)'
       }}>
         <div className={styles.filename} style={{ 
-          color: '#cccccc',
+          color: 'var(--ifm-color-content)',
           fontWeight: 500,
           fontSize: '13px'
         }}>AIM</div>
@@ -99,14 +95,14 @@ function CodeSnippet() {
             <button
               onClick={handleRun}
               style={{
-                color: '#cccccc',
+                color: 'var(--ifm-color-content)',
                 cursor: 'pointer',
                 fontSize: '12px',
                 padding: '4px 8px',
                 borderRadius: '4px',
                 transition: 'background-color 0.2s',
-                border: 'none',
-                backgroundColor: '#2d2d2d',
+                border: '1px solid var(--ifm-color-emphasis-300)',
+                backgroundColor: 'var(--ifm-background-surface-color)',
                 minWidth: '50px'
               }}
             >
@@ -116,14 +112,14 @@ function CodeSnippet() {
             <button
               onClick={handleStop}
               style={{
-                color: '#cccccc',
+                color: 'var(--ifm-color-content)',
                 cursor: 'pointer',
                 fontSize: '12px',
                 padding: '4px 8px',
                 borderRadius: '4px',
                 transition: 'background-color 0.2s',
-                border: 'none',
-                backgroundColor: '#2d2d2d',
+                border: '1px solid var(--ifm-color-emphasis-300)',
+                backgroundColor: 'var(--ifm-background-surface-color)',
                 minWidth: '50px'
               }}
             >
@@ -135,12 +131,12 @@ function CodeSnippet() {
       {isRunning && (
         <div style={{
           height: '2px',
-          backgroundColor: '#333',
+          backgroundColor: 'var(--ifm-color-emphasis-200)',
           position: 'relative'
         }}>
           <div style={{
             height: '100%',
-            backgroundColor: '#569cd6',
+            backgroundColor: 'var(--ifm-color-primary)',
             width: `${progressWidth}%`,
             transition: 'width 1s linear'
           }} />
@@ -155,21 +151,21 @@ function CodeSnippet() {
       }}>
         {showCode ? (
           <>
-            <div className={styles.codeLine} style={{ color: '#808080', marginBottom: '4px' }}>---</div>
-            <div className={styles.codeLine} style={{ color: '#808080' }}>title: "Imagine"</div>
-            <div className={styles.codeLine} style={{ color: '#808080', marginBottom: '8px' }}>---</div>
-            <div className={styles.codeLine} style={{ color: '#d4d4d4', marginBottom: '12px', wordBreak: 'break-word' }}>You may say I'm a dreamer,</div>
+            <div className={styles.codeLine} style={{ color: 'var(--ifm-color-emphasis-600)', marginBottom: '4px' }}>---</div>
+            <div className={styles.codeLine} style={{ color: 'var(--ifm-color-emphasis-600)' }}>title: "Imagine"</div>
+            <div className={styles.codeLine} style={{ color: 'var(--ifm-color-emphasis-600)', marginBottom: '8px' }}>---</div>
+            <div className={styles.codeLine} style={{ color: 'var(--ifm-color-content)', marginBottom: '12px', wordBreak: 'break-word' }}>You may say I'm a dreamer,</div>
             
             <div className={styles.codeBlock} style={{ marginBottom: '12px' }}>
               <div className={styles.language} style={{
-                color: '#569cd6',
+                color: 'var(--ifm-color-primary)',
                 marginBottom: '4px',
                 fontSize: '12px',
                 fontWeight: 500
               }}>```python</div>
               <div className={styles.code} style={{ 
-                color: '#ce9178',
-                backgroundColor: '#1e1e1e',
+                color: 'var(--ifm-color-success-darker)',
+                backgroundColor: 'var(--ifm-background-color)',
                 padding: '8px',
                 borderRadius: '6px',
                 overflowX: 'auto',
@@ -177,7 +173,7 @@ function CodeSnippet() {
                 wordBreak: 'break-word'
               }}>print("But I'm not the only one")</div>
               <div className={styles.language} style={{
-                color: '#569cd6',
+                color: 'var(--ifm-color-primary)',
                 marginTop: '4px',
                 fontSize: '12px',
                 fontWeight: 500
@@ -186,14 +182,14 @@ function CodeSnippet() {
             
             <div className={styles.codeBlock} style={{ marginBottom: '12px' }}>
               <div className={styles.language} style={{
-                color: '#569cd6',
+                color: 'var(--ifm-color-primary)',
                 marginBottom: '4px',
                 fontSize: '12px',
                 fontWeight: 500
               }}>```javascript</div>
               <div className={styles.code} style={{ 
-                color: '#ce9178',
-                backgroundColor: '#1e1e1e',
+                color: 'var(--ifm-color-success-darker)',
+                backgroundColor: 'var(--ifm-background-color)',
                 padding: '8px',
                 borderRadius: '6px',
                 overflowX: 'auto',
@@ -201,21 +197,21 @@ function CodeSnippet() {
                 wordBreak: 'break-word'
               }}>console.log("I hope someday you'll join us")</div>
               <div className={styles.language} style={{
-                color: '#569cd6',
+                color: 'var(--ifm-color-primary)',
                 marginTop: '4px',
                 fontSize: '12px',
                 fontWeight: 500
               }}>```</div>
             </div>
             
-            <div className={styles.codeLine} style={{ color: '#d4d4d4', wordBreak: 'break-word' }}>And the world will live as one</div>
+            <div className={styles.codeLine} style={{ color: 'var(--ifm-color-content)', wordBreak: 'break-word' }}>And the world will live as one</div>
           </>
         ) : (
           <div style={{
-            backgroundColor: '#1e1e1e',
+            backgroundColor: 'var(--ifm-background-color)',
             padding: '8px',
             borderRadius: '6px',
-            color: '#d4d4d4',
+            color: 'var(--ifm-color-content)',
             fontSize: '12px'
           }}>
             {lines.slice(0, currentLine + 1).map((line, index) => (
@@ -230,7 +226,7 @@ function CodeSnippet() {
                   wordBreak: 'break-word'
                 }}
               >
-                <span style={{ color: '#569cd6' }}>{'>'}</span> {line}
+                <span style={{ color: 'var(--ifm-color-primary)' }}>{'>'}</span> {line}
               </div>
             ))}
           </div>
