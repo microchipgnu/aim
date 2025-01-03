@@ -23,6 +23,8 @@ title: Roadmap
 - [ ] VS Code extension
     - [ ] Syntax highlighting
     - [ ] Preview functionality
+- [ ] Improved UI support for AIM apps 
+- [ ] Runs and Evals
 
 ## Future Ideas
 

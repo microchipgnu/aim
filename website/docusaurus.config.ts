@@ -98,22 +98,6 @@ const config: Config = {
               label: 'Getting Started',
               to: '/docs/intro',
             },
-            {
-              label: 'AIM Syntax',
-              to: '/docs/syntax',
-            },
-            {
-              label: 'Runtime',
-              to: '/docs/sdk/runtime',
-            },
-            {
-              label: 'Compiler',
-              to: '/docs/sdk/compiler',
-            },
-            {
-              label: 'Server',
-              to: '/docs/sdk/server',
-            },
           ],
         },
         {

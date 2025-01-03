@@ -1,5 +1,11 @@
 # @aim-sdk/server
 
+## 0.1.4
+
+### Patch Changes
+
+- update deps
+
 ## 0.1.3
 
 ### Patch Changes
