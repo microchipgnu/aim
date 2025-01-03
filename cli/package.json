@@ -1,7 +1,7 @@
 {
   "name": "aimd",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -35,7 +35,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@aim-sdk/runtime": "^0.1.4",
+    "@aim-sdk/compiler": "^0.1.4",
+    "@aim-sdk/runtime": "^0.1.5",
     "@aim-sdk/server": "^0.1.3",
     "@wasmer/sdk": "^0.9.0",
     "commander": "^12.1.0",
