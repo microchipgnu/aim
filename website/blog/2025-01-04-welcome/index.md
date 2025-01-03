@@ -1,6 +1,7 @@
 ---
 slug: welcome
 title: Prompt-Driven Programming
+image: ./code-ny.png
 authors: [micro]
 ---
 
