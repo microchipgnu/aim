@@ -22,6 +22,6 @@ start-here/
 npx aimd@latest start
 ```
 
-As you dive into AIM you'll notice that this project contains an SDK written in TypeScript that includes a [Compiler](/docs/sdk/compiler), a [Server](/docs/sdk/server) and a [Runtime](/docs/sdk/runtime). 
+As you dive into AIM you'll notice that this project contains an SDK written in TypeScript that includes a [Compiler](/docs/developer-tools/sdk/compiler), a [Server](/docs/developer-tools/sdk/server) and a [Runtime](/docs/developer-tools/sdk/runtime). 
 
 It also contains a [CLI](/docs/cli) that you can use to run, serve or compile your AIM files. The SDK is the first implementation of the SDK.
