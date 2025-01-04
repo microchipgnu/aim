@@ -5,7 +5,7 @@ image: ./cover.png
 authors: [micro]
 ---
 
-The landscape of software engineering has changed dramatically over the past few years. As we step into 2025, it’s clear that the tools, practices, and paradigms we once relied on are evolving.
+The landscape of software engineering has changed dramatically over the past few months. As we step into 2025, it’s clear that the tools, practices, and paradigms we once relied on are evolving.
 
 ![AIM](./code-ny.png)
 
