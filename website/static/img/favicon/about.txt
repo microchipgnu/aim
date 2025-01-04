@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Fira Code
+- Font Author: undefined
+- Font Source: https://fonts.gstatic.com/s/firacode/v22/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_NprFVfxN87gsj0.ttf
+- Font License: undefined)

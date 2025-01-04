@@ -15,9 +15,7 @@ After nearly three years of building with Large Language Models (LLMs), explorin
 
 **The near future of software engineering is prompt-driven programming.**
 
-At the heart of this transformation lies a simple yet powerful concept: **markup languages**.
-
-Markdown, a language many of us already use to structure our thoughts and ideas, has emerged as a natural fit for this shift. With its clarity and accessibility, it serves as the perfect foundation for a system that turns ideas into execution.
+In my opinion, Markdown, a language many of us already use to structure our thoughts and ideas, has emerged as a natural fit for this shift. With its clarity and accessibility, it serves as the perfect foundation for a system that turns ideas into execution.
 
 ### The AI Markup Language - AIM
 
@@ -40,4 +38,12 @@ This example demonstrates the power of AIM as a tool for prompt-driven programmi
 
 Prompt-driven programming isn’t just a new concept—it’s a practical solution to the challenges of modern software engineering. AIM enables you to focus less on boilerplate setup and more on solving problems, iterating faster, and delivering impactful solutions.
 
-**Welcome to AIM!**
+---
+
+I'll try to keep adding interactive examples to this blog post. Here's the first one:
+
+import {CodePreview} from '@site/src/components/code-preview';
+
+<CodePreview title="another-example.aim" example="dreamer"></CodePreview>
+
+This example does not show the full power of AIM, but this is just the beginning. [Follow me on X](https://x.com/microchipgnu) to stay updated on the latest developments.

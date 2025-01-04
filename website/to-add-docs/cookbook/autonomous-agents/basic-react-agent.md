@@ -1,5 +1,5 @@
 ---
-title: Basic React Agent
+title: Basic ReAct Agent
 ---
 
 Coming soon.
