@@ -1,5 +1,11 @@
 # aimd
 
+## 0.1.10
+
+### Patch Changes
+
+- update compiler
+
 ## 0.1.9
 
 ### Patch Changes
