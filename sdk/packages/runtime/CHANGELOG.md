@@ -1,5 +1,11 @@
 # @aim-sdk/runtime
 
+## 0.1.6
+
+### Patch Changes
+
+- update compiler
+
 ## 0.1.5
 
 ### Patch Changes
