@@ -1,5 +1,7 @@
 import type { ParsedDocument, Block, VariableReference, BlockType } from './types';
 
+// TODO: should not enable id to be set in directives as a variable
+
 /**
  * Represents a semantic error found during analysis
  */

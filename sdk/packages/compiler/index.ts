@@ -20,7 +20,15 @@ export interface CompilerResult {
 }
 
 export async function compile(input: string): Promise<CompilerResult> {
-  const parsedDocument = await processAIMDocument(input);
+  const parsedDocument = await processAIMDocument(input, {
+    addMdx: false,
+    addToc: false,
+    variableParser: {
+      startDelimiter: 'v[',  
+      endDelimiter: ']',
+      variableNamePattern: /[a-zA-Z][a-zA-Z0-9_.-]*/ // Start with letter, then alphanumeric/underscore/hyphen/dot
+    }
+  });
 
   // Perform semantic analysis
   // TODO: fix semantic analysis

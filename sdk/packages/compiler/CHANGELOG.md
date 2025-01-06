@@ -1,5 +1,11 @@
 # @aim-sdk/compiler
 
+## 0.1.6
+
+### Patch Changes
+
+- update parser
+
 ## 0.1.5
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@aim-sdk/compiler",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -15,12 +15,18 @@
     "effector": "^23.2.3",
     "js-yaml": "^4.1.0",
     "marked": "^15.0.2",
+    "remark-attr": "^0.11.1",
+    "remark-attributes": "^0.3.2",
     "remark-breaks": "^4.0.0",
     "remark-comment": "^1.0.0",
     "remark-directive": "^3.0.0",
     "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-mdx": "^3.1.0",
     "remark-parse": "^11.0.0",
+    "remark-squeeze-paragraphs": "^6.0.0",
     "remark-stringify": "^11.0.0",
+    "remark-toc": "^9.0.0",
     "unified": "^11.0.5"
   },
   "publishConfig": {

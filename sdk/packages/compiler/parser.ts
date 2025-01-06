@@ -3,8 +3,13 @@ import { nanoid } from 'nanoid'
 import remarkComment from 'remark-comment'
 import remarkDirective from 'remark-directive'
 import remarkFrontmatter from 'remark-frontmatter'
+import remarkSqueezeParagraphs from 'remark-squeeze-paragraphs'
 import remarkParse from 'remark-parse'
+import remarkMdx from 'remark-mdx'
 import remarkStringify from 'remark-stringify'
+import remarkToc from 'remark-toc'
+import remarkAttributes from 'remark-attributes'
+import remarkGfm from 'remark-gfm'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 import { $parserState, resetParserState, setVariable } from './state'
@@ -23,60 +28,92 @@ export interface AIMNode {
   frontmatter?: Record<string, any>
 }
 
+export interface VariableParserConfig {
+  startDelimiter: string
+  endDelimiter: string
+  variableNamePattern: RegExp
+}
+
+const defaultVariableParserConfig: VariableParserConfig = {
+  startDelimiter: '{{',
+  endDelimiter: '}}',
+  variableNamePattern: /[a-zA-Z0-9_.-]/
+}
+
 // -----------------------------------------------------------------------
-// processVariables: Convert {{VAR}} occurrences to { type: 'variable', ... }
+// processVariables: Convert variable expressions to { type: 'variable', ... }
 // -----------------------------------------------------------------------
-export function processVariables(content: string): Array<string | VariableReference> {
+export function processVariables(
+  content: string, 
+  config: Partial<VariableParserConfig> = {}
+): Array<string | VariableReference> {
+  console.log('Processing variables with content:', content)
+  console.log('Config:', config)
+
+  const {
+    startDelimiter,
+    endDelimiter,
+    variableNamePattern
+  } = { ...defaultVariableParserConfig, ...config }
+
+  console.log('Using delimiters:', { startDelimiter, endDelimiter })
+
   const variables = $parserState.getState().variables
+  console.log('Current parser state variables:', variables)
+
   const parts: Array<string | VariableReference> = []
   let currentText = ''
   let i = 0
 
   while (i < content.length) {
-    if (content[i] === '{' && content[i + 1] === '{') {
+    if (content.startsWith(startDelimiter, i)) {
+      console.log('Found variable start delimiter at index:', i)
+      
       if (currentText) {
+        console.log('Pushing current text:', currentText)
         parts.push(currentText)
         currentText = ''
       }
 
-      i += 2 // Skip '{{'
+      i += startDelimiter.length
 
       // Skip whitespace
       while (i < content.length && /\s/.test(content[i])) {
         i++
       }
 
+      // Extract the full variable name including dots
       let varName = ''
-      while (i < content.length && /[a-zA-Z0-9_.-]/.test(content[i])) {
-        varName += content[i]
+      while (i < content.length && !content.startsWith(endDelimiter, i)) {
+        if (!/\s/.test(content[i])) {
+          varName += content[i]
+        }
         i++
       }
+      console.log('Extracted variable name:', varName)
 
-      // Skip whitespace and closing }}
-      while (i < content.length && content[i] !== '}') {
-        i++
-      }
-      if (i < content.length && content[i] === '}') {
-        i++ // Skip first }
-      }
-      if (i < content.length && content[i] === '}') {
-        i++ // Skip second }
+      if (content.startsWith(endDelimiter, i)) {
+        i += endDelimiter.length
       }
 
       const varInfo = variables.get(varName)
-      
+      console.log('Variable info from state:', varInfo)
+
       // Check if this is an input variable from frontmatter
       if (varName.startsWith('input.')) {
         const cleanVarName = varName.replace('input.', '')
+        console.log('Processing input variable:', cleanVarName)
         parts.push({
-          type: 'variable', 
+          type: 'variable',
           name: cleanVarName,
           location: {
             blockId: 'frontmatter',
             blockType: 'input',
           },
+          contentType: 'string' // Default to string for input variables
         })
       } else {
+        console.log('Processing regular variable:', varName)
         parts.push({
           type: 'variable',
           name: varName,
@@ -84,6 +121,7 @@ export function processVariables(content: string): Array<string | VariableRefere
             blockId: varInfo?.blockId,
             blockType: varInfo?.blockType,
           },
+          contentType: 'string' // Default to string for regular variables
         })
       }
     } else {
@@ -93,9 +131,11 @@ export function processVariables(content: string): Array<string | VariableRefere
   }
 
   if (currentText) {
+    console.log('Pushing final text:', currentText)
     parts.push(currentText)
   }
 
+  console.log('Final processed parts:', parts)
   return parts
 }
 
@@ -128,22 +168,21 @@ export function createNode(
 // -----------------------------------------------------------------------
 // Process attributes to handle variable references
 // -----------------------------------------------------------------------
-export function processAttributes(attributes: Record<string, any>): Record<string, any> {
+export function processAttributes(
+  attributes: Record<string, any>,
+  config: Partial<VariableParserConfig> = {}
+): Record<string, any> {
   const processedAttributes: Record<string, any> = {}
 
   if (!attributes) return processedAttributes
 
   for (const [key, value] of Object.entries(attributes)) {
-    if (typeof value === 'string' && value.startsWith('{{') && value.endsWith('}}')) {
-      const varName = value.slice(2, -2).trim()
-      const varInfo = $parserState.getState().variables.get(varName)
-      processedAttributes[key] = {
-        type: 'variable',
-        name: varName,
-        location: {
-          blockId: varInfo?.blockId,
-          blockType: varInfo?.blockType,
-        },
+    if (typeof value === 'string') {
+      const processed = processVariables(value, config)
+      if (processed.length === 1) {
+        processedAttributes[key] = processed[0]
+      } else {
+        processedAttributes[key] = processed
       }
     } else {
       processedAttributes[key] = value
@@ -156,13 +195,23 @@ export function processAttributes(attributes: Record<string, any>): Record<strin
 // -----------------------------------------------------------------------
 // Process a single node in the AST
 // -----------------------------------------------------------------------
-export function processNode(node: any): AIMNode | undefined {
+export function processNode(
+  node: any, 
+  config: Partial<VariableParserConfig> = {}
+): AIMNode | undefined {
   if (node.type === 'yaml') {
     return
   }
 
   const blockId = node.attributes?.id || nanoid()
-  const processedAttributes = processAttributes(node.attributes)
+  
+  // Add hProperties attributes if they exist
+  const hProperties = node.data?.hProperties || {}
+  
+  const processedAttributes = processAttributes({
+    ...hProperties,
+    ...(node.attributes || {})
+  }, config)
 
   // Add language to attributes for code blocks
   if (node.type === 'code') {
@@ -186,7 +235,7 @@ export function processNode(node: any): AIMNode | undefined {
 
   // Handle directives (textDirective, leafDirective, containerDirective)
   if (node.type.endsWith('Directive')) {
-    const content = node.value ? processVariables(node.value) : undefined
+    const content = node.value ? processVariables(node.value, config) : undefined
     createdNode = createNode(
       node.type as BlockType,
       blockId,
@@ -201,21 +250,21 @@ export function processNode(node: any): AIMNode | undefined {
       blockId,
       node.name,
       processedAttributes,
-      node.value ? processVariables(node.value) : undefined
+      node.value ? processVariables(node.value, config) : undefined
     )
   }
 
   // Process children after parent node is created and registered
   if (node.children && node.children.length > 0) {
     createdNode.children = node.children
-      .map(processNode)
+      .map((childNode: any) => processNode(childNode, config))
       .filter(Boolean) as AIMNode[]
   }
 
   return createdNode
 }
 
-function remarkAIM() {
+function remarkAIM(config: Partial<VariableParserConfig> = {}) {
   return function transformer(tree: any, file: any) {
     // Process frontmatter
     visit(tree, 'yaml', (node: { value: string }) => {
@@ -232,7 +281,7 @@ function remarkAIM() {
     file.data.ast = {
       type: 'root' as BlockType,
       id: nanoid(),
-      children: tree.children.map(processNode).filter(Boolean) as AIMNode[],
+      children: tree.children.map((node: any) => processNode(node, config)).filter(Boolean) as AIMNode[],
       ...(file.data.frontmatter && { frontmatter: file.data.frontmatter })
     }
   }
@@ -241,15 +290,38 @@ function remarkAIM() {
 // -----------------------------------------------------------------------
 // Exported function to process the entire document
 // -----------------------------------------------------------------------
-export async function processAIMDocument(input: string): Promise<ParsedDocument> {
+export async function processAIMDocument(
+  input: string, 
+  options: { 
+    addToc?: boolean, 
+    addMdx?: boolean,
+    variableParser?: Partial<VariableParserConfig>
+  } = { 
+    addMdx: false, 
+    addToc: false 
+  }
+): Promise<ParsedDocument> {
   resetParserState()
 
   const processor = unified()
     .use(remarkParse)
+    .use(remarkAttributes as any)
     .use(remarkFrontmatter, ['yaml'])
+    .use(remarkGfm)
+
+  if (options.addToc) {
+    processor.use(remarkToc)
+  }
+
+  if (options.addMdx) {
+    processor.use(remarkMdx)
+  }
+
+  processor
+    .use(remarkSqueezeParagraphs)
     .use(remarkComment)
     .use(remarkDirective)
-    .use(remarkAIM)
+    .use(remarkAIM, options.variableParser)
     .use(remarkStringify)
 
   // const ast = processor.parse(input)
@@ -261,3 +333,31 @@ export async function processAIMDocument(input: string): Promise<ParsedDocument>
     frontmatter: file.data.frontmatter as Record<string, any> | undefined
   }
 }
+
+const doc = await processAIMDocument(`---
+input:
+  - name: question
+    type: string
+    description: "The math question to be answered"
+    default: "What is 2 + 2?"
+  - name: answer
+    type: string
+    description: "The answer to the math question"
+    default: "4"
+---
+
+# Hello World {id=test test=v[input.answer]}
+
+this is a var v[input.answer]
+
+`, {
+  addMdx: false,
+  addToc: false,
+  variableParser: {
+    startDelimiter: 'v[',  
+    endDelimiter: ']',
+    variableNamePattern: /[a-zA-Z][a-zA-Z0-9_.-]*/ // Start with letter, then alphanumeric/underscore/hyphen/dot
+  }
+})
+
+console.log(JSON.stringify(doc, null, 2))

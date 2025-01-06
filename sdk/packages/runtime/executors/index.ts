@@ -8,6 +8,7 @@ import { setBlockResult } from "../state";
 import type { BlockExecutor, RuntimeOptions } from "../types";
 import { getBlockContent } from "../utils";
 import { executeReplicateBlock } from "./tools/replicate";
+import { executeContainerBlock } from "./container";
 
 export const defaultExecutor: BlockExecutor = async (block: Block, options: RuntimeOptions) => {
     const result = getBlockContent(block, options);
@@ -29,6 +30,7 @@ export const defaultExecutor: BlockExecutor = async (block: Block, options: Runt
 
 export const blockExecutors: Record<BlockType, BlockExecutor> = {
     'default': defaultExecutor,
+    'container': executeContainerBlock,
     'ai': executeGenerationBlock,
     'structured': executeStructuredOutputBlock,
     'string': defaultExecutor,

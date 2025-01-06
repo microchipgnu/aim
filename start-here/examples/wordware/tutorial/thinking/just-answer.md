@@ -2,7 +2,9 @@
 title: "Just answer the question"
 description: "A simple example of how to use AIM to create a document."
 input:
-    question: string
+  - name: question
+    type: string
+    description: "The math question to be answered"
 ---
 
 <!-- 
@@ -19,7 +21,7 @@ Here we get a model to answer wordy maths questions by just outputting the answe
     
 4.  The flowers cost $9, the clay pot costs $20 more than the flower, and the bag of soil costs $2 less than the flower. How much does it cost to plant the flowers?
     
-5.  Of the 90 people on William’s bus, 3/5 were Dutch. Of the 1/2 of the Dutch who were also American, 1/3 got window seats. What’s the number of Dutch Americans who sat at the windows?
+5.  Of the 90 people on William's bus, 3/5 were Dutch. Of the 1/2 of the Dutch who were also American, 1/3 got window seats. What's the number of Dutch Americans who sat at the windows?
     
 
 **Correct answers**
@@ -38,10 +40,10 @@ Here we get a model to answer wordy maths questions by just outputting the answe
 
 Answer the question: 
 
-$question
+v[input.question]
 
 Output the number and only the number.
 
 ::ai{#answer model="openai/gpt-4o-mini"}
 
-$answer
+v[answer]

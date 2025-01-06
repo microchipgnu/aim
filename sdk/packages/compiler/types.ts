@@ -18,6 +18,7 @@ export interface VariableReference {
       blockId: string | undefined; // ID of block where variable is defined, or undefined if not found
       blockType: BlockType | undefined; // Type of block where variable is defined, or undefined if not found
     };
+    contentType: string; // The data type of the variable's value (e.g. 'string', 'number', 'boolean')
   }
   
 export interface ParsedDocument {
@@ -44,4 +45,5 @@ export type BlockType =
   | 'textDirective'
   | 'leafDirective'
   | 'containerDirective'
-  | 'replicate';
+  | 'replicate'
+  | 'container';
