@@ -13,7 +13,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.6",
     "@ai-sdk/openai": "^1.0.11",
-    "@aim-sdk/compiler": "^0.1.6",
+    "@aim-sdk/compiler": "^0.1.7",
     "@openrouter/ai-sdk-provider": "^0.0.6",
     "@sebastianwessel/quickjs": "^1.3.0",
     "@wasmer/sdk": "^0.9.0",

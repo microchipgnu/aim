@@ -47,19 +47,13 @@ export function processVariables(
   content: string, 
   config: Partial<VariableParserConfig> = {}
 ): Array<string | VariableReference> {
-  console.log('Processing variables with content:', content)
-  console.log('Config:', config)
-
   const {
     startDelimiter,
     endDelimiter,
     variableNamePattern
   } = { ...defaultVariableParserConfig, ...config }
 
-  console.log('Using delimiters:', { startDelimiter, endDelimiter })
-
   const variables = $parserState.getState().variables
-  console.log('Current parser state variables:', variables)
 
   const parts: Array<string | VariableReference> = []
   let currentText = ''
@@ -67,10 +61,7 @@ export function processVariables(
 
   while (i < content.length) {
     if (content.startsWith(startDelimiter, i)) {
-      console.log('Found variable start delimiter at index:', i)
-      
       if (currentText) {
-        console.log('Pushing current text:', currentText)
         parts.push(currentText)
         currentText = ''
       }
@@ -90,19 +81,16 @@ export function processVariables(
         }
         i++
       }
-      console.log('Extracted variable name:', varName)
 
       if (content.startsWith(endDelimiter, i)) {
         i += endDelimiter.length
       }
 
       const varInfo = variables.get(varName)
-      console.log('Variable info from state:', varInfo)
 
       // Check if this is an input variable from frontmatter
       if (varName.startsWith('input.')) {
         const cleanVarName = varName.replace('input.', '')
-        console.log('Processing input variable:', cleanVarName)
         parts.push({
           type: 'variable',
           name: cleanVarName,
@@ -113,7 +101,6 @@ export function processVariables(
           contentType: 'string' // Default to string for input variables
         })
       } else {
-        console.log('Processing regular variable:', varName)
         parts.push({
           type: 'variable',
           name: varName,
@@ -131,11 +118,9 @@ export function processVariables(
   }
 
   if (currentText) {
-    console.log('Pushing final text:', currentText)
     parts.push(currentText)
   }
 
-  console.log('Final processed parts:', parts)
   return parts
 }
 
@@ -324,9 +309,6 @@ export async function processAIMDocument(
     .use(remarkAIM, options.variableParser)
     .use(remarkStringify)
 
-  // const ast = processor.parse(input)
-  // const processedAst = await processor.run(ast)
-
   const file = await processor.process(input)
   return {
     blocks: (file.data.ast as { children: AIMNode[] }).children,
@@ -359,5 +341,3 @@ this is a var v[input.answer]
     variableNamePattern: /[a-zA-Z][a-zA-Z0-9_.-]*/ // Start with letter, then alphanumeric/underscore/hyphen/dot
   }
 })
-
-console.log(JSON.stringify(doc, null, 2))
