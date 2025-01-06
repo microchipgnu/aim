@@ -1,7 +1,7 @@
 {
   "name": "aimd",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "private": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
