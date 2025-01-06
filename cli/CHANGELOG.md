@@ -1,5 +1,11 @@
 # aimd
 
+## 0.1.12
+
+### Patch Changes
+
+- update deps
+
 ## 0.1.11
 
 ### Patch Changes
