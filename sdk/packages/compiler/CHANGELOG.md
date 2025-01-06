@@ -1,5 +1,11 @@
 # @aim-sdk/compiler
 
+## 0.1.5
+
+### Patch Changes
+
+- support comments and add {{VARS}} support only
+
 ## 0.1.4
 
 ### Patch Changes
