@@ -1,5 +1,13 @@
 # @aim-sdk/runtime
 
+## 0.1.8
+
+### Patch Changes
+
+- 02be233: update deps
+- Updated dependencies [02be233]
+  - @aim-sdk/compiler@0.1.8
+
 ## 0.1.7
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @aim-sdk/server
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [02be233]
+  - @aim-sdk/runtime@0.1.8
+
 ## 0.1.6
 
 ### Patch Changes

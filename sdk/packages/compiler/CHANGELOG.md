@@ -1,5 +1,11 @@
 # @aim-sdk/compiler
 
+## 0.1.8
+
+### Patch Changes
+
+- 02be233: update deps
+
 ## 0.1.7
 
 ### Patch Changes
