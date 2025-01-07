@@ -1,13 +1,13 @@
 {
-  "name": "aimd",
+  "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "private": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "aimd": "dist/index.js"
+    "aimx": "dist/index.js"
   },
   "type": "module",
   "publishConfig": {
@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "bun run typecheck && bun run copy-wasm && bun build ./index.ts --outdir ./dist --target node",
-    "build-binary": "bun run typecheck && bun build ./index.ts --compile --outfile aimd",
+    "build-binary": "bun run typecheck && bun build ./index.ts --compile --outfile aimx",
     "typecheck": "tsc --noEmit",
     "version": "changeset version",
     "copy-wasm": "mkdir -p dist && cp node_modules/@wasmer/sdk/dist/*.wasm dist/",

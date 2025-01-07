@@ -19,7 +19,7 @@ start-here/
 ```
 
 ```bash
-npx aimd@latest start
+npx aimx@latest start
 ```
 
 As you dive into AIM you'll notice that this project contains an SDK written in TypeScript that includes a [Compiler](/docs/developer-tools/sdk/compiler), a [Server](/docs/developer-tools/sdk/server) and a [Runtime](/docs/developer-tools/sdk/runtime). 

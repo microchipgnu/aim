@@ -1,4 +1,10 @@
-# aimd
+# aimx
+
+## 0.1.17
+
+### Patch Changes
+
+- aimx
 
 ## 0.1.16
 

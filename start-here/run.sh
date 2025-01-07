@@ -2,7 +2,7 @@
 
 # Build the Docker image
 echo "Building Docker image..."
-docker build -t aimd-app .
+docker build -t aimx-app .
 
 # Run the Docker container
 echo "Starting Docker container..."
@@ -13,13 +13,13 @@ docker stop $(docker ps -q --filter publish=3000) 2>/dev/null || true
 echo "Starting container with signal handling..."
 cleanup() {
     echo "Stopping container..."
-    docker stop $(docker ps -q --filter ancestor=aimd-app) 2>/dev/null || true
+    docker stop $(docker ps -q --filter ancestor=aimx-app) 2>/dev/null || true
 }
 
 # Set up signal handling
 trap cleanup SIGINT SIGTERM
 
-docker run -p 3000:3000 aimd-app
+docker run -p 3000:3000 aimx-app
 
 # Run cleanup on exit
 cleanup

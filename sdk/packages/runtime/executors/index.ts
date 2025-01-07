@@ -28,7 +28,7 @@ export const defaultExecutor: BlockExecutor = async (block: Block, options: Runt
     return Promise.resolve(results);
 };
 
-export const blockExecutors: Record<BlockType, BlockExecutor> = {
+export const blockExecutors: Record<BlockType | string, BlockExecutor> = {
     'default': defaultExecutor,
     'container': executeContainerBlock,
     'ai': executeGenerationBlock,
@@ -84,6 +84,49 @@ export const executeBlocks = async (blocks: Block[], options: RuntimeOptions): P
 
         if (blockType.endsWith('Directive')) {
             blockType = block.name as BlockType;
+        }
+
+        // Handle conditional execution
+        if (block.attributes?.if !== undefined) {
+            // Evaluate the condition in the context of options.variables
+            const condition = new Function('v', `return ${block.attributes.if}`)(options.variables);
+            options.onLog(`Evaluating condition: ${block.attributes.if}`);
+            
+            if (!condition) {
+                // Skip current block and look for else-if or else
+                for (let i = index + 1; i < blocks.length; i++) {
+                    const nextBlock = blocks[i];
+                    
+                    if (nextBlock.attributes?.['else-if'] !== undefined) {
+                        const elseIfCondition = new Function('v', `return ${nextBlock.attributes['else-if']}`)(options.variables);
+                        if (elseIfCondition) {
+                            return executeBlock(nextBlock, i, previousBlocks);
+                        }
+                        // Continue checking next else-if
+                        continue;
+                    }
+                    
+                    if (nextBlock.attributes?.else !== undefined) {
+                        return executeBlock(nextBlock, i, previousBlocks);
+                    }
+                    
+                    // If we find a block without else/else-if, stop checking
+                    break;
+                }
+                // No matching else/else-if found or none were true
+                return;
+            }
+        }
+
+        // Skip this block if it's an else/else-if block and we got here directly
+        // This was causing both blocks to execute because we weren't skipping the else-if block
+        // when processing blocks sequentially
+        if (block.attributes?.['else-if'] !== undefined || block.attributes?.else !== undefined) {
+            const prevBlock = blocks[index - 1];
+            // Check if previous block exists and has an if condition that evaluated to true
+            if (!prevBlock?.attributes?.if || new Function('v', `return ${prevBlock.attributes.if}`)(options.variables)) {
+                return;
+            }
         }
 
         const executor = (blockExecutors[blockType] as BlockExecutor | undefined) ?? defaultExecutor;

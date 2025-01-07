@@ -1,0 +1,44 @@
+{
+  "name": "aim",
+  "displayName": "aim",
+  "description": "the ai markup language syntax highlight",
+  "version": "0.0.1",
+  "publisher": "aim",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "scripts": {
+    "package": "vsce package --no-dependencies"
+  },
+  "contributes": {
+    "languages": [{
+      "id": "aim",
+      "aliases": ["aim", "AIM"],
+      "extensions": [".aim", ".md", ".aimd", ".mdx"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "aim",
+      "scopeName": "source.aim",
+      "path": "./syntaxes/aim.tmLanguage.json"
+    }],
+    "themes": [{
+      "label": "AIM Theme",
+      "uiTheme": "vs-dark",
+      "path": "./themes/aim-color-theme.json"
+    }],
+    "snippets": [
+      {
+        "language": "aim",
+        "path": "./snippets/aim.json"
+      }
+    ]
+  },
+  "dependencies": {
+    "@vscode/vsce": "^3.2.1",
+    "vsce": "^2.15.0"
+  }
+}

@@ -14,17 +14,17 @@ The AIM CLI is a command line interface for the AIM project.
 <Tabs>
   <TabItem value="npx" label="npx">
     ```bash
-    npx aimd@latest
+    npx aimx@latest
     ```
   </TabItem>
   <TabItem value="pnpm" label="pnpm">
     ```bash
-    pnpx run aimd@latest
+    pnpx run aimx@latest
     ```
   </TabItem>
   <TabItem value="bun" label="bun">
     ```bash
-    bunx run aimd@latest
+    bunx run aimx@latest
     ```
   </TabItem>
 </Tabs>

@@ -1,4 +1,4 @@
-# aimd
+# aimx
 
 To install dependencies:
 
