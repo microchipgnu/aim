@@ -15,7 +15,7 @@ const getFrontmatter = (ast: Node) => {
     return frontmatter;
 }
 
-export const parser = async (input: string, config: Config = defaultConfig) => {
+export const parser = async (input: string, config: Config = defaultConfig): Promise<{ ast: Node, validation: any, config: Config, frontmatter: any }> => {
     const tokenizer = new Markdoc.Tokenizer({
         allowComments: true,
         allowIndentation: true,

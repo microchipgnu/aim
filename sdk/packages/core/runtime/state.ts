@@ -11,19 +11,21 @@ export const pushStack = createEvent<{
 export const popStack = createEvent();
 export const setData = createEvent<Record<string, any>>();
 export const resetContext = createEvent();
+export const addToTextRegistry = createEvent<string>();
+export const clearTextRegistry = createEvent();
 
-// Store
+// Store with explicit type for update handlers
 export const $runtimeContext = createStore<RuntimeContext>({
     stack: [],
     data: {}
-});
-
-// Update handlers
-$runtimeContext
+})
     .on(pushStack, (state, stackFrame) => ({
         ...state,
         stack: [...state.stack, stackFrame]
-    }))
+    } as RuntimeContext));
+
+// Update handlers
+$runtimeContext
     .on(popStack, (state) => ({
         ...state,
         stack: state.stack.slice(0, -1)
@@ -36,6 +38,11 @@ $runtimeContext
         }
     }))
     .reset(resetContext);
+
+// Add new store for text registry
+export const $textRegistry = createStore<string[]>([])
+    .on(addToTextRegistry, (state, text) => [...state, text])
+    .reset(clearTextRegistry);
 
 // Effects
 export const getCurrentConfigFx = createEffect((config: Config): Config => {

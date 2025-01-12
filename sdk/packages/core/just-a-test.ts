@@ -1,29 +1,29 @@
-import Markdoc from "@markdoc/markdoc";
-import { parser } from "./markdoc/parser"
-import { process } from "./runtime/process"
+import { aim } from "index";
 
-const content = `---
-title: What's the capital of Portugal?
+const doc = await aim`---
+execute: true
 ---
 
-# {% $frontmatter.title %}
+Hey there!
 
-{% ai #hey model="openai/gpt-4-mini" /%}
+What's the capital of Portugal?
 
-{% $hey.result %}
+{% ai #hey model="openai/gpt-4o-mini" /%}
 
-{% loop count=3 %}
-    {% $frontmatter.title %}
-{% /loop %}
+The AI answered this: {% $hey.result %}
+
+What was the question?
+
+{% ai #hey model="openai/gpt-4o-mini" /%}
+
+ {% hey.result %}
+
 
 `
 
-const { ast, validation, config } = await parser(content);
-console.log(config);
-const { execution, context } = await process(ast, config);
 
-console.log(JSON.stringify(execution, null, 2));
+console.log(await doc.execute({
+    onLog: (message) => console.log(message),
+}));
 
-for (const item of execution) {
-    console.log(Markdoc.renderers.html(item));
-}
+process.exit(0);
