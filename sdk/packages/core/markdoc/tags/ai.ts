@@ -8,6 +8,7 @@ import { $textRegistry } from "runtime/state";
 
 export const aiTag: Schema = {
     render: 'ai',
+    selfClosing: true,
     attributes: {
         model: { type: String, required: true, default: 'openai/gpt-4-mini' },
         id: { type: String, required: false },

@@ -8,7 +8,9 @@ execute: true
 pick a model from the list [openai/gpt-4o-mini, anthropic/claude-3-5-sonnet-20240620]
 . Answer with the model name only.
 
-{% ai #model model="meta-llama/llama-3.2-3b-instruct:free@openrouter" /%}
+{% ai #model model="meta-llama/llama-3.2-3b-instruct:free@openrouter"%}
+sdfsfd
+{% /ai %}
 
 This is the model: {% $model.result %}
 `
