@@ -34,7 +34,6 @@ export const execute = async (ast: Node, options: RuntimeOptions): Promise<strin
                 if (typeof result === 'string' || typeof result === 'object') {
                     results.push(result);
                 }
-                await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
 

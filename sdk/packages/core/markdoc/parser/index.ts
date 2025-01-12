@@ -1,6 +1,6 @@
-import Markdoc, { type Config, type Node } from "@markdoc/markdoc";
-import { config as defaultConfig } from "../config";
+import Markdoc, { type Config, type Node, type ValidateError } from "@markdoc/markdoc";
 import yaml from 'js-yaml';
+import { config as defaultConfig } from "../config";
 
 const getFrontmatter = (ast: Node) => {
     let frontmatter = {};
@@ -15,7 +15,7 @@ const getFrontmatter = (ast: Node) => {
     return frontmatter;
 }
 
-export const parser = async (input: string, config: Config = defaultConfig): Promise<{ ast: Node, validation: any, config: Config, frontmatter: any }> => {
+export const parser = async (input: string, config: Config = defaultConfig): Promise<{ ast: Node, validation: ValidateError[], config: Config, frontmatter: any }> => {
     const tokenizer = new Markdoc.Tokenizer({
         allowComments: true,
         allowIndentation: true,

@@ -1,6 +1,6 @@
+import { type Node } from "@markdoc/markdoc";
+import { process as runtimeProcess } from "../runtime/process";
 import type { RuntimeOptions } from "../types";
-import {type Node} from "@markdoc/markdoc";
-import { process as runtimeProcess } from "../runtime/process"
 
 export const execute = async (ast: Node, options: RuntimeOptions): Promise<string[]> => {
     options.variables = options.variables || {};
@@ -16,7 +16,6 @@ export const execute = async (ast: Node, options: RuntimeOptions): Promise<strin
                 if (typeof result === 'string' || typeof result === 'object') {
                     results.push(result);
                 }
-                await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
         options.onFinish("Execution finished!");

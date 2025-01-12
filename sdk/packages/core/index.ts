@@ -11,11 +11,21 @@ export async function aim(strings: TemplateStringsArray, ...values: any[]) {
 
     const { ast, validation, config, frontmatter } = await parser(text);
 
+    const warnings = validation
+        .map(error => ({
+            ...error,
+            error: {
+                ...error.error,
+                level: error.error?.id === 'variable-undefined' ? 'warning' : error.error?.level
+            }
+        }));
+
+
     if (frontmatter?.execute === false) {
         return {
             ast,
             errors: [],//errors,
-            warnings: [],
+            warnings: warnings,
             execute: async (options: Partial<RuntimeOptions> = {}) => {
                 return Promise.resolve();
             }
@@ -25,7 +35,7 @@ export async function aim(strings: TemplateStringsArray, ...values: any[]) {
     return {
         ast,
         errors: [],//errors,
-        warnings: [],
+        warnings: warnings,
         execute: async (options: Partial<RuntimeOptions> = {}) => {
             const abortController = new AbortController();
 
