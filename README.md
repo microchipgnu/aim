@@ -12,25 +12,23 @@ The AIM project is structured as a monorepo containing several key packages:
 
 ### Core Packages
 
-1. **@aim-sdk/compiler**
+1. **@aim-sdk/core**
    - Parses AIM documents
    - Transforms AIM syntax into executable code
    - Handles directives and command processing
    - Manages variable substitution and context
-
-2. **@aim-sdk/runtime**
    - Executes compiled AIM documents
    - Manages AI model integrations
    - Handles state management
    - Processes multimedia content
 
-3. **@aim-sdk/server**
+2. **@aim-sdk/server**
    - Serves AIM projects
    - Handles API endpoints
    - Manages routing and request processing
    - Provides development server capabilities
 
-4. **CLI (aimd)**
+3. **CLI (aimd)**
    - Command-line interface for AIM projects
    - Project initialization and management
    - Development server controls
@@ -42,12 +40,9 @@ The AIM project is structured as a monorepo containing several key packages:
 aim/
 ├── cli/ # Command line interface
 ├── sdk/ # Core SDK packages
-│ ├── packages/
-│ │ ├── compiler/ # AIM compiler
-│ │ ├── runtime/ # Runtime engine
-│ │ ├── server/ # Server implementation
-│ │ └── examples/ # Example implementations
-│ └── docs/ # SDK documentation
+│ └── packages/
+│   ├── core/ # Core functionality
+│   └── server/ # Server implementation
 ├── website/ # Documentation website
 └── start-here/ # Getting started guide and template project
 ```

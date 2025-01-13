@@ -9,50 +9,46 @@ The last tosses were heads, heads, tails, heads, tails, heads, heads, heads.
 
 Output 'heads' or 'tails' only.
 
-::ai{#flip model="openai/gpt-4o-mini"}
+{% ai #flip model="openai/gpt-4o-mini" /%}
 
 <!-- We reference the value of the flip in this if-else block -->
 
-::::container{if="v[flip]=='heads'"}
+{% if flip == "heads" %}
 
 Heads, I win!
 
 Should I gloat? Write yes or no only.
 
-::ai{#gloat model="google/gemma-2"}
+{% ai #gloat model="google/gemma-2" /%}
 
 <!-- It's possible to nest container blocks inside other container blocks. In fact you can put all the same things in the body of a container block as you can in a prompt -->
 
-:::container{if="'yes' in v[gloat]"}
+{% if gloat == "yes" %}
 
 Now, write a gloating song. Output just the song.
 
-::ai{#song model="openai/gpt-4o-mini"}
+{% ai #song model="openai/gpt-4o-mini" /%}
 
-:::
+{% /if %}
 
-:::container{else}
+{% if gloat != "yes" %}
 
 Now, be humble and congratulate the loser on their well played match.
 
-::ai{#humble model="openai/gpt-4o-mini"}
+{% ai #humble model="openai/gpt-4o-mini" /%}
 
-:::
+{% /if %}
 
-::::
-
-:::container{else-if="v[flip]=='tails'"}
+{% if flip == "tails" %}
 
 Tails, you lose! 😏
 
-:::
+{% /if %}
 
-::::
+{% if flip != "heads" && flip != "tails" %}
 
-:::container{else}
+Neither heads nor tails, everyone loses �
 
-Neither heads nor tails, everyone loses 😱
+{% /if %}
 
-:::
-
-::::
+{% $flip.result %}

@@ -9,11 +9,11 @@ input:
 
 <!-- This tool uses the Serper API to search Google and return relevant results -->
 
-Searching Google for: v[input.query]
+Searching Google for: {% $frontmatter.input.query %}
 
-```js
+```js {#output}
 // Reference the input query and remove any quotation marks
-const input = v[input.query].trim().replace(/^"+|"+$/g, '');
+const input = {{ $frontmatter.input.query }}.trim().replace(/^"+|"+$/g, '');
 
 const hl = "en";
 const gl = "us";
@@ -68,5 +68,7 @@ if (snippets.length === 0) {
   return "No good Google Search Result was found";
 }
 
-return snippets.join("\n- ");
+export default snippets.join("\n- ");
 ```
+
+{% $output.result %}

@@ -13,9 +13,9 @@ You create sub-prompts that do one thing really well and reuse those throughout 
 
 It's extremely useful when you've got a chain of prompts where each part needs quite different instructions/personas and you don't want all the context from previous generations to be passed in. -->
 
-Write a short blog post about v[input.topic].
+Write a short blog post about {% $frontmatter.input.topic %}.
 
-::ai{#blog_post model="openai/gpt-3.5-turbo"}
+{% ai #blog_post model="openai/gpt-3.5-turbo" /%}
 
 <!-- To create a prompt node type /prompt then select the prompt you want to run in the sidebar and provide the inputs. 
 Inputs can be references to variables or literal values.
@@ -26,12 +26,12 @@ Here we have created a prompt that will translate an input into the given langua
 
 <!-- When a prompt is called none of the context from the current prompt is included other than the values passed as inputs -->
 
-::flow{#french input=v[blog_post] language="French" path="file://./translate.md"}
+{% flow #french input=$blog_post language="French" path="file://./translate.md" /%}
 
 ## Spanish 🇪🇸
 
-::flow{#spanish input=v[blog_post] language="Spanish" path="file://./translate.md"}
+{% flow #spanish input=$blog_post language="Spanish" path="file://./translate.md" /%}
 
 ## Pirate 🏴‍☠️
 
-::flow{#pirate input=v[blog_post] language="Pirate" path="file://./translate.md"}
+{% flow #pirate input=$blog_post language="Pirate" path="file://./translate.md" /%}

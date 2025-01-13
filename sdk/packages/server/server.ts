@@ -1,6 +1,6 @@
 import express from 'express'
 import { getAIMRoutes } from './resolution'
-import { aim } from '@aim-sdk/runtime'
+import { aim } from '@aim-sdk/core'
 import { promises as fs } from 'fs'
 
 interface ServerConfig {
@@ -35,9 +35,10 @@ export const createServer = async ({
     // GET route to return parsed document
     app.get(route.path, async (req, res) => {
       const content = await fs.readFile(route.filePath, 'utf-8');
+      
       const aimDocument = await aim`${content}`;
       res.json({
-        document: aimDocument.document,
+        document: aimDocument.ast,
         errors: aimDocument.errors,
         warnings: aimDocument.warnings
       });
@@ -48,7 +49,7 @@ export const createServer = async ({
       const content = await fs.readFile(route.filePath, 'utf-8');
       const aimDocument = await aim`${content}`;
       // Get input variables from document frontmatter
-      const inputVariables = aimDocument.document.frontmatter?.input || [];
+      const inputVariables = aimDocument.frontmatter?.input || [];
       const body = req.body;
       const input: Record<string, any> = {};
 

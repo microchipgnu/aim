@@ -13,16 +13,16 @@ input:
     description: "The emotional tone to use"
 ---
 
-Write a v[input.type] about v[input.topic]
+Write a {% $frontmatter.input.type %} about {% $frontmatter.input.topic %}
 
-Make it full of joy and happiness. {if="v[input.tone]=='happy'"}
+Make it full of joy and happiness. {% if $frontmatter.input.tone == "happy" %}
 
-Make it full of sadness and despair. {else-if="v[input.tone]=='sad'"}
+Make it full of sadness and despair. {% if $frontmatter.input.tone == "sad" %}
 
-Make it full of sadness and despair. { else }
+Make it full of sadness and despair. {% else %}
 
-Output just the v[input.type]
+Output just the {% $frontmatter.input.type %}
 
-::ai{#output model="openai/gpt-4o-mini"}
+{% ai #output model="openai/gpt-4o-mini" /%}
 
-v[input.type]
+{% $output.result %}

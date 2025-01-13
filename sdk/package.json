@@ -12,10 +12,9 @@
   "scripts": {
     "clean": "rm -rf packages/*/dist",
     "build": "bun run clean && bun run build:all",
-    "build:compiler": "cd packages/compiler && bun run build --minify",
-    "build:runtime": "cd packages/runtime && bun run build --minify",
+    "build:core": "cd packages/core && bun run build --minify",
     "build:server": "cd packages/server && bun run build --minify",
-    "build:all": "bun run build:compiler && bun run build:runtime && bun run build:server",
+    "build:all": "bun run build:core && bun run build:server",
     "changeset": "changeset",
     "version": "changeset version",
     "prepublish": "bun run scripts/prepare-publish.ts",

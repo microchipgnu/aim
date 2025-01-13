@@ -19,9 +19,9 @@ Ok, let's get started on the prompt itself...
 
 -->
 
-Say hello to v[input.name].
+Say hello to {% $frontmatter.input.name %}.
 
-::ai{#greeting model="openai/gpt-4o-mini"}
+{% ai #greeting model="openai/gpt-4o-mini" /%}
 
 <!-- ### Explanation
 

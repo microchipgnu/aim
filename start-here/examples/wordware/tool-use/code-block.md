@@ -35,10 +35,10 @@ const sum = addNumbers(1, 1);
 console.log("1 + 1 =", sum);
 
 // ... and even mention values from outside the code
-const greeting = `Hello ${v[input.name]}, you're looking good today 🔥`;
+const greeting = `Hello {{ input.name }}, you're looking good today 🔥`;
 
 // If we return a value it'll be included in the prompt
 return greeting;
 ```
 
-The code returned: v[example]
+The code returned: {% $example.result %}

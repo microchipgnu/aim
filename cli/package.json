@@ -1,7 +1,7 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.17",
+  "version": "0.1.19",
   "private": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -18,7 +18,7 @@
     "src"
   ],
   "scripts": {
-    "build": "bun run typecheck && bun run copy-wasm && bun build ./index.ts --outdir ./dist --target node",
+    "build": "bun run typecheck && bun build ./index.ts --outdir ./dist --target node",
     "build-binary": "bun run typecheck && bun build ./index.ts --compile --outfile aimx",
     "typecheck": "tsc --noEmit",
     "version": "changeset version",
@@ -35,10 +35,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@aim-sdk/compiler": "0.1.8",
-    "@aim-sdk/runtime": "0.1.8",
-    "@aim-sdk/server": "0.1.7",
-    "@wasmer/sdk": "^0.9.0",
+    "@aim-sdk/core": "0.0.2",
+    "@aim-sdk/server": "^0.1.8",
     "commander": "^12.1.0",
     "dotenv": "^16.4.7",
     "inquirer": "^12.3.0"

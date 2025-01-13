@@ -38,12 +38,10 @@ Here we get a model to answer wordy maths questions by just outputting the answe
 
 -->
 
-Answer the question: 
-
-v[input.question]
+Answer the question: {% $frontmatter.input.question %}
 
 Output the number and only the number.
 
-::ai{#answer model="openai/gpt-4o-mini"}
+{% ai #answer model="openai/gpt-4o-mini" /%}
 
-v[answer]
+{% $answer.result %}
