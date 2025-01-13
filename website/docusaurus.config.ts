@@ -2,7 +2,157 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+const customLight = {
+  ...prismThemes.vsLight,
+  styles: [
+    ...prismThemes.vsLight.styles,
+    {
+      types: ['frontmatter'],
+      style: {
+        color: '#57606a' // GitHub light gray
+      }
+    },
+    {
+      types: ['frontmatter', 'punctuation'],
+      style: {
+        color: '#57606a' // GitHub light gray
+      }
+    },
+    {
+      types: ['equals'],
+      style: {
+        color: '#57606a' // GitHub light gray
+      }
+    },
+    {
+      types: ['plain'],
+      style: {
+        color: '#000000' //
+      }
+    },
+    {
+      types: ['comment'],
+      style: {
+        color: '#6e7781' // GitHub light comment gray
+      }
+    },
+    {
+      types: ['tagType'],
+      style: {
+        color: '#0550ae' // GitHub light blue
+      }
+    },
+    {
+      types: ['token', 'tag'],
+      style: {
+        color: '#cf222e' // GitHub light red
+      }
+    },
+    {
+      types: ['id'],
+      style: {
+        color: '#953800' // GitHub light orange
+      }
+    },
+    {
+      types: ['token', 'variable'],
+      style: {
+        color: '#1a7f37' // GitHub light green - better contrast for variables
+      }
+    },
+    {
+      types: ['attr-value', 'string'],
+      style: {
+        color: '#0a3069' // GitHub light navy
+      }
+    },
+    {
+      types: ['function'],
+      style: {
+        color: '#8250df' // GitHub light purple
+      }
+    },
+    {
+      types: ['token.tag.boolean', 'number'],
+      style: {
+        color: '#0550ae' // GitHub light blue - better contrast for booleans/numbers
+      }
+    }
+  ]
+};
+
+const customDark = {
+  ...prismThemes.vsDark,
+  styles: [
+    ...prismThemes.vsDark.styles,
+    {
+      types: ['frontmatter'],
+      style: {
+        color: '#8B949E' // Medium gray
+      }
+    },
+    {
+      types: ['plain'],
+      style: {
+        color: '#FFFFFF' //
+      }
+    },
+    {
+      types: ['frontmatter', 'punctuation', 'equals'],
+      style: {
+        color: '#8B949E' // Medium gray
+      }
+    },
+    {
+      types: ['comment'],
+      style: {
+        color: '#6E7681' // VS Code dark comment gray
+      }
+    },
+    {
+      types: ['tagType'],
+      style: {
+        color: '#79C0FF' // VS Code dark blue
+      }
+    },
+    {
+      types: ['token', 'tag'],
+      style: {
+        color: '#FF7B72' // VS Code dark red
+      }
+    },
+    {
+      types: ['id'],
+      style: {
+        color: '#FFA657' // VS Code dark orange
+      }
+    },
+    {
+      types: ['token', 'variable'],
+      style: {
+        color: '#7EE787' // VS Code dark green
+      }
+    },
+    {
+      types: ['attr-value', 'string'],
+      style: {
+        color: '#A5D6FF' // VS Code dark string blue
+      }
+    },
+    {
+      types: ['function'],
+      style: {
+        color: '#D2A8FF' // VS Code dark purple
+      }
+    },
+    {
+      types: ['boolean', 'number'],
+      style: {
+        color: '#79C0FF' // VS Code dark blue
+      }
+    }
+  ]
+};
 
 const config: Config = {
   title: 'AIM',
@@ -126,8 +276,8 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} AIM`,
     },
     prism: {
-      theme: prismThemes.jettwaveLight,
-      darkTheme: prismThemes.jettwaveDark,
+      theme: customLight,
+      darkTheme: customDark,
     },
   } satisfies Preset.ThemeConfig,
 };
