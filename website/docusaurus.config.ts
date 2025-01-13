@@ -156,7 +156,7 @@ const customDark = {
 
 const config: Config = {
   title: 'AIM',
-  tagline: 'The AI Markup Language',
+  tagline: 'The Markup Language for AI Prompt-driven Programming',
   favicon: 'img/favicon/favicon.ico',
 
   // Set the production url of your site here
