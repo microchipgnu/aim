@@ -11,9 +11,10 @@ input:
 ---
 ---
 
-Say hello to v[input.name].
+Say hello to {% $frontmatter.input.name %}.
 
-Use the following style: v[input.style]. Do not use any other style. Do not use emojis.
+Use the following style: {% $frontmatter.input.style %}. Do not use any other style. Do not use emojis.
 
-::ai{#greeting model="openai/gpt-4o-mini"}
+{% ai #greeting model="openai/gpt-4o-mini" /%}
 
+{% $greeting.result %}

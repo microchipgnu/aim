@@ -7,20 +7,20 @@ input:
     description: "The topic to be explained"
 ---
 
-I'd like you to explain v[input.topic] to a 12 year old.
+I'd like you to explain {% $frontmatter.input.topic %} to a 12 year old.
 
-::ai{#thought model="openai/gpt-4o-mini"}
+{% ai #thought model="openai/gpt-4o-mini" /%}
 
-v[thought]
+{% $thought.result %}
 
 Judge the above explanation on it's correctness, conciseness and understandability for a 12 year old. Suggest some feedback to improve it.
 
-::ai{#feedback model="openai/gpt-4o-mini"}
+{% ai #feedback model="openai/gpt-4o-mini" /%}
 
-v[feedback]
+{% $feedback.result %}
 
 Now improve the explanation based on the feedback.
 
-::ai{#improved model="openai/gpt-4o-mini"}
+{% ai #improved model="openai/gpt-4o-mini" /%}
 
-v[improved]
+{% $improved.result %}

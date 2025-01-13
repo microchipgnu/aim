@@ -64,27 +64,27 @@ Final answer:
 
 # Run
 
-Question: v[input.question]
+Question: {% $frontmatter.input.question %}
 
-::::loop{#counter count=10}
+{% loop counter=10 %}
 
-Thought: :ai{#thought model="openai/gpt-4"}
+Thought: {% ai #thought model="openai/gpt-4" /%}
 
-Action: :ai{#action model="openai/gpt-4"}
+Action: {% ai #action model="openai/gpt-4" /%}
 
-:::container{if=v[action] == "googleSearch"}
+{% if action == "googleSearch" %}
 
-Input: :ai{#input model="openai/gpt-4"}
+Input: {% ai #input model="openai/gpt-4" /%}
 
-::flow{#output model="openai/gpt-4" path="file://./tools/google-search.md"}
+{% flow #output model="openai/gpt-4" path="file://./tools/google-search.md" /%}
 
-Observation: v[output]
+Observation: {% $output.result %}
 
-:::
+{% /if %}
 
-:::container{else-if=v[action] == "runCode"}
+{% if action == "runCode" %}
 
-Input: :ai{#code model="openai/gpt-4"}
+Input: {% ai #code model="openai/gpt-4" /%}
 
 
 ```js {#output}
@@ -95,30 +95,30 @@ return await eval(v[code])
 
 <!-- We show the logs from running the code to the model -->
 
-Code ran: v[output]
+Code ran: {% $output.result %}
 
-:::
+{% /if %}
 
-:::container{else-if=v[action] == "done"}
+{% if action == "done" %}
 
 <!-- We're done, no need to do anything, this is also checked in the loop parameters so we terminate the loop -->
 
 Done!
 
-:::
+{% /if %}
 
-:::container{else}
+{% if action != "googleSearch" && action != "runCode" && action != "done" %}
 
 <!-- Occasionally the agent will mess up and generate an invalid action, by feeding this back to the model it can self-correct -->
 
 v[action] is not a valid action, should be 'googleSearch', 'runCode' or 'done'
 
-:::
+{% /if %}
 
-::::
+{% /loop %}
 
 # Final answer: 
 
 <!-- We get the model to output a final answer, this is what we'd show to our user -->
 
-v[finalAnswer]
+{% $finalAnswer.result %}

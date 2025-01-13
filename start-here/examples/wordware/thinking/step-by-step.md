@@ -9,22 +9,22 @@ input:
 
 <!-- First we get the model to think through the answer -->
 
-v[input.question]
+{% $frontmatter.input.question %}
 
-::ai{#thinking model="openai/gpt-4o-mini"}
+{% ai #thinking model="openai/gpt-4o-mini" /%}
 
 <!-- We're even using a much smaller, faster and cheaper model here; Mistral 7B rather than GPT-3.5. 
 Mistral 7B is 7.5x lower cost on output tokens 
 (see the [model documentation](https://www.notion.so/wordware/Models-615b76d7498f4e06ae522a329695da74)). -->
 
-::ai{#thought model="openai/gpt-4o-mini"}
+{% ai #thought model="openai/gpt-4o-mini" /%}
 
 <!-- Lastly, we extract the final answer -->
 
-This was your thought: v[thought]
+This was your thought: {% $thought.result %}
 
 Now output the final number and only the number.
 
-::ai{#answer model="ollama/llama3.2"}
+{% ai #answer model="ollama/llama3.2" /%}
 
-v[answer]
+{% $answer.result %}

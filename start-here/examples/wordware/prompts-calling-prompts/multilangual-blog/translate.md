@@ -12,8 +12,10 @@ input:
 
 <!-- This prompt is called from the multilingual blog example to translate text into different languages -->
 
-Translate the following into v[input.language]:
+Translate the following into {% $frontmatter.input.language %}:
 
-v[input.input]
+{% $frontmatter.input.input %}
 
-::ai{#translation model="openai/gpt-3.5-turbo"}
+{% ai #translation model="openai/gpt-3.5-turbo" /%}
+
+{% $translation.result %}

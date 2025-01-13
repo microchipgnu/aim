@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import { createServer } from "@aim-sdk/server";
-import { aim } from "@aim-sdk/runtime";
+import { aim } from "@aim-sdk/core";
 import { Command } from "commander";
 import "dotenv/config";
 import pkg from "./package.json" assert { type: "json" };
 import fs from 'fs';
 import * as readline from 'readline';
-import { compile } from "@aim-sdk/compiler";
 
 // Initialize Commander
 const program = new Command();
@@ -36,9 +35,9 @@ program
   .action(async (filepath: string) => {
     try {
       const content = fs.readFileSync(filepath, 'utf-8');
-      const { document, errors } = await compile(content);
+      const aimDocument = await aim`${content}`;
       
-      console.log(JSON.stringify({ document, errors }, null, 2));
+      console.log(JSON.stringify({ document: aimDocument.ast, errors: aimDocument.errors }, null, 2));
     } catch (error) {
       console.error('Compilation failed:', error);
       process.exit(1);

@@ -34,6 +34,7 @@ export async function aim(strings: TemplateStringsArray, ...values: any[]) {
 
     return {
         ast,
+        frontmatter,
         errors: [],//errors,
         warnings: warnings,
         execute: async (options: Partial<RuntimeOptions> = {}) => {

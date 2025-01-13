@@ -1,5 +1,17 @@
 # aimx
 
+## 0.1.19
+
+### Patch Changes
+
+- remove copy-wasm from build
+
+## 0.1.18
+
+### Patch Changes
+
+- added core
+
 ## 0.1.17
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @aim-sdk/server
 
+## 0.1.8
+
+### Patch Changes
+
+- added aim-sdk core
+
 ## 0.1.7
 
 ### Patch Changes
