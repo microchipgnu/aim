@@ -1,10 +1,9 @@
 import type { Schema } from "@markdoc/markdoc";
 import Markdoc, { Tag } from "@markdoc/markdoc";
-import { pushStack } from "runtime/state";
-import type { AIMTag } from "types";
 import { generateText } from "ai";
 import { getModelProvider } from "runtime/ai/get-model-providers";
-import { $textRegistry } from "runtime/state";
+import { $textRegistry, clearTextRegistry, pushStack } from "runtime/state";
+import type { AIMTag } from "types";
 
 export const aiTag: Schema = {
     render: 'ai',
@@ -46,6 +45,9 @@ export const aiTagWithRuntime: AIMTag = {
                 context: contextText // Make context available in variables
             }
         });
+
+        // Clear registry after AI processing
+        clearTextRegistry();
 
         return new Tag('ai', {
             result: result.text,

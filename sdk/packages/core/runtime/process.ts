@@ -1,16 +1,17 @@
 import Markdoc, { Tag, type Config, type Node } from "@markdoc/markdoc";
 import { aiTagWithRuntime } from "markdoc/tags/ai";
 import { loopTagWithRuntime } from "markdoc/tags/loop";
+import { setTagWithRuntime } from "markdoc/tags/set";
 import { config as defaultConfig } from "../markdoc/config";
 import { runQuickJS } from "./code/quickjs";
-import { getCurrentConfigFx, getRuntimeContextFx, pushStack, addToTextRegistry, clearTextRegistry, $textRegistry, $runtimeContext } from "./state";
+import { addToTextRegistry, getCurrentConfigFx, getRuntimeContextFx, pushStack } from "./state";
 
 async function _process(ast: Node, config: Config) {
     async function executeNode(node: Node): Promise<any> {
         const currentConfig = await getCurrentConfigFx(config);
 
         switch (node.type) {
-            case 'text':    
+            case 'text':
             case 'paragraph':
             case 'softbreak':
             case 'hardbreak':
@@ -23,16 +24,16 @@ async function _process(ast: Node, config: Config) {
             case 'item':
             case 'table':
             case 'thead':
-            case 'tbody': 
+            case 'tbody':
             case 'tr':
             case 'th':
             case 'td':
-            case 'heading':{
+            case 'heading': {
                 const transformedNode = Markdoc.transform(node, currentConfig);
 
                 if (transformedNode) {
                     let content = '';
-                    
+
                     if (typeof transformedNode === 'string') {
                         content = transformedNode;
                     } else if (Array.isArray(transformedNode)) {
@@ -90,14 +91,14 @@ async function _process(ast: Node, config: Config) {
             }
             case 'tag':
                 switch (node.tag) {
+                    case 'set': {
+                        return await setTagWithRuntime.runtime(node, currentConfig, { executeNode });
+                    }
                     case 'loop': {
                         return await loopTagWithRuntime.runtime(node, currentConfig, { executeNode });
                     }
                     case 'ai': {
-                        // Clear registry after AI processing
-                        const result = await aiTagWithRuntime.runtime(node, currentConfig, {});
-                        clearTextRegistry();
-                        return result;
+                        return await aiTagWithRuntime.runtime(node, currentConfig, { executeNode });
                     }
                     default: {
                         return Markdoc.transform(node, currentConfig);

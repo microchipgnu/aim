@@ -22,8 +22,8 @@ export const loopTagWithRuntime: AIMTag = {
         const context = await getCurrentConfigFx(config);
 
         const attrs = node.transformAttributes(context);
-        const count = attrs.count;
-        const items = attrs.items;
+        const count = typeof attrs.count === 'number' ? attrs.count : attrs.count?.resolve(context);
+        const items = Array.isArray(attrs.items) ? attrs.items.map(item => item?.resolve ? item.resolve(context) : item) : attrs.items.resolve(context);
         const id = attrs.id || 'loop';
         const results = [];
 
