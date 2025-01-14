@@ -30,7 +30,7 @@ input:
 
 # Welcome to AIM
 
-Hello, $userName!
+Hello, {% $userName %}!
 
 {% ai #greetUser model="openai/gpt-4o-mini" /%}
 
