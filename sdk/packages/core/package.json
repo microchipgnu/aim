@@ -1,12 +1,13 @@
 {
   "name": "@aim-sdk/core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/js-yaml": "^4.0.9"
+    "@types/js-yaml": "^4.0.9",
+    "tsup": "^8.3.5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -31,7 +32,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "rm -rf dist && tsc -p tsconfig.build.json && bun build ./index.ts --outdir ./dist --target node"
+    "build": "rm -rf dist && tsup --config tsup.config.ts"
   },
   "exports": {
     ".": {

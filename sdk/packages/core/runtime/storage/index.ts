@@ -1,5 +1,5 @@
 import * as browserStorage from './storage.browser';
-import * as nodeStorage from './storage.node';
+import * as nodeStorage from './storage.node.ts';
 
 export const getLocalStorageItem = (key: string): string | null => {
   // Check if we're in a browser environment

@@ -1,5 +1,13 @@
 # @aim-sdk/server
 
+## 0.1.9
+
+### Patch Changes
+
+- smaller bundle
+- Updated dependencies
+  - @aim-sdk/core@0.0.3
+
 ## 0.1.8
 
 ### Patch Changes
