@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.20
+
+### Patch Changes
+
+- smaller bundle
+
 ## 0.1.19
 
 ### Patch Changes
