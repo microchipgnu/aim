@@ -1,5 +1,71 @@
 # aimx
 
+## 0.1.31
+
+### Patch Changes
+
+- update server logs
+
+## 0.1.30
+
+### Patch Changes
+
+- improve compiler
+
+## 0.1.29
+
+### Patch Changes
+
+- test cjs
+
+## 0.1.28
+
+### Patch Changes
+
+- test
+
+## 0.1.27
+
+### Patch Changes
+
+- fix
+
+## 0.1.26
+
+### Patch Changes
+
+- fix again x 1000
+
+## 0.1.25
+
+### Patch Changes
+
+- fix
+
+## 0.1.24
+
+### Patch Changes
+
+- test
+
+## 0.1.23
+
+### Patch Changes
+
+- fix
+
+## 0.1.22
+
+### Patch Changes
+
+- fix
+
+## 0.1.21
+
+### Patch Changes
+
+- new bundle
+
 ## 0.1.20
 
 ### Patch Changes

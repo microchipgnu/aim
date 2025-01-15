@@ -1,33 +1,72 @@
 import { defineConfig } from 'tsup'
+import { copyFile, mkdir } from 'node:fs/promises'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
   entry: ['index.ts'],
-  format: ['cjs', 'esm'],
+  format: ['esm', 'cjs'],
   dts: true,
   clean: true,
   minify: true,
   outDir: 'dist',
-  sourcemap: false, // Disable sourcemaps to reduce bundle size
-  splitting: true,
+  splitting: false,
   treeshake: {
     preset: 'recommended',
-    moduleSideEffects: false, // Assume modules have no side effects for better tree shaking
+    moduleSideEffects: true,
   },
-  noExternal: [], // Bundle all dependencies
-  target: 'es2020', // Target newer JS version for smaller output
+  noExternal: [
+    '@aim-sdk/core',
+    '@aim-sdk/server',
+    'commander',
+    'inquirer',
+    'dotenv',
+    'ora',
+    'chalk',
+  ],
+  external: [
+    'path',
+    'fs',
+    'readline',
+    'process'
+  ],
+  target: 'node18',
   outExtension({ format }) {
     return {
-      js: format === 'cjs' ? '.js' : '.mjs',
+      js: format === 'cjs' ? '.cjs' : '.mjs'
     }
   },
-  esbuildOptions(options) {
-    options.assetNames = '[name]'
-    options.drop = ['console', 'debugger'] // Remove console.logs and debugger statements
-    options.pure = ['console.log'] // Mark console.log calls as pure for removal
-    options.legalComments = 'none' // Remove license comments
-    options.mangleProps = /^_/ // Mangle private properties starting with underscore
-    options.minifyIdentifiers = true
-    options.minifySyntax = true
-    options.minifyWhitespace = true
+  banner: {
+    js: '#!/usr/bin/env node',
   },
+  esbuildOptions(options) {
+    options.platform = 'node'
+    options.mainFields = ['module', 'main']
+  },
+  // async onSuccess() {
+  //   try {
+  //     // Create fonts directory in both the root and dist
+  //     await mkdir(join(__dirname, 'fonts'), { recursive: true });
+  //     await mkdir(join(__dirname, 'dist/fonts'), { recursive: true });
+      
+  //     // Copy Standard.flf from figlet module to both locations
+  //     const fontPath = fileURLToPath(new URL('./node_modules/figlet/fonts/Standard.flf', import.meta.url));
+      
+  //     // Copy to root fonts directory (for development)
+  //     await copyFile(
+  //       fontPath,
+  //       join(__dirname, 'fonts/Standard.flf')
+  //     );
+      
+  //     // Copy to dist fonts directory (for production)
+  //     await copyFile(
+  //       fontPath,
+  //       join(__dirname, 'dist/fonts/Standard.flf')
+  //     );
+  //   } catch (error) {
+  //     console.error('Error copying fonts:', error);
+  //   }
+  // },
 })
