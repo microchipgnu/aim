@@ -1,54 +1,48 @@
 ---
 slug: syntax-decisions
-title: Syntax, Syntax, Syntax
+title: Syntax Decisions
 authors: [micro]
 image: ./cover.png
 ---
 
-Twelve days have passed since my [last update](/blog/welcome), where I briefly introduced AIM. In this post, I’ll walk you through the different syntax options I’ve been exploring and the decisions I’ve made along the way.
+Twelve days have passed since my [last update](/blog/welcome) where I briefly introduced AIM. In this post, I’ll show you how AIM fits into the growing **generative coding** landscape and explain the design decisions that led me here.
+
+As an engineer, I’ve always been drawn to **simplifying experiences**. Over time, I grew tired of complex builds, unwieldy frameworks, and the constant overhead of scaffolding just to do something simple—especially when working with AI.
+
+I wanted to make a language and **a system** that would interpret it, so I wouldn’t have to constantly reinvent the wheel. Also, I wanted this language to integrate with **existing tools** and ecosystems—no one wants yet another locked-down platform.
+
+import rickRubin from './rick-rubin.jpeg';
 
 
-I intentionally held off on showing any concrete syntax until now because I wanted to ensure I had a solid grasp of the possibilities. Ever since I started my engineering journey, I’ve been drawn to the idea of simplifying things for end users—even if that means sacrificing some flexibility or hacking together a workaround. That’s how I operate: simplicity over complexity whenever possible.
-
-> *Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away.*
-> 
-> **Antoine de Saint-Exupéry**
-
-<!-- truncate -->
-
-## Simple at Heart
-
-From day one, my vision for AIM was that it should be **easy to use** and **understand**. Ideally, I want it to be a tool that’s productive enough to write software on the go -- from my Notes app on a phone, for example, all the way to an actual working solution. Maybe that’s a stretch, but I hope you see where I’m coming from.
-
-I’m not entirely sure when it happened, but I woke up one morning just exhausted by coding. Everything felt so time-consuming and overcomplicated -- while my true passion is solving problems, not wrestling with boilerplate. This is particularly relevant when we’re using AI to solve problems.
-
-![](./rick-rubin.jpeg)
+<img src={rickRubin} alt="Rick Rubin" width="300" />
 
 > "*How are you building your AIs?*"
 >
 > "*Plain text*"
 
-So, I decided to build a language and a system to interpret it. That way, I wouldn’t have to deal with all the usual complexity every single time. And more importantly, I could have full control over the whole language and how I wanted it to work.
+<!-- truncate -->
 
-Then one night in Kuala Lumpur around late November 2024, I was looking at the city from above and I started thinking that a new language should integrate gracefully with the whole programming tools and ecosystems. That’s where the spark came from -- the idea of making it play nicely with the infrastructure we already rely on.
+## A Prompt-driven World
 
-![](./IMG_8943.jpg)
+By now, you’ve probably used (or at least heard of) generative coding tools. Whether it’s [Bolt](https://bolt.new), [v0](https://v0.dev), Cursor, or something like Devin, the pattern is similar: you **prompt** the AI, it outputs code, and you refine until it’s right.
 
-## State of Generative Coding in 2025
-
-Generative coding in 2025 is a bit of a mess. There are several ways to have an AI co-pilot your software development:
-
-- [Bolt](https://bolt.new), [v0](https://v0.dev), and Lovable operate as standalone products.
-- Cursor and various IDE solutions integrate with LLMs to achieve similar functionality.
+- [Bolt](https://bolt.new) and [v0](https://v0.dev) operate as standalone products and let you prompt the system in a conversational way.
+- Cursor and various IDE solutions integrate with LLMs to achieve similar functionality, but integrated in existing tooling like your IDE.
 - Devin (and others like it) run fully autonomously, tying into your team’s codebase and communication platforms like Slack.
 
 Programming has become less about cranking out lines of code and more about prompting. You select text, label it, and ask the system to do something. If it’s off, you keep prompting until it gets closer to what you need.
 
-That’s where tools like Devin come in: they automate a lot of the process and let you collaborate in real time with AI. But it all boils down to prompts -- small notes you send to the AI to fix or create something.
+It struck me that prompting is essentially note-taking. If building software is turning into note-taking, we need a **prompting-oriented language**—something that reads naturally while still distinguishing between text and instructions.
 
-To me, prompts are basically **notes** reflecting our thought process as we evaluate AI’s work. If that’s how we’re building software, then I want to do it in a note-taking style. This is why I see value in a **prompting-oriented language** for building entire solutions.
+import kuala from './IMG_8943.jpg';
 
-And if we’re building software like we’re taking notes, we need a straightforward, flexible syntax -- one that separates code from text in a super clear way.
+<div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+  <img src={kuala} alt="Kuala Lumpur November 2024" width="500" />
+  <p style={{ marginTop: '8px', color: '#666', fontSize: '0.9em' }}>View from my room in Kuala Lumpur where I wrote the first idea for AIM, November 2024</p>
+</div>
+
+That’s the niche I see for AIM: a **file-first**, minimal-boilerplate way to orchestrate AI workflows, all within a Markdown-like structure.
+
 
 ## Natural Language Programming
 
@@ -61,36 +55,27 @@ I love the concept, but Wordware itself is proprietary and relatively closed. I 
 
 Software programming is simply a way to express ideas, instructions, and concepts in a format the computer understands. It’s a means to the end goal—solving problems.
 
-**Problems!**
+**Solving problems!**
 
 Are software developers the only people who can solve problems? Of course not. They’re good at solving computer problems, but in many cases, they are given problems by people who don’t know how to solve them. 
 
 Developers are basically translators. They take a problem from someone (or themselves) and break it down into computer instructions. But problem-solving is a team effort, so software development should be too.
 
-## Markdown
+---
 
-In an ideal scenario, you’d just say:
+In an ideal scenario, you’d just write *"Do this, do that, do the other thing"* and the computer would interpret it and make it happen. That’s essentially **prompt-driven development**.
 
-"Do this, do that, do the other thing"
+But if we’re building bigger systems with agentic workflows, we need reproducibility, testability, version control, collaboration. We can try to rely on writing in pure natural language and convert that to code, or let a system to interpret it, but in my opinion, it’s a bit early for large-scale, complex projects to rely solely on these approaches.
 
-And the computer would interpret it and make it happen. That’s essentially prompt-driven development.
+On top of that, we should try to accommodate less-technical collaborators in our workflows, bridging the gap between them and traditional developers. Plain text isn’t ideal for all scenarios. We need a bit more structure and a way to differentiate between instructions and normal language.
 
-But if we’re building bigger systems with agentic workflows, we need reproducibility, testability, version control, collaboration. Sure, we can write in pure natural language and convert that to code, but in my opinion, it’s a bit early for large-scale, complex projects to rely solely on that approach.
-
-On top of that, we need to accommodate less-technical collaborators in our workflows, bridging the gap between them and traditional developers. Plain text isn’t ideal for all scenarios. We need a bit more structure and a way to differentiate between instructions and normal language.
-
-This is where Markdown shines. It’s simple, easy to read, and supports just enough structure.
-
-Markdown has been around forever, and I’ve personally used it for more than a decade. It’s widely regarded as the best option for keeping documents both simple and readable.
+This is where Markdown shines. It's simple, easy to read, and supports just enough structure. Having been around forever (and personally using it for more than a decade), it's widely regarded as the best option for keeping documents both simple and readable.
 
 If I were to compare Markdown to other languages vs plain text, I think Markdown leans more towards plain text.
 
 ![](./complexity-chart.png)
 
-Markdown was built to be simple and readable while allowing for structure.
-
 There are other Markup languages, but it seems that the general consensus is that Markdown is the best option for keeping things simple and readable. I compared Markdown to other Markup languages to see how it compares. 
-
 
 import { useState } from 'react';
 
@@ -220,18 +205,18 @@ import { useState } from 'react';
   })()}
 </div>
 
-Markdown ticked all the boxes for me and of course I have been using it for more than a decade. But while Markdown is simple and readable, it also makes it difficult to add rich content to it.
-
 
 The downside? Adding rich, interactive content to Markdown can be tricky. Tools like MDX let you inject JavaScript, but they don’t fundamentally rethink how to express program logic.
 
-## Back to the Drawing Board
+---
 
-Once I decided that Markdown was a strong starting point, I looked into different ways to extend it:
+
+Having decided that Markdown was a strong starting point, I looked into different ways to extend it:
 
 1. [**Directives Proposal** ](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)
 2. [**Remark Ecosystem**](https://github.com/remarkjs/remark/blob/main/doc/plugins.md#list-of-plugins)
 3. [**Markdoc**](https://markdoc.io/)
+4. [**MDX**](https://mdxjs.com/)
 
 At first, I tried to use directives for something straightforward -- like querying an LLM and outputting the result. 
 
@@ -255,30 +240,60 @@ It seemed intuitive until I realized how messy it gets when you start nesting di
 :::::
 ```
 
-Then I stumbled across a blog post by [Gruber](https://daringfireball.net/linked/2022/05/19/markdoc) discussing some of Markdown’s original syntax decisions. It reminded me that we should keep it simple, or risk losing the very things that make Markdown so pleasant in the first place.
+<div style={{ textAlign: 'center' }}>
+  I ended up having two options: **Markdoc** and **MDX**.
+</div>
 
+I **love MDX** and have used it several times. It’s powerful because it lets you interleave arbitrary JavaScript—including React components—directly into your Markdown. Think of it as “docs as code.” However, this can also lead to complex or code-heavy content.
+
+By contrast, Markdoc enforces a cleaner boundary between text and logic—“docs as data.” It uses a fully declarative approach to composition and flow control, which helps maintain clear, well-structured content. With MDX, you get more freedom and flexibility, but the trade-off is that your documents can become as complicated as regular code, hurting maintainability and making the authoring process more cumbersome.
+
+Then I stumbled across a blog post by [John Gruber discussing some of Markdown’s original syntax decisions](https://daringfireball.net/linked/2022/05/19/markdoc). His point was simple but vital: don’t lose Markdown’s simplicity, or you risk throwing away the very benefits that made it so appealing in the first place.
 
 > Markdoc is Stripe’s own content authoring system, implementing a rich superset of Markdown, and released this week as an open source project. It looks wonderful. I love their syntax extensions — very true to the spirit of Markdown. They use curly braces for their extensions; I’m not sure I ever made this clear, publicly, but I avoided using curly braces in Markdown itself — even though they are very tempting characters — to unofficially reserve them for implementation-specific extensions. Markdoc’s extensive use of curly braces for its syntax is exactly the sort of thing I was thinking about.
 
-Reading that post reaffirmed the direction I was heading in. I spent the next few days pouring over Markdoc’s documentation and thinking about how it enforces structure and separation between code and content:
+Reading that post reaffirmed the direction I was heading in. I spent the next few days diving into Markdoc’s documentation to see how it:
 
-
-```aim
-{% container %}
-  {% container2 %}
-    {% container3 %}
-      {% ai #decisions model="openai/o1" /%}
-    {% /container3 %}
-  {% /container2 %}
-{% /container %}
-
-```
+1. Enforces structure and keeps content and code logically separate
+2. Remains true to Markdown while allowing “richer nodes” when needed.
 
 [Markdoc was designed to decouple code and content while enforcing proper discipline at the boundaries, as read in the Stripe Engineering Blog](https://stripe.com/blog/markdoc).
 
-It seemed to echo my own goals: keep Markdown at the core, but allow for a richer set of directives or “nodes” when we really need them. This is where I would place AIM's Markdown flavour (based on Markdoc) now.
+It seemed to echo my own goals: keep Markdown at the core, but allow for a richer set of directives or “nodes” when we really need them.
+
+Based on pure gut feeling, this is where I would place Markdoc, and AIM's Markdown flavour (based on Markdoc) now.
 
 ![](./complexity-chart-ext.png)
+
+## AIM in a Nutshell
+
+**AIM** stands for “**AI M**arkup *Language*,” a specialized superset of Markdown that keeps the simplicity while letting you do complex AI tasks natively. Here’s a minimal example:
+
+
+```aim
+---
+input:
+  - city: string
+    description: "Name of the city"
+---
+
+What's the weather in {% $input.city %}?
+
+{% ai #weather model="openai/o1" /%}
+
+{% $weather.result %}
+```
+
+1. The frontmatter section at the top declares external inputs.
+2. Text can reference those inputs using the `{% $input.city %}` syntax.
+3. The `{% ai #weather model="openai/o1" /%}` directive runs the AI workflow.
+4. The result is stored in the `$weather.result` variable.
+
+This is how **AIM** stays close to Markdown but gives you a clear syntax for AI operations.
+
+> **Markdown-Like, But Not Exactly**  
+> AIM extends Markdown with some additional directives for AI interactions. That’s why it might not “look like Markdown,” but it’s still human-readable and easy to learn.
+
 
 Now let's see how AIM compares to JavaScript in a practical example. Both achieve the same result, but notice how AIM's declarative syntax eliminates boilerplate and lets you focus purely on describing what you want to accomplish.
 
@@ -400,22 +415,36 @@ By streamlining these tasks into a file-first format and handling AI prompts nat
 
 Moreover, AIM’s syntax is easier to extend and maintain as your project grows. Rather than scattering prompt templates across multiple files or frameworks, you keep all logic in one concise place. 
 
+
+**What's next for AIM?**
+
+1. **Open Sourcing** - A public repo is in the works. Once released, you'll be able to view all the internals: how `.aim` files are compiled, run and served.
+2. **Technical Documentation** - I'm working on a comprehensive guide to help you understand how AIM works and how to use it.
+3. **Developer Tooling** - A command line interface for AIM for running and serving files and an SDK for AIM integration into existing projects.
+4. **Cookbooks** - A collection of recipes for common use cases.
+5. And hopefully a lot more...
+
+
 ## Final Thoughts
 
 By reducing boilerplate and making it easier to connect to an LLM, you streamline development and make the solution more accessible and modular. Every solution should boil down to a file—or a collection of files—written in a format as close to natural language as possible.
 
-1. Lower barries to entry - non-technical users can use it and easily create solutions
-2. Simplicity and future-proofing - You can swap LLMs without fuss, and you are not locked into any single app
-3. Enduring value -- As [Kepano](https://stephango.com/file-over-app) says "the files you create are more important than the tools you use to create them", so it's best to keep them in an open, portable format.
+1. **Lower barries to entry** - non-technical users can use it and easily create solutions
+2. **Simplicity and future-proofing** - You can swap LLMs without fuss, and you are not locked into any single app
+3. **Enduring value** - As [Kepano](https://stephango.com/file-over-app) says "the files you create are more important than the tools you use to create them", so it's best to keep them in an open, portable format.
 
 LLMs are fast becoming the "CPUs" of moderns problem-solving, and file-first approach safeguards us from ever being trapped by today's software platforms. Beyond that, this approach naturally lends itself to "coding agents" because:
 
 1. LLMs produce text in Markdown, which already enhances readibility, formatting and structure.
-2. It cuts down token usage significantly -- sometimes by up to 3x -- making the resulting AI-driven solutions both more efficient and const-effective.
+2. It cuts down token usage significantly - sometimes by up to 3x -- making the resulting AI-driven solutions both more efficient and const-effective.
 
 
-But the biggest reason for me is **empowering humans**. We want people to stay in control of how they solve problems, using **their own natural language** without fear of vendor lock-in. I'm convinced that there's practically infinite demand for software, and AIM should let everyone contribute without being stuck in a single platform's ecosystem.
+But the biggest reason for me is **empowering humans**. We want people to stay in control of how they solve problems, using **their own language** without fear of vendor lock-in. I'm convinced that there's practically infinite demand for software, and AIM should let everyone contribute without being stuck in a single platform's ecosystem.
 
+
+> *Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away.*
+> 
+> **Antoine de Saint-Exupéry**
 
 <!-- 1. Wordware
 2. Why Markdown?
@@ -427,3 +456,5 @@ But the biggest reason for me is **empowering humans**. We want people to stay i
 8. Integrating into the growing gen code with ai, means that having a simple syntax costs less and makes it even easier to use, while achieving powerful results
 9. reproducilble prompts
 10. tool compatibility -->
+
+
