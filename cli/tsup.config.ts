@@ -1,7 +1,5 @@
-import { defineConfig } from 'tsup'
-import { copyFile, mkdir } from 'node:fs/promises'
-import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { defineConfig } from 'tsup'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 

@@ -8,8 +8,6 @@ import { createServer } from "./src/server";
 import chalk from 'chalk';
 import type { ValidationError } from "@markdoc/markdoc";
 import ora from 'ora';
-import path from "node:path";
-import { createServer as createViteServer } from 'vite';
 
 // Initialize Commander
 const program = new Command();
