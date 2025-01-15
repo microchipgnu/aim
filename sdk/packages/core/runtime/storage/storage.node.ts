@@ -1,7 +1,7 @@
 export const getLocalStorageItem = (key: string): string | null => {
   try {
-    const fs = require('fs');
-    const path = require('path');
+    const fs = require('node:fs');
+    const path = require('node:path');
     const storageFile = path.join(process.cwd(), '.aim-storage.json');
     
     if (!fs.existsSync(storageFile)) {
@@ -18,8 +18,8 @@ export const getLocalStorageItem = (key: string): string | null => {
 
 export const setLocalStorageItem = (key: string, value: string): void => {
   try {
-    const fs = require('fs');
-    const path = require('path');
+    const fs = require('node:fs');
+    const path = require('node:path');
     const storageFile = path.join(process.cwd(), '.aim-storage.json');
     
     let data: Record<string, string> = {};

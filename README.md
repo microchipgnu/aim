@@ -72,4 +72,3 @@ To get started with AIM, please refer to the [Getting Started](./start-here/READ
    - Hot reload support
    - Build optimization
    - Deployment utilities
-

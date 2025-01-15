@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.32
+
+### Patch Changes
+
+- update logs in server
+
 ## 0.1.31
 
 ### Patch Changes

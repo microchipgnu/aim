@@ -8,6 +8,8 @@ import { createServer } from "./src/server";
 import chalk from 'chalk';
 import type { ValidationError } from "@markdoc/markdoc";
 import ora from 'ora';
+import path from "node:path";
+import { createServer as createViteServer } from 'vite';
 
 // Initialize Commander
 const program = new Command();
@@ -20,7 +22,7 @@ program
   .name(pkg.name)
   .description(pkg.description)
   .version(pkg.version);
-  
+
 program
   .command("start")
   .description("Start the AIM server")
@@ -28,24 +30,58 @@ program
   .option('-p, --port <number>', 'Port number', '3000')
   .action(async (options) => {
     console.clear();
-    
+
     console.log(chalk.cyan('AIM Server'));
     console.log(chalk.dim(`Starting server with configuration:`));
     console.log(chalk.dim(`• Routes directory: ./${options.dir}`));
     console.log(chalk.dim(`• Port: ${options.port}\n`));
-    
+
     const spinner = ora({
       text: 'Starting development server...',
       color: 'cyan'
     }).start();
 
-    spinner.succeed(chalk.green(`Server is running at ${chalk.bold(`http://localhost:${options.port}`)}`));
+    // try {
+
+    //   const dir = path.resolve(__dirname, "./src/app");
+
+    //   const server = await createViteServer({
+    //     root: dir,
+    //     server: {
+    //       port: 10000
+    //     },
+    //     configFile: path.resolve(dir, 'vite.config.ts'),
+    //     define: {
+    //       // Define global constants that will be available in the app
+    //       __APP_DATA__: JSON.stringify({
+    //         serverStartTime: new Date().toISOString(),
+    //         environment: "aimx",
+    //       })
+    //     }
+    //   });
+
+    //   await server.listen();
+
+    //   server.printUrls();
+
+    //   // Handle process termination
+    //   process.on('SIGINT', async () => {
+    //     await server.close();
+    //     process.exit();
+    //   });
+
+    // } catch (error) {
+    //   console.error("Failed to start playground:", error);
+    //   process.exit(1);
+    // }
+
 
     await createServer({
       port: parseInt(options.port),
       routesDir: options.dir,
     });
 
+    spinner.succeed(chalk.green(`Server is running at ${chalk.bold(`http://localhost:${options.port}`)}`));
 
     console.log(chalk.dim('Press Ctrl+C to stop the server\n'));
 
@@ -72,10 +108,10 @@ program
         text: 'Validating syntax...',
         color: 'cyan'
       }).start();
-      
+
       const content = await fs.readFile(filepath, 'utf-8');
       const aimDocument = await aim`${content}`;
-      
+
       spinner.stop();
 
       console.log(chalk.dim('Finished validating syntax.\n'));
@@ -134,12 +170,12 @@ program
             input: process.stdin,
             output: process.stdout
           });
-          
+
           const answer = await new Promise<string>(resolve => {
             rl.question(prompt + ' ', resolve);
             rl.close();
           });
-          
+
           return answer;
         };
       };
@@ -199,7 +235,7 @@ program
 //   .description("Display a simple console menu")
 //   .action(async () => {
 //     console.clear();
-    
+
 //     console.log(chalk.cyan("Console Menu"));
 //     console.log("\nSelect an option:");
 

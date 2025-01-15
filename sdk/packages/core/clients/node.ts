@@ -1,6 +1,6 @@
 
 import type { RuntimeOptions } from "../types";
-import * as readline from "readline";
+import * as readline from "node:readline";
 import Markdoc, {type Node} from "@markdoc/markdoc";
 import { process as runtimeProcess } from "../runtime/process"
 
