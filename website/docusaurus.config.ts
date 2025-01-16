@@ -155,6 +155,7 @@ const customDark = {
 };
 
 const config: Config = {
+  themes: ['@docusaurus/theme-mermaid'],
   title: 'AIM',
   tagline: 'The Markup Language for AI Prompt-driven Programming',
   favicon: 'img/favicon/favicon.ico',
@@ -217,6 +218,9 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
+    mermaid: {
+      theme: {light: 'neutral', dark: 'forest'},
+    },
     navbar: {
       title: 'AIM',
       // logo: {
@@ -278,6 +282,9 @@ const config: Config = {
     prism: {
       theme: customLight,
       darkTheme: customDark,
+    },
+    markdown: {
+      mermaid: true,
     },
   } satisfies Preset.ThemeConfig,
 };
