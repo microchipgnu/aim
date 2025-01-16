@@ -63,9 +63,13 @@ Developers are basically translators. They take a problem from someone (or thems
 
 ---
 
-In an ideal scenario, you’d just write *"Do this, do that, do the other thing"* and the computer would interpret it and make it happen. That’s essentially **prompt-driven development**.
+In an ideal scenario, you’d just write:
 
-But if we’re building bigger systems with agentic workflows, we need reproducibility, testability, version control, collaboration. We can try to rely on writing in pure natural language and convert that to code, or let a system to interpret it, but in my opinion, it’s a bit early for large-scale, complex projects to rely solely on these approaches.
+> *"Do this, do that, do the other thing"* 
+
+The computer would interpret it and make it happen. That’s essentially **prompt-driven development**.
+
+But if we’re building bigger systems with [**agentic workflows**](https://www.anthropic.com/research/building-effective-agents), we need reproducibility, testability, version control, collaboration. We can try to rely on writing in pure natural language and convert that to code, or let a system to interpret it, but in my opinion, it’s a bit early for large-scale, complex projects to rely solely on these approaches.
 
 On top of that, we should try to accommodate less-technical collaborators in our workflows, bridging the gap between them and traditional developers. Plain text isn’t ideal for all scenarios. We need a bit more structure and a way to differentiate between instructions and normal language.
 
@@ -73,7 +77,16 @@ This is where Markdown shines. It's simple, easy to read, and supports just enou
 
 If I were to compare Markdown to other languages vs plain text, I think Markdown leans more towards plain text.
 
-![](./complexity-chart.png)
+import Mermaid from '@theme/Mermaid';
+
+<Mermaid value={`
+%%{init: { 'theme': 'light' } }%%
+xychart-beta
+    title "Complexity of Syntax"
+    x-axis ["Plain Text", "Markdown", "Programming Languages"]
+    y-axis " " 0 --> 1
+    line [0, 0.2, 1]
+`}/>
 
 There are other Markup languages, but it seems that the general consensus is that Markdown is the best option for keeping things simple and readable. I compared Markdown to other Markup languages to see how it compares. 
 
@@ -206,11 +219,6 @@ import { useState } from 'react';
 </div>
 
 
-The downside? Adding rich, interactive content to Markdown can be tricky. Tools like MDX let you inject JavaScript, but they don’t fundamentally rethink how to express program logic.
-
----
-
-
 Having decided that Markdown was a strong starting point, I looked into different ways to extend it:
 
 1. [**Directives Proposal** ](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)
@@ -244,7 +252,9 @@ It seemed intuitive until I realized how messy it gets when you start nesting di
   I ended up having two options: **Markdoc** and **MDX**.
 </div>
 
-I **love MDX** and have used it several times. It’s powerful because it lets you interleave arbitrary JavaScript—including React components—directly into your Markdown. Think of it as “docs as code.” However, this can also lead to complex or code-heavy content.
+I **love MDX** and have used it several times. It’s powerful because it lets you interleave arbitrary JavaScript—including React components—directly into your Markdown. Think of it as “docs as code.” However, this can also lead to complex or code-heavy content. MDX does not enforce a clear boundary between text and logic and doesn't fundamentally rethink how to express program logic.
+
+It's quite hard to tell what's text and what's logic. In this case, the `input` is a variable that's passed to the LLM and when parsing the file, the `input` is interpreted as a variable.
 
 By contrast, Markdoc enforces a cleaner boundary between text and logic—“docs as data.” It uses a fully declarative approach to composition and flow control, which helps maintain clear, well-structured content. With MDX, you get more freedom and flexibility, but the trade-off is that your documents can become as complicated as regular code, hurting maintainability and making the authoring process more cumbersome.
 
@@ -263,9 +273,21 @@ It seemed to echo my own goals: keep Markdown at the core, but allow for a riche
 
 Based on pure gut feeling, this is where I would place Markdoc, and AIM's Markdown flavour (based on Markdoc) now.
 
-![](./complexity-chart-ext.png)
+
+<Mermaid value={`
+%%{init: { 'theme': 'light' } }%%
+xychart-beta
+    title "Complexity of Syntax"
+    x-axis ["Plain Text", "Markdown", "Markdown with Extensions", "Programming Languages"]
+    y-axis " " 0 --> 1
+    line [0, 0.2, 0.4, 1]
+`}/>
+
+
+*I also want to add that MDX might be something I will explore in the future, but for now, I think Markdoc is the best option and I had to make a decision. Maybe adding a tag to indicate that a snippet is MDX or something would be a good compromise.*
 
 ## AIM in a Nutshell
+
 
 **AIM** stands for “**AI M**arkup *Language*,” a specialized superset of Markdown that keeps the simplicity while letting you do complex AI tasks natively. Here’s a minimal example:
 
@@ -316,13 +338,9 @@ Details: {% $frontmatter.input.details %}
 
 {% ai #research model="perplexity/sonar" /%}
 
-{% $research.result %}
-
 Write a copy to convince them to use Natural Language for AI Agents.
 
 {% ai #benefits model="anthropic/claude-3.5-sonnet" /%}
-
-{% $benefits.result %}
 
 Write a poem about them and why using AIM makes sense.
 
@@ -332,7 +350,7 @@ Write a poem about them and why using AIM makes sense.
 
 ```
   </TabItem>
-  <TabItem value="js" label="JavaScript">
+  <TabItem value="js-langchain" label="JavaScript (Langchain)">
 
 ```js
 
@@ -341,18 +359,16 @@ const { OpenAI } = require('langchain/llms/openai');
 const { Claude } = require('langchain/llms/claude');
 const { Sonar } = require('langchain/llms/sonar');
 
-// Initialize the LLMs
-const llmSonar = new Sonar({ modelName: 'perplexity-sonar' }); // Using Sonar for research
+const llmSonar = new Sonar({ modelName: 'perplexity-sonar' });
 const llmClaude = new Claude({
   modelName: 'claude-sonnet-3.5',
-  useStructuredGenerations: true, // Using Claude's Sonnet 3.5 with structured generations
+  useStructuredGenerations: true,
 });
 const llmOpenAI = new OpenAI({
   modelName: 'text-davinci-003',
-  temperature: 0.7, // Using OpenAI's GPT model for the poem
+  temperature: 0.7,
 });
 
-// Define the templates
 const researchPrompt = new PromptTemplate({
   inputVariables: ['name', 'details'],
   template: `
@@ -379,7 +395,6 @@ Write a poem which will underline how amazing {name} is and why using a product 
 `,
 });
 
-// Example usage
 async function generateOutputs() {
   const researchChain = new LLMChain({ llm: llmSonar, prompt: researchPrompt });
   const benefitsChain = new LLMChain({
@@ -388,7 +403,6 @@ async function generateOutputs() {
   });
   const poemChain = new LLMChain({ llm: llmOpenAI, prompt: poemPrompt });
 
-  // Example inputs
   const inputs = {
     name: 'John Doe',
     details: 'Tech entrepreneur focused on AI tools',
@@ -406,14 +420,79 @@ async function generateOutputs() {
 generateOutputs();
 ```
   </TabItem>
+  <TabItem value="js-ai-sdk" label="JavaScript (AI-SDK)">
+```js
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { sonar } from '@ai-sdk/sonar';
+
+const llmSonar = sonar('perplexity-sonar');
+const llmClaude = anthropic('claude-sonnet-3.5');
+const llmOpenAI = openai('text-davinci-003');
+
+const researchPrompt = ({ name, details }) => `
+Research this person: ${name}
+Details: ${details}
+[research]
+`;
+
+const benefitsPrompt = ({ name }) => `
+Now, write a copy to personally convince ${name} to start using Natural Language to create their AI Agents utilizing a product called Wordware.
+Underline the benefits of using AI to automate their work.
+[benefits]
+`;
+
+const poemPrompt = ({ name }) => `
+Write a poem which will underline how amazing ${name} is and why using a product like Wordware makes sense for them.
+[poem]
+`;
+
+async function generateOutputs() {
+  const inputs = {
+    name: 'John Doe',
+    details: 'Tech entrepreneur focused on AI tools',
+  };
+
+  try {
+    const researchOutput = await generateText({
+      model: llmSonar,
+      prompt: researchPrompt(inputs),
+    });
+
+    const benefitsOutput = await generateText({
+      model: llmClaude,
+      prompt: benefitsPrompt(inputs),
+    });
+
+    const poemOutput = await generateText({
+      model: llmOpenAI,
+      prompt: poemPrompt(inputs),
+    });
+
+    console.log('Research Output:', researchOutput);
+    console.log('Benefits Output:', benefitsOutput);
+    console.log('Poem Output:', poemOutput);
+  } catch (error) {
+    console.error('Error generating outputs:', error);
+  }
+}
+
+generateOutputs();
+```
+  </TabItem>
 </Tabs>
 
 
 Both snippets achieve the same goal—researching a person, writing persuasive copy, and generating a poem. However, the AIM version provides a more declarative approach, letting you focus on what needs to be done rather than how to implement it. The JavaScript example, while familiar to many developers, requires additional imports, function calls, and boilerplate to orchestrate the AI workflows.
 
-By streamlining these tasks into a file-first format and handling AI prompts natively, AIM cuts down on the overhead code and token usage. In this example, JavaScript weighs in at 510 tokens, while AIM comes in at just 138 tokens—nearly a 3.7x improvement in terms of verbosity. That leaner footprint translates to lower costs and a faster route to building dynamic, AI-driven solutions.
+By streamlining these tasks into a file-first format and handling AI prompts natively, AIM cuts down on the overhead code and token usage. In this example, **JavaScript (Langchain)** weighs in at **480 tokens** and the **AI-SDK** version weighs in at **377 tokens**, while **AIM** comes in at just **145 tokens** — around a **2.6 to 3.3x improvement** in terms of verbosity for common libraries. 
+
+That leaner footprint translates to lower costs and a faster route to building dynamic, AI-driven solutions. This is simple example, but the goal is to make AIM address common AI patterns and workflows and make it easier to use.
 
 Moreover, AIM’s syntax is easier to extend and maintain as your project grows. Rather than scattering prompt templates across multiple files or frameworks, you keep all logic in one concise place. 
+
+For token counts, I used the [OpenAI GPT4o token calculator](https://platform.openai.com/tokenizer).
 
 
 ## What's next for AIM?
@@ -422,9 +501,8 @@ Moreover, AIM’s syntax is easier to extend and maintain as your project grows.
 2. **Technical Documentation** - I'm working on a comprehensive guide to help you understand how AIM works and how to use it.
 3. **Developer Tooling** - A command line interface for AIM for running and serving files and an SDK for AIM integration into existing projects.
 4. **Cookbooks** - A collection of recipes for common use cases.
-5. And hopefully a lot more...
 
-[In the meantime, you can take a look at a more detailed syntax overview here](/docs/syntax).
+And hopefully a lot more... [In the meantime, you can take a look at a more detailed syntax overview here](/docs/syntax).
 
 ## Final Thoughts
 
@@ -434,10 +512,10 @@ By reducing boilerplate and making it easier to connect to an LLM, you streamlin
 2. **Simplicity and future-proofing** - You can swap LLMs without fuss, and you are not locked into any single app
 3. **Enduring value** - As [Kepano](https://stephango.com/file-over-app) says "the files you create are more important than the tools you use to create them", so it's best to keep them in an open, portable format.
 
-LLMs are fast becoming the "CPUs" of moderns problem-solving, and file-first approach safeguards us from ever being trapped by today's software platforms. Beyond that, this approach naturally lends itself to "coding agents" because:
+LLMs are fast becoming the "CPUs" of modern problem-solving, and file-first approach safeguards us from ever being trapped by today's software platforms. Beyond that, this approach naturally lends itself to "coding agents" because:
 
 1. LLMs produce text in Markdown, which already enhances readibility, formatting and structure.
-2. It cuts down token usage significantly - sometimes by up to 3x -- making the resulting AI-driven solutions both more efficient and const-effective.
+2. It cuts down token usage significantly - sometimes **by up to 3x**, making the resulting AI-driven solutions both more efficient and cost-effective.
 
 
 But the biggest reason for me is **empowering humans**. We want people to stay in control of how they solve problems, using **their own language** without fear of vendor lock-in. I'm convinced that there's practically infinite demand for software, and AIM should let everyone contribute without being stuck in a single platform's ecosystem.
