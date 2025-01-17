@@ -14,7 +14,7 @@ I wanted to make a language and **a system** that would interpret it, so I would
 import rickRubin from './rick-rubin.jpeg';
 
 
-<img src={rickRubin} alt="Rick Rubin" width="300" />
+<img src={rickRubin} alt="Rick Rubin" style={{ borderRadius: '8px' }}/>
 
 > "*How are you building your AIs?*"
 >
@@ -37,7 +37,7 @@ It struck me that prompting is essentially note-taking. If building software is 
 import kuala from './IMG_8943.jpg';
 
 <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-  <img src={kuala} alt="Kuala Lumpur November 2024" width="500" />
+  <img src={kuala} alt="Kuala Lumpur November 2024" width="400" style={{ borderRadius: '8px' }} />
   <p style={{ marginTop: '8px', color: '#666', fontSize: '0.9em' }}>View from my room in Kuala Lumpur where I wrote the first idea for AIM, November 2024</p>
 </div>
 
@@ -79,8 +79,20 @@ If I were to compare Markdown to other languages vs plain text, I think Markdown
 
 import Mermaid from '@theme/Mermaid';
 
-<Mermaid value={`
-%%{init: { 'theme': 'light' } }%%
+<Mermaid value={`---
+config:
+    xyChart:
+        height: 350
+        axisLineWidth: 15
+        plotReservedSpacePercent: 10
+        yAxis:
+          labelPadding: 15
+          lineWidth: 15
+          labelFontSize: 12
+        xAxis:
+          labelFontSize: 12
+          lineWidth: 15
+---
 xychart-beta
     title "Complexity of Syntax"
     x-axis ["Plain Text", "Markdown", "Programming Languages"]
@@ -274,8 +286,20 @@ It seemed to echo my own goals: keep Markdown at the core, but allow for a riche
 Based on pure gut feeling, this is where I would place Markdoc, and AIM's Markdown flavour (based on Markdoc) now.
 
 
-<Mermaid value={`
-%%{init: { 'theme': 'light' } }%%
+<Mermaid value={`---
+config:
+    xyChart:
+        height: 350
+        axisLineWidth: 15
+        plotReservedSpacePercent: 10
+        yAxis:
+          labelPadding: 15
+          lineWidth: 15
+          labelFontSize: 12
+        xAxis:
+          labelFontSize: 12
+          lineWidth: 15
+---
 xychart-beta
     title "Complexity of Syntax"
     x-axis ["Plain Text", "Markdown", "Markdown with Extensions", "Programming Languages"]

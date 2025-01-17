@@ -1,5 +1,5 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const customLight = {
@@ -213,13 +213,46 @@ const config: Config = {
         },
       } satisfies Preset.Options,
     ],
+  ], 
+  headTags: [
+    // Declare a <link> preconnect tag
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preconnect',
+        href: 'https://aim.microchipgnu.pt',
+      },
+    },
+    // Declare some json-ld structured data
+    {
+      tagName: 'script',
+      attributes: {
+        type: 'application/ld+json',
+      },
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org/',
+        '@type': 'Organization',
+        name: 'AIM',
+        url: 'https://aim.microchipgnu.pt',
+        logo: 'https://aim.microchipgnu.pt/img/logo.jpeg',
+      }),
+    },
   ],
 
   themeConfig: {
+    metadata: [
+      { name: 'keywords', content: 'aim, ai, prompt, programming, llm, ai-prompt-driven-programming' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+    ],
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     mermaid: {
-      theme: {light: 'neutral', dark: 'forest'},
+      theme: { light: 'neutral', dark: 'forest' },
+    },
+    docs: {
+      sidebar: {
+        hideable: true,
+      },
     },
     navbar: {
       title: 'AIM',
@@ -234,7 +267,7 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
+        { to: '/blog', label: 'Blog', position: 'left' },
         {
           href: 'https://github.com/microchipgnu/aim',
           label: 'GitHub',

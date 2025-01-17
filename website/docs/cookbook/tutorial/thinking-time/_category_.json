@@ -1,0 +1,8 @@
+{
+  "label": "Thinking Time",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "A set of recipes for building AI-powered applications."
+  }
+}

@@ -1,8 +1,18 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Import JetBrains Mono for code blocks */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Use JetBrains Mono for code blocks - a font designed for programming */
+:root {
+  --ifm-code-font-size: 95%;
+  --ifm-font-family-monospace: 'JetBrains Mono', monospace;
+}
 
 /* You can override the default Infima variables here. */
 :root {

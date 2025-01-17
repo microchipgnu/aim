@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 title: Syntax
 ---
 
@@ -454,7 +454,49 @@ Frontmatter is a YAML metadata block at the top of the document. It's used to de
 ```aim
 ---
 title: Example AIM Document
-author: Jane Doe
-date: 2024-11-28
+description: "An example of how to build an AIM document"
+input:
+  - name: userName
+    type: string
+    description: "The name of the user to greet"
 ---
+```
+
+Here's a list of the available frontmatter fields:
+
+- `title`: The title of the document
+- `description`: The description of the document
+- `input`: The input of the document
+- `output`: The output of the document
+
+### Input
+
+The `input` field is an array of objects. Each object represents an input field.
+
+```aim
+input:
+  - name: userName
+    type: string
+    description: "The name of the user to greet"
+```
+
+### Output
+
+The `output` field is an array of objects. Each object represents an output field.
+
+```aim
+output:
+  - name: userName
+    type: string
+    description: "The name of the user to greet"
+```
+
+## Comments
+
+AIM supports [Markdown comment syntax](https://spec.commonmark.org/0.30/#example-624). Adding comments will not be rendered in the output nor executed in runtime.
+
+```aim
+<!-- This is a comment -->
+
+This is not a comment
 ```
