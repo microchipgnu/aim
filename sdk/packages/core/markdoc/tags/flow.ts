@@ -3,7 +3,7 @@ import { Tag } from "@markdoc/markdoc";
 import { aim } from "index";
 import { parser } from "markdoc/parser";
 import { getCurrentConfigFx, pushStack } from "runtime/state";
-import type { AIMTag } from "types";
+import type { AIMRuntime, AIMTag } from "types";
 
 export const flowTag: Schema = {
     render: 'flow',
@@ -17,9 +17,9 @@ export const flowTag: Schema = {
 
 export const flowTagWithRuntime: AIMTag = {
     ...flowTag,
-    runtime: async (node, config) => {
+    runtime: async ({ node, config, execution }: AIMRuntime) => {
         const attrs = node.transformAttributes(config);
-        const context = await getCurrentConfigFx(config);
+        const context = await execution.runtime.context.methods.getCurrentConfig(config);
 
         const path = attrs.path?.resolve ? attrs.path.resolve(context) : attrs.path;
         const id = attrs.id;
@@ -50,18 +50,18 @@ export const flowTagWithRuntime: AIMTag = {
                 flowContent = await response.text();
             }
 
-            const {ast, errors, execute } = await aim`{flow ${flowContent}}`
+            const {ast, errors, execute } = aim({content: flowContent, options: {
+                config: {
+                    ...config,
+                }
+            }})
 
 
             if (errors && errors.length > 0) {
                 throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
             }
 
-            await execute({
-                onLog: (log) => {
-                    console.log(log);
-                }
-            });
+            await execute();
 
             // Push flow variables to stack
             pushStack({

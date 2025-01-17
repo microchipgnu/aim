@@ -1,30 +1,32 @@
-import { type Node } from "@markdoc/markdoc";
 import { process as runtimeProcess } from "../runtime/process";
-import type { RuntimeOptions } from "../types";
+import type { AIMRuntime } from "../types";
 
-export const execute = async (ast: Node, options: RuntimeOptions): Promise<string[]> => {
+export const execute = async ({ node, config, execution }: AIMRuntime): Promise<string[]> => {
+
+    const options = execution.runtime?.options || {};
     options.variables = options.variables || {};
-    
-    options.onStart("Execution started!");
+
+    options?.events?.onStart?.("Execution started!");
 
     let results: (string | object)[] = [];
     try {
-        const generator = runtimeProcess(ast, options.config);
+        const generator = runtimeProcess({ node, config, execution });
         for await (const result of generator) {
             if (result) {
-                options.onLog(`Processing result: ${JSON.stringify(result)}`);
+                options.events?.onLog?.(`Processing result: ${JSON.stringify(result)}`);
+                options.events?.onData?.(result);
                 if (typeof result === 'string' || typeof result === 'object') {
                     results.push(result);
                 }
             }
         }
-        options.onFinish("Execution finished!");
-        options.onSuccess("Execution completed successfully!");
+        options.events?.onFinish?.("Execution finished!");
+        options.events?.onSuccess?.("Execution completed successfully!");
     } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
-            options.onAbort("Execution aborted!");
+            options.events?.onAbort?.("Execution aborted!");
         } else {
-            options.onError(`Execution error: ${error}`);
+            options.events?.onError?.(`Execution error: ${error}`);
         }
         throw error;
     }

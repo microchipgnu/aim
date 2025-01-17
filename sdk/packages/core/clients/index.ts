@@ -1,14 +1,19 @@
-import type { RuntimeOptions } from "../types";
+import type { AIMRuntime, RuntimeContext, RuntimeOptions } from "../types";
 import { execute as nodeExecute } from "./node";
 import { execute as browserExecute } from "./browser";
-import {type Node} from "@markdoc/markdoc";
+import { type Node } from "@markdoc/markdoc";
+import * as jsEnvironment from "browser-or-node"
 
-const isBrowser = typeof window !== 'undefined';
+export const execute = async ({ config, execution, node }: AIMRuntime): Promise<string[]> => {
 
-export const execute = async (ast: Node, options: RuntimeOptions): Promise<string[]> => {
-    if (isBrowser) {
-        return browserExecute(ast, options);
+    if (jsEnvironment.isBrowser) {
+        return browserExecute({ node, config, execution });
     }
-    return nodeExecute(ast, options);
+    else if (jsEnvironment.isNode) {
+        return nodeExecute({ node, config, execution });
+    }
+    else {
+        throw new Error("Unsupported environment");
+    }
 };
 

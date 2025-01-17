@@ -1,6 +1,6 @@
 import { Tag, type Schema } from "@markdoc/markdoc";
 import { getCurrentConfigFx, pushStack } from "runtime/state";
-import type { AIMTag } from "types";
+import type { AIMRuntime, AIMTag } from "types";
 
 export const setTag: Schema = {
     render: 'set',
@@ -17,27 +17,24 @@ export const setTag: Schema = {
 
 export const setTagWithRuntime: AIMTag = {
     ...setTag,
-    runtime: async (node, config) => {
+    runtime: async ({ node, config, execution }: AIMRuntime) => {
         const attrs = node.transformAttributes(config);
 
-        const context = await getCurrentConfigFx(config);
+        const currentContext = await execution.runtime.context.methods.getCurrentConfig(config);
 
         const id = attrs.id;
         const object = attrs.object ? Object.fromEntries(
             Object.entries(attrs.object).map(([key, value]) => [
                 key,
-                (value as any)?.resolve ? (value as any).resolve(context) : value
+                (value as any)?.resolve ? (value as any).resolve(currentContext) : value
             ])
         ) : attrs.object;
-        const number = attrs.number?.resolve ? attrs.number.resolve(context) : attrs.number;
-        const string = attrs.string?.resolve ? attrs.string.resolve(context) : attrs.string;
-        const boolean = attrs.boolean?.resolve ? attrs.boolean.resolve(context) : attrs.boolean;
+        const number = attrs.number?.resolve ? attrs.number.resolve(currentContext) : attrs.number;
+        const string = attrs.string?.resolve ? attrs.string.resolve(currentContext) : attrs.string;
+        const boolean = attrs.boolean?.resolve ? attrs.boolean.resolve(currentContext) : attrs.boolean;
         const array = attrs.array ? attrs.array.map((item: any) => 
-            item?.resolve ? item.resolve(context) : item
+            item?.resolve ? item.resolve(currentContext) : item
         ) : attrs.array;
-
-
-        console.log("SET CONTEXT", object);
 
         if (!id) {
             throw new Error('Set tag must have an id attribute');

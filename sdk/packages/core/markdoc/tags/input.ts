@@ -1,7 +1,7 @@
 import type { Schema } from "@markdoc/markdoc";
 import { Tag } from "@markdoc/markdoc";
 import { getCurrentConfigFx, pushStack } from "runtime/state";
-import type { AIMTag } from "types";
+import type { AIMRuntime, AIMTag } from "types";
 
 export const inputTag: Schema = {
     render: 'input',
@@ -16,9 +16,9 @@ export const inputTag: Schema = {
 
 export const inputTagWithRuntime: AIMTag = {
     ...inputTag,
-    runtime: async (node, config) => {
+    runtime: async ({ node, config, execution }: AIMRuntime) => {
         const attrs = node.transformAttributes(config);
-        const context = await getCurrentConfigFx(config);
+        const context = await execution.runtime.context.methods.getCurrentConfig(config);
 
         const name = attrs.name?.resolve ? attrs.name.resolve(context) : attrs.name;
         const description = attrs.description?.resolve ? attrs.description.resolve(context) : attrs.description;

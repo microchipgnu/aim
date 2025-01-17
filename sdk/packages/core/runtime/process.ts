@@ -1,14 +1,18 @@
-import Markdoc, { Tag, type Config, type Node } from "@markdoc/markdoc";
+import Markdoc, { Tag, type Node } from "@markdoc/markdoc";
 import { aiTagWithRuntime } from "markdoc/tags/ai";
 import { loopTagWithRuntime } from "markdoc/tags/loop";
 import { setTagWithRuntime } from "markdoc/tags/set";
-import { config as defaultConfig } from "../markdoc/config";
+import type { AIMRuntime } from "types";
 import { runQuickJS } from "./code/quickjs";
 import { addToTextRegistry, getCurrentConfigFx, getRuntimeContextFx, pushStack } from "./state";
 
-async function _process(ast: Node, config: Config) {
+export async function _process({ node, config, execution }: AIMRuntime) {
     async function executeNode(node: Node): Promise<any> {
+
         const currentConfig = await getCurrentConfigFx(config);
+        const context = await getRuntimeContextFx();
+
+        execution.runtime.options.events?.onStep?.(`Processing ${node.type}  ${node.tag ? node.tag : ''}`);
 
         switch (node.type) {
             case 'text':
@@ -89,35 +93,46 @@ async function _process(ast: Node, config: Config) {
                     language,
                 }, node.attributes.content), result]
             }
-            case 'tag':
+            case 'tag': {
                 switch (node.tag) {
                     case 'set': {
-                        return await setTagWithRuntime.runtime(node, currentConfig, { executeNode });
+                        return await setTagWithRuntime.runtime({ node, config, execution });
                     }
                     case 'loop': {
-                        return await loopTagWithRuntime.runtime(node, currentConfig, { executeNode });
+                        return await loopTagWithRuntime.runtime({ node, config, execution });
                     }
                     case 'ai': {
-                        return await aiTagWithRuntime.runtime(node, currentConfig, { executeNode });
+                        return await aiTagWithRuntime.runtime({ node, config, execution });
                     }
                     default: {
+                        if (node.tag) {
+                            const plugin = context.plugins.get(node.tag);
+                            if (plugin?.tags && node.tag in plugin.tags) {
+                                const tagConfig = plugin.tags[node.tag];
+                                if ('runtime' in tagConfig) {
+                                    return await tagConfig.runtime({ node, config, execution });
+                                }
+                            }
+                        }
                         return Markdoc.transform(node, currentConfig);
                     }
                 }
+            }
             default:
                 return Markdoc.transform(node, currentConfig);
         }
     }
 
-    const result = await executeNode(ast);
+    const result = await executeNode(node);
     return { result, context: await getRuntimeContextFx() };
 }
 
-export async function* process(ast: Node, config: Config = defaultConfig) {
+export async function* process({ node, config, execution }: AIMRuntime) {
+
     let currentContext = await getRuntimeContextFx();
 
-    for (const child of ast.children) {
-        const { context, result } = await _process(child, { ...config, variables: { ...config.variables, ...currentContext.data } });
+    for (const child of node.children) {
+        const { context, result } = await _process({ node: child, config, execution, });
         currentContext = context;
         yield result;
     }
