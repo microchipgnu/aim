@@ -319,16 +319,17 @@ const config: Config = {
     markdown: {
       mermaid: true,
     },
-    plugins: [
-      [
-        'vercel-analytics',
-        {
-          debug: true,
-          mode: 'auto',
-        },
-      ],
-    ],
   } satisfies Preset.ThemeConfig,
-};
+
+  plugins: [
+    [
+      'vercel-analytics',
+      {
+        debug: true,
+        mode: 'auto',
+      },
+    ],
+  ],
+} satisfies Config;
 
 export default config;
