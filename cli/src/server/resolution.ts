@@ -72,7 +72,7 @@ export async function getAIMRoutes(directory: string, extensions: string[] = ['a
           : '/' + entry.name.replace(new RegExp(`\\.(${extensions.join('|')})$`), '');
           
         routes.push({
-          path: path.join(routePrefix, routePart).replace(/\\/g, '/'),
+          path: path.join('api', routePrefix, routePart).replace(/\\/g, '/'), // Prepend 'api' to the path
           filePath: fullPath
         });
       }

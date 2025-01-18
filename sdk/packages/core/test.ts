@@ -24,16 +24,13 @@ $textRegistry.watch((state) => {
 
 const content = `---
 title: Test
+input:
+  - name: problem
+    type: string
+    description: "The math problem to solve"
 ---
 
-HEY BEFORE SLEEP
-
-{% sleep seconds=2 /%}
-
-HEY AFTER SLEEP
-
-
-
+hey {% $frontmatter.input.problem %}
 `
 
 const doc = aim({
@@ -105,7 +102,11 @@ const doc = aim({
 })
 
 
-await doc.execute()
+await doc.execute({
+    input: {
+        problem: "What is 2 + 2?"
+    }
+})
 process.exit(0)
 
 

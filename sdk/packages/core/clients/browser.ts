@@ -1,7 +1,7 @@
 import { process as runtimeProcess } from "../runtime/process";
 import type { AIMRuntime } from "../types";
 
-export const execute = async ({ node, config, execution }: AIMRuntime): Promise<string[]> => {
+export const execute = async ({ node, config, execution }: AIMRuntime): Promise<void> => {
 
     const options = execution.runtime?.options || {};
     options.variables = options.variables || {};
@@ -30,5 +30,4 @@ export const execute = async ({ node, config, execution }: AIMRuntime): Promise<
         }
         throw error;
     }
-    return results.map(result => typeof result === 'string' ? result : JSON.stringify(result));
 };

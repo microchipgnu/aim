@@ -1,5 +1,23 @@
 # aimx
 
+## 0.1.33-beta.2
+
+### Patch Changes
+
+- up
+
+## 0.1.33-beta.1
+
+### Patch Changes
+
+- up
+
+## 0.1.33-beta.0
+
+### Patch Changes
+
+- test
+
 ## 0.1.32
 
 ### Patch Changes

@@ -1,0 +1,12 @@
+{
+  "mode": "exit",
+  "tag": "beta",
+  "initialVersions": {
+    "aimx": "0.1.33-beta.1"
+  },
+  "changesets": [
+    "nice-crews-crash",
+    "popular-trainers-fix",
+    "stale-news-develop"
+  ]
+}

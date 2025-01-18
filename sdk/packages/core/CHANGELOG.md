@@ -1,5 +1,29 @@
 # @aim-sdk/core
 
+## 0.0.7-beta.3
+
+### Patch Changes
+
+- up
+
+## 0.0.7-beta.2
+
+### Patch Changes
+
+- test
+
+## 0.0.7-beta.1
+
+### Patch Changes
+
+- test
+
+## 0.0.7-beta.0
+
+### Patch Changes
+
+- test
+
 ## 0.0.6
 
 ### Patch Changes

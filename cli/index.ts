@@ -6,7 +6,7 @@ import * as readline from 'node:readline';
 import pkg from "./package.json" assert { type: "json" };
 import { createServer } from "./src/server";
 import chalk from 'chalk';
-import type { ValidationError } from "@markdoc/markdoc";
+import type { ValidateError, ValidationError } from "@markdoc/markdoc";
 import ora from 'ora';
 
 // Initialize Commander
@@ -26,62 +26,41 @@ program
   .description("Start the AIM server")
   .option('-d, --dir <path>', 'Routes directory path', './routes')
   .option('-p, --port <number>', 'Port number', '3000')
+  .option('--ui', 'Enable web UI', false)
   .action(async (options) => {
     console.clear();
 
     console.log(chalk.cyan('AIM Server'));
     console.log(chalk.dim(`Starting server with configuration:`));
     console.log(chalk.dim(`• Routes directory: ./${options.dir}`));
-    console.log(chalk.dim(`• Port: ${options.port}\n`));
+    console.log(chalk.dim(`• Port: ${options.port}`));
+    if (options.ui) {
+      console.log(chalk.dim(`• Web UI: enabled`));
+    }
+    console.log();
 
     const spinner = ora({
       text: 'Starting development server...',
       color: 'cyan'
     }).start();
 
-    // try {
+    try {
+      await createServer({
+        port: parseInt(options.port),
+        routesDir: options.dir,
+        enableUI: options.ui
+      });
 
-    //   const dir = path.resolve(__dirname, "./src/app");
+      spinner.succeed(chalk.green(`Server is running at ${chalk.bold(`http://localhost:${options.port}`)}`));
+      if (options.ui) {
+        console.log(chalk.green(`Web UI available at ${chalk.bold(`http://localhost:${options.port}/ui`)}`));
+      }
 
-    //   const server = await createViteServer({
-    //     root: dir,
-    //     server: {
-    //       port: 10000
-    //     },
-    //     configFile: path.resolve(dir, 'vite.config.ts'),
-    //     define: {
-    //       // Define global constants that will be available in the app
-    //       __APP_DATA__: JSON.stringify({
-    //         serverStartTime: new Date().toISOString(),
-    //         environment: "aimx",
-    //       })
-    //     }
-    //   });
-
-    //   await server.listen();
-
-    //   server.printUrls();
-
-    //   // Handle process termination
-    //   process.on('SIGINT', async () => {
-    //     await server.close();
-    //     process.exit();
-    //   });
-
-    // } catch (error) {
-    //   console.error("Failed to start playground:", error);
-    //   process.exit(1);
-    // }
-
-
-    await createServer({
-      port: parseInt(options.port),
-      routesDir: options.dir,
-    });
-
-    spinner.succeed(chalk.green(`Server is running at ${chalk.bold(`http://localhost:${options.port}`)}`));
-
-    console.log(chalk.dim('Press Ctrl+C to stop the server\n'));
+      console.log(chalk.dim('\nPress Ctrl+C to stop the server\n'));
+    } catch (error) {
+      spinner.fail(chalk.red(`Failed to start server: ${error instanceof Error ? error.message : String(error)}`));
+      process.exit(1);
+    }
 
     // Handle exit events
     const cleanup = () => {
@@ -108,7 +87,13 @@ program
       }).start();
 
       const content = await fs.readFile(filepath, 'utf-8');
-      const aimDocument = await aim`${content}`;
+      const aimDocument = aim({ content, options: {
+        variables: {},
+        config: {},
+        events: {
+          onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
+        }
+      } });
 
       spinner.stop();
 
@@ -119,8 +104,8 @@ program
 
       if (aimDocument.errors.length > 0) {
         validationResults.push('\n' + chalk.red.bold('⚠️  Errors:'));
-        aimDocument.errors.forEach((error: ValidationError, index) => {
-          validationResults.push(chalk.red(`  ${index + 1}. ${error.message}`));
+        aimDocument.errors.forEach((error: ValidateError, index) => {
+          validationResults.push(chalk.red(`  ${index + 1}. ${error}`));
         });
       }
 
@@ -160,7 +145,13 @@ program
       console.log(chalk.dim('Executing AIM file...\n'));
 
       const aimContent = await fs.readFile(filepath, 'utf-8');
-      const aimDocument = await aim`${aimContent}`;
+      const aimDocument = aim({ content: aimContent, options: {
+        variables: {},
+        config: {},
+        events: {
+          onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
+        }
+      } });
 
       const createUserInputHandler = () => {
         return async (prompt: string): Promise<string> => {
@@ -188,13 +179,7 @@ program
         }
       }
 
-      await aimDocument.execute({
-        onData: (data: unknown) => console.log(`Data: ${JSON.stringify(data)}`),
-        onUserInput: createUserInputHandler(),
-        onLog: (log: string) => console.log(`Log: ${log}`),
-        onStep: (step: string) => console.log(`Step: ${step}`),
-        variables: variables
-      });
+      await aimDocument.execute(variables);
 
     } catch (error) {
       console.error('Execution failed:', error);

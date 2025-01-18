@@ -1,6 +1,6 @@
 {
   "name": "@aim-sdk/core",
-  "version": "0.0.6",
+  "version": "0.0.7-beta.3",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -8,6 +8,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/js-yaml": "^4.0.9",
+    "@types/react": "^19.0.7",
     "@types/semver": "^7.5.8",
     "tsup": "^8.3.5"
   },
@@ -26,6 +27,7 @@
     "js-yaml": "^4.1.0",
     "nanoid": "^5.0.9",
     "ollama-ai-provider": "^1.0.0",
+    "react": "^19.0.0",
     "replicate": "^1.0.1",
     "semver": "^7.6.3",
     "zod": "^3.24.1"

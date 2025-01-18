@@ -75,7 +75,7 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
         }
     }
 
-    const { ast, validation, config, frontmatter } = parser(content, runtimeOptions);
+    const { ast, validation, frontmatter } = parser(content, runtimeOptions);
 
     const warnings = validation
         .map(error => ({
@@ -90,41 +90,51 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
         error.error?.level === 'error' && error.error?.id !== 'variable-undefined'
     );
 
-    // if (frontmatter?.execute === false) {
-    //     return {
-    //         ast,
-    //         errors: errors,
-    //         warnings: warnings,
-    //         execute: async (options: Partial<RuntimeOptions> = {}) => {
-    //             return Promise.resolve();
-    //         }
-    //     }
-    // }
-
     return {
         ast,
         frontmatter,
         errors: errors,
         warnings: warnings,
-        execute: async () => {
+        execute: async (variables?: Record<string, any>) => {
             // Get input variables from document frontmatter
             const inputVariables = frontmatter?.input || [];
-            const variables: Record<string, any> = {};
+            const resolvedVariables: Record<string, any> = {};
 
-            // First try to get values from options.input or options.variables
-            const inputValues = runtimeOptions.input || runtimeOptions.variables || {};
+            // First try to get values from passed variables, then options.input or options.variables
+            const inputValues = variables || runtimeOptions.input || runtimeOptions.variables || {};
 
             // Map input variables using provided values or defaults from schema
             for (const variable of inputVariables) {
                 const value = inputValues[variable.name];
-                variables[variable.name] = value ?? variable.schema?.default;
+                resolvedVariables[variable.name] = value ?? variable.schema?.default;
             }
+
+            // Create a nested input object for frontmatter access
+            const inputObject = {
+                ...inputValues // Include all input values directly
+            };
+
+            pushStack({
+                id: "frontmatter",
+                variables: {
+                    ...inputObject
+                }
+            });
 
             const context = await getRuntimeContextFx();
 
-            return execute({
+            await execute({
                 node: ast,
-                config: runtimeOptions.config,
+                config: {
+                    ...runtimeOptions.config,
+                    variables: {
+                        ...runtimeOptions.config.variables,
+                        frontmatter: {
+                            ...frontmatter,
+                            ...inputObject
+                        }
+                    }
+                },
                 execution: {
                     executeNode: async () => {
                         return Promise.resolve();

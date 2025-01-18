@@ -1,6 +1,6 @@
 {
   "name": "@aim-sdk/monorepo",
-  "module": "index.ts",
+  "module": "index.ts", 
   "version": "0.0.1",
   "private": true,
   "workspaces": [
@@ -17,6 +17,9 @@
     "changeset": "changeset",
     "version": "changeset version",
     "prepublish": "bun run scripts/prepare-publish.ts",
-    "release": "bun run build && bun run prepublish && changeset publish"
+    "release": "bun run build && bun run prepublish && changeset publish",
+    "version:beta": "changeset pre enter beta && changeset version",
+    "release:beta": "changeset pre exit && bun run build && bun run prepublish && changeset publish --tag beta",
+    "version:stable": "changeset pre exit && changeset version"
   }
 }
