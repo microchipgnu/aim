@@ -205,39 +205,25 @@ export async function createServer(config: ServerConfig) {
                     console.error(chalk.red('Failed to start Vite dev server:'), error);
                 }
             } else {
-                // In production, try multiple possible UI locations
-                const possiblePaths = [
-                    path.join(__dirname, '..', '..', 'dist', 'ui'), // Local development
-                    path.join(__dirname, '..', 'ui'), // When installed as package
-                    path.join(process.cwd(), 'node_modules', 'aimx', 'dist', 'ui'), // When installed globally
-                ];
-
-                let uiDistPath: string | undefined;
+                // In production, serve from the bundled UI files in dist/ui
+                const uiDistPath = path.join(__dirname, 'ui');
                 
-                // Find the first path that exists and contains index.html
-                for (const p of possiblePaths) {
-                    console.log(chalk.dim('Checking UI path:', p));
-                    if (existsSync(p) && existsSync(path.join(p, 'index.html'))) {
-                        uiDistPath = p;
-                        break;
-                    }
-                }
-
-                if (!uiDistPath) {
-                    console.error(chalk.red('UI files not found in any of these locations:'));
-                    possiblePaths.forEach(p => console.error(chalk.red(`- ${p}`)));
+                if (!existsSync(uiDistPath) || !existsSync(path.join(uiDistPath, 'index.html'))) {
+                    console.error(chalk.red('UI files not found in:', uiDistPath));
                     return;
                 }
 
                 console.log(chalk.dim(`Serving UI from: ${uiDistPath}`));
-                app.use('/', express.static(uiDistPath));
                 
-                // Handle client-side routing
+                // Serve static files
+                app.use(express.static(uiDistPath));
+                
+                // Handle client-side routing by serving index.html for all non-API routes
                 app.get('*', (req, res, next) => {
                     if (req.path.startsWith('/api')) {
                         return next();
                     }
-                    res.sendFile(path.join(uiDistPath!, 'index.html'));
+                    res.sendFile(path.join(uiDistPath, 'index.html'));
                 });
             }
         }

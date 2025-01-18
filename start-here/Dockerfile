@@ -3,23 +3,20 @@ FROM node:slim
 WORKDIR /app
 
 # Install aimx using npm
-RUN npm install -g aimx@0.1.8
+RUN npm install -g aimx@0.1.33-beta.3
 
 # Echo aimx version
 RUN aimx -V
 
-# Copy examples folder
-COPY examples/ /app/routes/
+# Copy the entire application
+COPY . .
 
-# Copy .env file
-COPY .env /app/.env
-
-# Set environment variables from .env
-ENV $(cat /app/.env | xargs)
+# Set default environment variables (you should set these in fly.toml or via fly secrets)
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
 # Expose port 3000 and bind to all interfaces
 EXPOSE 3000
-ENV HOST=0.0.0.0
 
 # Set default command to run aimx start
-CMD ["aimx", "start", "--dir", "./routes"]
+CMD ["aimx", "start", "-d", ".", "--ui"]

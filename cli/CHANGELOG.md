@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.33-beta.3
+
+### Patch Changes
+
+- fix path resolution
+
 ## 0.1.33-beta.2
 
 ### Patch Changes
