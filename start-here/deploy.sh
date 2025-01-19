@@ -116,57 +116,98 @@ if [ ! -f fly.toml ]; then
     flyctl launch
 fi
 
-# Load environment variables from .env file and set them as fly secrets
-print_status "Loading environment variables from .env..."
-if [ -f .env ]; then
-    # Create a temporary array to hold all secrets
-    secrets=()
-    while IFS='=' read -r key value || [ -n "$key" ]; do
-        # Skip comments and empty lines
-        [[ $key =~ ^#.*$ ]] && continue
-        [[ -z $key ]] && continue
-        
-        # Remove any quotes and leading/trailing whitespace from the value
-        value=$(echo "$value" | tr -d '"' | tr -d "'" | xargs)
-        key=$(echo "$key" | xargs)
-        
-        # Add to secrets array
-        secrets+=("$key=$value")
-    done < .env
-
-    # Set all secrets at once if there are any
-    if [ ${#secrets[@]} -gt 0 ]; then
-        print_status "Setting Fly secrets..."
-        flyctl secrets set "${secrets[@]}"
-    fi
-else
-    print_warning ".env file not found, skipping secrets setup"
-fi
-
-# Deploy to fly
-print_status "Deploying to fly.io..."
-if flyctl deploy; then
-    print_status "Deployment successful!"
-    
-    # Handle domain management if requested
-    if [ "$1" = "--domain" ]; then
-        handle_domain "$2" "$3"
-    fi
-    
-    # Show the deployment status
-    print_status "Deployment status:"
-    flyctl status
-    
-    # Show the app URL
-    print_status "App URL:"
-    flyctl apps open
-else
-    print_error "Deployment failed!"
+# Get app name from fly.toml
+APP_NAME=$(grep "^app = " fly.toml | cut -d "'" -f 2)
+if [ -z "$APP_NAME" ]; then
+    print_error "Could not find app name in fly.toml"
     exit 1
 fi
 
-# Show certificate status if domain was added
-if [ "$1" = "--domain" ] && [ "$2" = "add" ]; then
-    print_status "Certificate status:"
-    flyctl certs list
+# Generate a unique app name if the original is taken
+generate_unique_app_name() {
+    local base_name=$1
+    local random_suffix=$(head /dev/urandom | tr -dc 'a-z0-9' | head -c 4)
+    echo "${base_name}-${random_suffix}"
+}
+
+# Check if app exists on Fly.io and create it if it doesn't
+print_status "Checking if app exists..."
+if ! flyctl apps list | grep -q "^$APP_NAME"; then
+    print_warning "App '$APP_NAME' not found. Creating it..."
+    
+    # Try to create the app, if it fails due to name taken, try with a unique name
+    if ! flyctl apps create "$APP_NAME" 2>/dev/null; then
+        NEW_APP_NAME=$(generate_unique_app_name "$APP_NAME")
+        print_warning "App name taken, trying with: $NEW_APP_NAME"
+        
+        if flyctl apps create "$NEW_APP_NAME"; then
+            print_status "App created successfully as: $NEW_APP_NAME"
+            # Update fly.toml with the new app name
+            sed -i.bak "s/^app = .*/app = '$NEW_APP_NAME'/" fly.toml
+            APP_NAME=$NEW_APP_NAME
+        else
+            print_error "Failed to create app!"
+            exit 1
+        fi
+    else
+        print_status "App created successfully!"
+    fi
+fi
+
+# Only proceed with secrets and deployment if we have a valid app
+if [ $? -eq 0 ]; then
+    # Load environment variables from .env file and set them as fly secrets
+    print_status "Loading environment variables from .env..."
+    if [ -f .env ]; then
+        # Create a temporary array to hold all secrets
+        secrets=()
+        while IFS='=' read -r key value || [ -n "$key" ]; do
+            # Skip comments and empty lines
+            [[ $key =~ ^#.*$ ]] && continue
+            [[ -z $key ]] && continue
+            
+            # Remove any quotes and leading/trailing whitespace from the value
+            value=$(echo "$value" | tr -d '"' | tr -d "'" | xargs)
+            key=$(echo "$key" | xargs)
+            
+            # Add to secrets array
+            secrets+=("$key=$value")
+        done < .env
+
+        # Set all secrets at once if there are any
+        if [ ${#secrets[@]} -gt 0 ]; then
+            print_status "Setting Fly secrets..."
+            flyctl secrets set "${secrets[@]}"
+        fi
+    else
+        print_warning ".env file not found, skipping secrets setup"
+    fi
+
+    # Deploy to fly
+    print_status "Deploying to fly.io..."
+    if flyctl deploy; then
+        print_status "Deployment successful!"
+        
+        # Handle domain management if requested
+        if [ "$1" = "--domain" ]; then
+            handle_domain "$2" "$3"
+        fi
+        
+        # Show the deployment status
+        print_status "Deployment status:"
+        flyctl status
+        
+        # Show the app URL
+        print_status "App URL:"
+        flyctl apps open
+    else
+        print_error "Deployment failed!"
+        exit 1
+    fi
+
+    # Show certificate status if domain was added
+    if [ "$1" = "--domain" ] && [ "$2" = "add" ]; then
+        print_status "Certificate status:"
+        flyctl certs list
+    fi
 fi 

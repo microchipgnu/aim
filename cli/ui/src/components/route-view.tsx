@@ -3,9 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AlertCircle } from "lucide-react";
-import React from 'react';
-import { Link } from 'react-router-dom';
 import {
     Sheet,
     SheetContent,
@@ -13,6 +10,10 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import Markdoc from "@markdoc/markdoc";
+import { AlertCircle, FileText, ListChecks, PlayCircle, Terminal } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface DocumentError {
     type: string;
@@ -26,6 +27,26 @@ interface DocumentError {
         level: 'warning' | 'critical';
         message: string;
     };
+}
+
+const components = {
+    P: (props: any) => <p className="text-foreground">{props.children}</p>,
+    Ai: (props: any) => (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 text-blue-700 my-2">
+            <Terminal className="h-5 w-5" />
+            <span className="font-medium">{props?.result}</span>
+        </div>
+    ),
+    If: () => (
+        <div className="flex items-center gap-2 p-2 rounded bg-gray-100">
+            <span className="font-mono">if</span>
+        </div>
+    ),
+    Else: () => (
+        <div className="flex items-center gap-2 p-2 rounded bg-gray-100">
+            <span className="font-mono">else</span>
+        </div>
+    )
 }
 
 export function RouteView({ path }: { path: string }) {
@@ -51,7 +72,7 @@ export function RouteView({ path }: { path: string }) {
         setErrors([]);
         setLogs([]);
         setSteps([]);
-        
+
         fetchAst();
     }, [path]);
 
@@ -159,6 +180,57 @@ export function RouteView({ path }: { path: string }) {
                     </Link>
                     <div className="ml-auto flex items-center space-x-4">
                         <div className="text-sm text-muted-foreground">{path}</div>
+                        
+                        {logs.length > 0 && (
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="relative">
+                                        <FileText className="h-5 w-5 text-blue-500" />
+                                        <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                            {logs.length}
+                                        </span>
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent>
+                                    <SheetHeader>
+                                        <SheetTitle>Execution Logs</SheetTitle>
+                                    </SheetHeader>
+                                    <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
+                                        <pre className="text-sm font-mono whitespace-pre-wrap break-all bg-muted p-4 rounded-lg">
+                                            {logs.join('\n')}
+                                        </pre>
+                                    </ScrollArea>
+                                </SheetContent>
+                            </Sheet>
+                        )}
+
+                        {steps.length > 0 && (
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="relative">
+                                        <ListChecks className="h-5 w-5 text-green-500" />
+                                        <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                            {steps.length}
+                                        </span>
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent>
+                                    <SheetHeader>
+                                        <SheetTitle>Execution Steps</SheetTitle>
+                                    </SheetHeader>
+                                    <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
+                                        <div className="space-y-2">
+                                            {steps.map((step, index) => (
+                                                <pre key={index} className="text-sm font-mono whitespace-pre-wrap break-all bg-muted p-4 rounded-lg">
+                                                    {JSON.stringify(step, null, 2)}
+                                                </pre>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                </SheetContent>
+                            </Sheet>
+                        )}
+
                         {(warnings.length > 0 || errors.length > 0) && (
                             <Sheet>
                                 <SheetTrigger asChild>
@@ -213,30 +285,34 @@ export function RouteView({ path }: { path: string }) {
                     </div>
                 </div>
             </nav>
-
             <div className="container mx-auto px-4 pb-12">
-                <header className="mb-8 pt-20">
-                    <h1 className="text-3xl font-semibold tracking-tight">
+                <header className="mb-10 pt-24">
+                    <h1 className="text-4xl font-bold tracking-tight text-foreground">
                         {frontmatter?.title || path}
                     </h1>
                     {frontmatter?.description && (
-                        <p className="mt-2 text-muted-foreground">{frontmatter.description}</p>
+                        <p className="mt-3 text-lg text-muted-foreground leading-relaxed max-w-3xl">
+                            {frontmatter.description}
+                        </p>
                     )}
                 </header>
 
                 {error && (
-                    <Alert variant="destructive" className="mb-6">
-                        <AlertDescription>{error}</AlertDescription>
+                    <Alert variant="destructive" className="mb-8 max-w-3xl">
+                        <AlertDescription className="text-sm">{error}</AlertDescription>
                     </Alert>
                 )}
 
-                <div className="grid grid-cols-12 gap-6">
-                    <div className="col-span-12 lg:col-span-5 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Execute Document</CardTitle>
+                <div className="grid grid-cols-12 gap-10">
+                    <div className="col-span-12 lg:col-span-4">
+                        <Card className="sticky top-24 shadow-sm border-slate-200">
+                            <CardHeader className="border-b border-slate-100">
+                                <CardTitle className="flex items-center gap-2.5 text-lg font-semibold">
+                                    <PlayCircle className="h-5 w-5 text-primary" />
+                                    Execute Document
+                                </CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="pt-6">
                                 <form onSubmit={(e) => {
                                     e.preventDefault();
                                     const formData = new FormData(e.currentTarget);
@@ -244,18 +320,20 @@ export function RouteView({ path }: { path: string }) {
                                     executeDocument(values);
                                 }}>
                                     {frontmatter?.input && frontmatter.input.length > 0 && (
-                                        <div className="space-y-4 mb-4">
+                                        <div className="space-y-6 mb-6">
                                             {frontmatter.input.map((input: any) => (
-                                                <div key={input.name} className="space-y-2">
-                                                    <label className="text-sm font-medium block">{input.name}</label>
+                                                <div key={input.name} className="space-y-2.5">
+                                                    <label className="text-sm font-medium block text-foreground">
+                                                        {input.name}
+                                                    </label>
                                                     <Input
                                                         name={input.name}
                                                         defaultValue={input.schema?.default || ''}
                                                         placeholder={input.schema?.default || ''}
-                                                        className="w-full"
+                                                        className="w-full focus:ring-2 focus:ring-primary/20"
                                                     />
                                                     {input.schema?.description && (
-                                                        <p className="text-sm text-muted-foreground">
+                                                        <p className="text-sm text-muted-foreground/80 leading-relaxed">
                                                             {input.schema.description}
                                                         </p>
                                                     )}
@@ -263,76 +341,92 @@ export function RouteView({ path }: { path: string }) {
                                             ))}
                                         </div>
                                     )}
-                                    <Button type="submit" disabled={loading} className="w-full">
+                                    <Button type="submit" disabled={loading} className="w-full font-medium shadow-sm transition-all hover:shadow-md">
                                         {loading ? (
-                                            <span className="flex items-center gap-2">
+                                            <span className="flex items-center gap-2.5">
                                                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
                                                 Executing...
                                             </span>
-                                        ) : 'Execute'}
+                                        ) : 'Execute Document'}
                                     </Button>
                                 </form>
                             </CardContent>
                         </Card>
-
-                        {logs.length > 0 && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Execution Logs</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <ScrollArea className="h-[300px]">
-                                        <pre className="text-sm font-mono whitespace-pre-wrap break-all bg-muted p-4 rounded-lg">
-                                            {logs.join('\n')}
-                                        </pre>
-                                    </ScrollArea>
-                                </CardContent>
-                            </Card>
-                        )}
-
-                        {steps.length > 0 && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Execution Steps</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <ScrollArea className="h-[300px]">
-                                        <div className="space-y-2">
-                                            {steps.map((step, index) => (
-                                                <pre key={index} className="text-sm font-mono whitespace-pre-wrap break-all bg-muted p-4 rounded-lg">
-                                                    {JSON.stringify(step, null, 2)}
-                                                </pre>
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </CardContent>
-                            </Card>
-                        )}
                     </div>
 
-                    <div className="col-span-12 lg:col-span-7 space-y-6">
+                    <div className="col-span-12 lg:col-span-8">
                         {result.length > 0 && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <Card className="shadow-sm border-slate-200">
+                                <CardHeader className="border-b border-slate-100">
+                                    <CardTitle className="flex items-center gap-2.5 text-lg font-semibold">
+                                        <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        Results
+                                        Execution Results
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent>
-                                    <ScrollArea className="h-[400px]">
-                                        {result.map((item, index) => (
-                                            <div key={index} className="mb-4 last:mb-0">
-                                                <pre className="text-sm font-mono bg-muted p-4 rounded-lg overflow-auto">
-                                                    {JSON.stringify(item, null, 2)}
-                                                </pre>
-                                            </div>
-                                        ))}
+                                <CardContent className="p-0">
+                                    <ScrollArea className="h-[600px]">
+                                        <div className="p-6">
+                                            {result.map((item, index) => {
+                                                // Skip empty arrays
+                                                if (Array.isArray(item) && item.length === 0) {
+                                                    return null;
+                                                }
+
+                                                let content = item;
+                                                
+                                                const processMarkdocTag = (tag: any): any => {
+                                                    if (tag?.$$mdtype === 'Tag') {
+                                                        try {
+                                                            // Ensure first letter of tag is uppercase to match component keys
+                                                            if (tag.name && components[tag.name.charAt(0).toUpperCase() + tag.name.slice(1) as keyof typeof components]) {
+                                                                tag.name = tag.name.charAt(0).toUpperCase() + tag.name.slice(1);
+                                                            }
+
+                                                            // Process children recursively
+                                                            if (tag.children) {
+                                                                tag.children = tag.children.map((child: any) => processMarkdocTag(child));
+                                                            }
+
+                                                            // Parse the Markdoc tag into React elements
+                                                            return Markdoc.renderers.react(tag, React, { components });
+                                                        } catch (err) {
+                                                            console.error('Error rendering Markdoc:', err);
+                                                            return null;
+                                                        }
+                                                    }
+                                                    return tag;
+                                                };
+
+                                                if (item?.$$mdtype === 'Tag') {
+                                                    content = processMarkdocTag(item);
+                                                }
+
+                                                if (!content) {
+                                                    return null;
+                                                }
+
+                                                // Handle arrays that contain Markdoc tags
+                                                if (Array.isArray(content)) {
+                                                    content = content.map((item) => {
+                                                        if (item?.$$mdtype === 'Tag') {
+                                                            return processMarkdocTag(item);
+                                                        }
+                                                        return item;
+                                                    });
+                                                }
+
+                                                return (
+                                                    <div key={index} className="mb-5 last:mb-0">
+                                                        {typeof content === 'string' ? content : React.createElement(React.Fragment, null, content)}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </ScrollArea>
                                 </CardContent>
                             </Card>

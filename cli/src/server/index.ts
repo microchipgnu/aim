@@ -130,7 +130,7 @@ export async function createServer(config: ServerConfig) {
                                 },
                                 onSuccess: (data) => {
                                     console.log(data);
-                                    res.write(`event: success\ndata: ${JSON.stringify({data})}\n\n`);
+                                    // res.write(`event: success\ndata: ${JSON.stringify({data})}\n\n`);
                                 },
                                 onAbort: (reason) => {
                                     console.warn(reason);
@@ -138,11 +138,11 @@ export async function createServer(config: ServerConfig) {
                                 },
                                 onFinish: (data) => {
                                     console.log(data);
-                                    res.write(`event: finish\ndata: ${JSON.stringify({data})}\n\n`);
+                                    // res.write(`event: finish\ndata: ${JSON.stringify({data})}\n\n`);
                                 },
                                 onStart: (data) => {
                                     console.log(data);
-                                    res.write(`event: start\ndata: ${JSON.stringify({data})}\n\n`);
+                                    // res.write(`event: start\ndata: ${JSON.stringify({data})}\n\n`);
                                 },
                                 onStep: (data) => {
                                     console.log(data);
@@ -158,7 +158,7 @@ export async function createServer(config: ServerConfig) {
                                 },
                                 onUserInput: async (prompt) => {
                                     console.log(prompt);
-                                    res.write(`event: prompt\ndata: ${JSON.stringify({prompt})}\n\n`);
+                                    // res.write(`event: prompt\ndata: ${JSON.stringify({prompt})}\n\n`);
                                     return "";
                                 }
                             },
