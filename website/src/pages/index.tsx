@@ -42,7 +42,7 @@ function HomepageHeader() {
           <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div className={styles.buttons} style={{ marginBottom: '2rem' }}>
             <Link
-              to="/docs/intro"
+              to="https://t.me/writeAIM"
               style={{
                 padding: '0.75rem 1.5rem',
                 fontWeight: 500,
