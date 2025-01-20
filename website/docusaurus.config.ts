@@ -294,6 +294,10 @@ const config: Config = {
               label: 'X',
               href: 'https://x.com/microchipgnu',
             },
+            {
+              label: 'Telegram',
+              href: 'https://t.me/writeAIM',
+            },
           ],
         },
         {
