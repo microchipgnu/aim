@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.7-beta.4
+
+### Patch Changes
+
+- update code blocks to reference runtime variables and update set to take any args
+
 ## 0.0.7-beta.3
 
 ### Patch Changes

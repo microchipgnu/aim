@@ -9,7 +9,8 @@ $runtimeContext.watch((state) => {
         adapterCount: state.adapters.size,
         textRegistryCount: state.textRegistry.length,
         text: state.textRegistry,
-        stack: state.stack
+        stack: state.stack,
+        variables: state.stack
     });
 });
 
@@ -30,7 +31,16 @@ input:
     description: "The math problem to solve"
 ---
 
-hey {% $frontmatter.input.problem %}
+{% set #var greeting=$frontmatter.input.problem /%}
+
+\`\`\`js {% #code %}
+
+const result = aimVariables.var.greeting;
+
+export default result;
+\`\`\`
+
+{% $code.result %}
 `
 
 const doc = aim({

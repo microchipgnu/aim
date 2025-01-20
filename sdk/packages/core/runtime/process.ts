@@ -76,8 +76,16 @@ export async function _process({ node, config, execution }: AIMRuntime) {
                     }
                 }
 
-                const { evalCode } = await runQuickJS();
-                const evalResult = await evalCode(node.attributes.content);
+                const { evalCode } = await runQuickJS({
+                    env: {
+                        __AIM_VARIABLES__: JSON.stringify(currentConfig.variables),
+                    },
+                });
+
+                const evalResult = await evalCode(`
+                    import { aimVariables } from "load-vars";
+                    ${node.attributes.content}
+                `);
 
                 const result = evalResult.ok ? JSON.stringify(evalResult.data) : "";
 
