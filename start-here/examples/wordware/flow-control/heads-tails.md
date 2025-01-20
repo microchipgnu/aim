@@ -13,7 +13,7 @@ Output 'heads' or 'tails' only.
 
 <!-- We reference the value of the flip in this if-else block -->
 
-{% if flip == "heads" %}
+{% if equals($flip.result, "heads") %}
 
 Heads, I win!
 
@@ -23,31 +23,31 @@ Should I gloat? Write yes or no only.
 
 <!-- It's possible to nest container blocks inside other container blocks. In fact you can put all the same things in the body of a container block as you can in a prompt -->
 
-{% if gloat == "yes" %}
+{% if equals($gloat.result, "yes") %}
 
-Now, write a gloating song. Output just the song.
+    Now, write a gloating song. Output just the song.
 
-{% ai #song model="openai/gpt-4o-mini" /%}
-
-{% /if %}
-
-{% if gloat != "yes" %}
-
-Now, be humble and congratulate the loser on their well played match.
-
-{% ai #humble model="openai/gpt-4o-mini" /%}
+    {% ai #song model="openai/gpt-4o-mini" /%}
 
 {% /if %}
 
-{% if flip == "tails" %}
+{% if not(equals($gloat.result, "yes")) %}
 
-Tails, you lose! 😏
+    Now, be humble and congratulate the loser on their well played match.
+
+    {% ai #humble model="openai/gpt-4o-mini" /%}
 
 {% /if %}
 
-{% if flip != "heads" && flip != "tails" %}
+{% if equals($flip.result, "tails") %}
 
-Neither heads nor tails, everyone loses �
+    Tails, you lose! 😏
+
+{% /if %}
+
+{% if and(not(equals($flip.result, "heads")), not(equals($flip.result, "tails"))) %}
+
+Neither heads nor tails, everyone loses 🤷‍♂️
 
 {% /if %}
 

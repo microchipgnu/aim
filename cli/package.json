@@ -1,7 +1,7 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.32",
+  "version": "0.1.33-beta.6",
   "private": false,
   "type": "commonjs",
   "bin": {
@@ -22,16 +22,23 @@
   },
   "files": [
     "dist",
-    "dist/fonts"
+    "dist/ui"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsup --config tsup.config.ts",
+    "build": "rm -rf dist && cd ui && bun run build && cd .. && tsup --config tsup.config.ts",
+    "dev": "concurrently \"cd ui && bun run dev\" \"tsup --config tsup.config.ts --watch --no-dts\"",
+    "dev:ui": "cd ui && bun run dev",
+    "dev:cli": "tsup --config tsup.config.ts --watch --no-dts",
+    "dev:test": "concurrently \"bun run dev\" \"wait-on dist/index.mjs && bun --watch run ./dist/index.mjs start -d ../start-here/examples/ --ui\"",
     "build-binary": "bun run typecheck && bun build ./index.ts --compile --outfile aimx",
     "typecheck": "tsc --noEmit",
     "version": "changeset version",
     "copy-wasm": "mkdir -p dist && cp node_modules/@wasmer/sdk/dist/*.wasm dist/",
     "release": "bun run cleanup && bun run build && changeset publish",
-    "cleanup": "rm -rf dist"
+    "cleanup": "rm -rf dist",
+    "version:beta": "changeset pre enter beta && changeset version",
+    "release:beta": "changeset pre exit && bun run build && changeset publish --tag beta",
+    "version:stable": "changeset pre exit && changeset version"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.11",
@@ -39,19 +46,22 @@
     "@types/express": "^5.0.0",
     "@types/figlet": "^1.7.0",
     "@types/node": "^22.10.2",
+    "concurrently": "^9.1.2",
     "tsup": "^8.3.5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@aim-sdk/core": "0.0.6",
+    "@aim-sdk/core": "0.0.7-beta.4",
     "@markdoc/markdoc": "^0.4.0",
     "chalk": "^5.4.1",
     "commander": "^12.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "inquirer": "^12.3.0",
-    "ora": "^8.1.1"
+    "ora": "^8.1.1",
+    "vite": "^6.0.7",
+    "wait-on": "^8.0.2"
   }
 }

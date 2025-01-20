@@ -1,0 +1,14 @@
+{
+  "mode": "exit",
+  "tag": "beta",
+  "initialVersions": {
+    "@aim-sdk/core": "0.0.7-beta.3"
+  },
+  "changesets": [
+    "late-experts-decide",
+    "nice-lobsters-remain",
+    "soft-bottles-kneel",
+    "thirty-books-fetch",
+    "thirty-fishes-fetch"
+  ]
+}

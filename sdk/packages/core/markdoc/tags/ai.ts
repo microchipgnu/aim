@@ -3,13 +3,13 @@ import Markdoc, { Tag } from "@markdoc/markdoc";
 import { generateText } from "ai";
 import { getModelProvider } from "runtime/ai/get-model-providers";
 import { $textRegistry, clearTextRegistry, pushStack } from "runtime/state";
-import type { AIMTag } from "types";
+import type { AIMRuntime, AIMTag } from "types";
 
 export const aiTag: Schema = {
     render: 'ai',
     selfClosing: true,
     attributes: {
-        model: { type: String, required: true, default: 'openai/gpt-4-mini' },
+        model: { type: String, required: true, default: 'openai/gpt-4o-mini' },
         id: { type: String, required: false },
         temperature: { type: Number, required: false, default: 0.5 }
     }
@@ -17,7 +17,7 @@ export const aiTag: Schema = {
 
 export const aiTagWithRuntime: AIMTag = {
     ...aiTag,
-    runtime: async (node, config) => {
+    runtime: async ({ node, config, execution }: AIMRuntime) => {
         const attrs = node.transformAttributes(config);
         const promptNode = Markdoc.transform(node, config);
         const prompt = Markdoc.renderers.html(promptNode);
@@ -47,7 +47,7 @@ export const aiTagWithRuntime: AIMTag = {
         });
 
         // Clear registry after AI processing
-        clearTextRegistry();
+        // clearTextRegistry();
 
         return new Tag('ai', {
             result: result.text,

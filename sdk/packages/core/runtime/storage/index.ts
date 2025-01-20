@@ -1,22 +1,26 @@
 import * as browserStorage from './storage.browser';
 import * as nodeStorage from './storage.node.ts';
+import * as jsEnvironment from 'browser-or-node';
 
 export const getLocalStorageItem = (key: string): string | null => {
-  // Check if we're in a browser environment
-  if (typeof window !== 'undefined') {
+  if (jsEnvironment.isBrowser) {
     return browserStorage.getLocalStorageItem(key);
   }
-  // Otherwise use Node.js storage
-  return nodeStorage.getLocalStorageItem(key);
+  else if (jsEnvironment.isNode) {
+    return nodeStorage.getLocalStorageItem(key);
+  }
+  else {
+    throw new Error("Storage is not supported in this environment");
+  }
 };
 
 export const setLocalStorageItem = (key: string, value: string): void => {
-  // Check if we're in a browser environment
-  if (typeof window !== 'undefined') {
+  if (jsEnvironment.isBrowser) {
     browserStorage.setLocalStorageItem(key, value);
-  } else {
-    // Otherwise use Node.js storage
+  } else if (jsEnvironment.isNode) {
     nodeStorage.setLocalStorageItem(key, value);
   }
+  else {
+    throw new Error("Storage is not supported in this environment");
+  }
 };
-

@@ -1,0 +1,16 @@
+{
+  "mode": "exit",
+  "tag": "beta",
+  "initialVersions": {
+    "aimx": "0.1.33-beta.5"
+  },
+  "changesets": [
+    "afraid-lamps-heal",
+    "mighty-bags-beg",
+    "nice-crews-crash",
+    "popular-trainers-fix",
+    "quick-eggs-join",
+    "seven-avocados-knock",
+    "stale-news-develop"
+  ]
+}

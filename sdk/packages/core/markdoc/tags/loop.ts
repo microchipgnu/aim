@@ -1,6 +1,7 @@
-import type { Schema } from "@markdoc/markdoc";
-import { getCurrentConfigFx, popStack, pushStack } from "runtime/state";
-import type { AIMTag } from "types";
+import { type Schema } from "@markdoc/markdoc";
+import { _process } from "runtime";
+import { popStack, pushStack } from "runtime/state";
+import type { AIMRuntime, AIMTag } from "types";
 
 export const loopTag: Schema = {
     render: 'loop',
@@ -13,17 +14,18 @@ export const loopTag: Schema = {
 
 export const loopTagWithRuntime: AIMTag = {
     ...loopTag,
-    runtime: async (node, config, { executeNode }) => {
-
-        if (!executeNode) {
+    runtime: async ({ node, config, execution }: AIMRuntime) => {
+        if (!execution.executeNode) {
             throw new Error('Loop tag must have executeNode function');
         }
 
-        const context = await getCurrentConfigFx(config);
+        const context = await execution.runtime.context.methods.getCurrentConfig(config);
 
         const attrs = node.transformAttributes(context);
         const count = typeof attrs.count === 'number' ? attrs.count : attrs.count?.resolve(context);
-        const items = Array.isArray(attrs.items) ? attrs.items.map(item => item?.resolve ? item.resolve(context) : item) : attrs.items.resolve(context);
+        const items = Array.isArray(attrs.items) 
+            ? attrs.items.map(item => item?.resolve ? item.resolve(context) : item) 
+            : attrs.items?.resolve ? attrs.items.resolve(context) : undefined;
         const id = attrs.id || 'loop';
         const results = [];
 
@@ -48,7 +50,10 @@ export const loopTagWithRuntime: AIMTag = {
 
             const iterationResults = [];
             for (const child of node.children) {
-                const result = await executeNode(child);
+                // TODO: Fix this. There's a bug here
+                const result = await _process({ node: child, config, execution });
+
+                execution.runtime.options?.events?.onData?.(`DATAAAAA ${id}.${child.tag}.${JSON.stringify(result)}`);
                 if (result !== null) {
                     iterationResults.push(result);
                 }
@@ -57,6 +62,6 @@ export const loopTagWithRuntime: AIMTag = {
 
             popStack();
         }
-        return results;
+        return "loop"
     }
 }

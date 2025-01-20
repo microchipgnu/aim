@@ -1,5 +1,47 @@
 # aimx
 
+## 0.1.33-beta.6
+
+### Patch Changes
+
+- update sdk to 0.0.7-beta.4
+
+## 0.1.33-beta.5
+
+### Patch Changes
+
+- improve ui rendering responses
+
+## 0.1.33-beta.4
+
+### Patch Changes
+
+- update ui
+
+## 0.1.33-beta.3
+
+### Patch Changes
+
+- fix path resolution
+
+## 0.1.33-beta.2
+
+### Patch Changes
+
+- up
+
+## 0.1.33-beta.1
+
+### Patch Changes
+
+- up
+
+## 0.1.33-beta.0
+
+### Patch Changes
+
+- test
+
 ## 0.1.32
 
 ### Patch Changes

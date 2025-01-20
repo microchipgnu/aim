@@ -1,6 +1,7 @@
 import Markdoc, { type Config, type Node, type ValidateError } from "@markdoc/markdoc";
 import yaml from 'js-yaml';
-import { config as defaultConfig } from "../config";
+import type { RuntimeOptions } from "../../types";
+
 
 const getFrontmatter = (ast: Node) => {
     let frontmatter = {};
@@ -15,7 +16,7 @@ const getFrontmatter = (ast: Node) => {
     return frontmatter;
 }
 
-export const parser = async (input: string, config: Config = defaultConfig): Promise<{ ast: Node, validation: ValidateError[], config: Config, frontmatter: any }> => {
+export const parser = (input: string, options?: Partial<RuntimeOptions>): { ast: Node, validation: ValidateError[], config: Config, frontmatter: any } => {
     const tokenizer = new Markdoc.Tokenizer({
         allowComments: true,
         allowIndentation: true,
@@ -24,15 +25,15 @@ export const parser = async (input: string, config: Config = defaultConfig): Pro
     const tokens = tokenizer.tokenize(input);
     const ast = Markdoc.parse(tokens);
 
-    const validation = Markdoc.validate(ast, config);
+    const validation = Markdoc.validate(ast, options?.config);
     const frontmatter = getFrontmatter(ast);
 
     const _config = {
-        ...config,
+        ...options?.config,
         variables: {
-            ...config.variables,
+            ...options?.config,
             frontmatter
-        }
+        },
     }
 
     return {

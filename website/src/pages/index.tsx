@@ -27,7 +27,7 @@ function HomepageHeader() {
           <p className="hero__subtitle" style={{ fontSize: '1.5rem', opacity: 0.9, marginBottom: '2rem' }}>
             {siteConfig.tagline}
           </p>
-          <div className={styles.buttons} style={{ marginBottom: '3rem' }}>
+          <div className={styles.buttons} style={{ marginBottom: '1rem' }}>
             <Link
               className="button button--secondary button--lg"
               to="/docs/intro"
@@ -40,6 +40,17 @@ function HomepageHeader() {
             </Link>
           </div>
           <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <div className={styles.buttons} style={{ marginBottom: '2rem' }}>
+            <Link
+              to="/docs/intro"
+              style={{
+                padding: '0.75rem 1.5rem',
+                fontWeight: 500,
+                transition: 'all 0.2s ease',
+              }}>
+              Join our Telegram Group
+            </Link>
+          </div>
             <CodePreview example='dreamer' title='dreamer.aim' outputs={["You may say I'm a dreamer", "But I'm not the only one", "I hope you'll join us", "And the world will live as one."]} />
           </div>
         </div>
