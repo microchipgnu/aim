@@ -25,6 +25,6 @@ This was your thought: {% $thought.result %}
 
 Now output the final number and only the number.
 
-{% ai #answer model="ollama/llama3.2" /%}
+{% ai #answer model="openai/gpt-4o-mini" /%}
 
 {% $answer.result %}

@@ -19,7 +19,9 @@ Heads, I win!
 
 Should I gloat? Write yes or no only.
 
-{% ai #gloat model="google/gemma-2" /%}
+{% ai #gloat model="openai/gpt-4o-mini" /%}
+
+GLOAT {% $gloat.result %}
 
 <!-- It's possible to nest container blocks inside other container blocks. In fact you can put all the same things in the body of a container block as you can in a prompt -->
 
