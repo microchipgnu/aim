@@ -120,49 +120,69 @@ export function RouteView({ path }: { path: string }) {
                 const events = chunk.split('\n\n').filter(Boolean);
 
                 for (const event of events) {
-                    const [eventLine, dataLine] = event.split('\n');
-                    if (!eventLine || !dataLine) continue;
+                    try {
+                        const [eventLine, dataLine] = event.split('\n');
+                        if (!eventLine || !dataLine) continue;
 
-                    const eventType = eventLine.replace('event: ', '');
-                    const data = JSON.parse(dataLine.replace('data: ', ''));
+                        const eventType = eventLine.replace('event: ', '');
+                        let data;
+                        try {
+                            data = JSON.parse(dataLine.replace('data: ', ''));
+                        } catch (parseErr) {
+                            console.warn('Failed to parse event data:', parseErr);
+                            continue;
+                        }
 
-                    switch (eventType) {
-                        case 'log':
-                            setLogs(prev => [...prev, data.message]);
-                            break;
-                        case 'error':
-                            setError(data.error);
-                            break;
-                        case 'step':
-                            setSteps(prev => [...prev, data]);
-                            break;
-                        case 'complete':
-                            if (data.result) {
-                                setResult(prev => [...prev, data.result]);
-                            }
-                            break;
-                        case 'success':
-                            if (data.data) {
-                                setResult(prev => [...prev, data.data]);
-                            }
-                            break;
-                        case 'output':
-                            if (data.output) {
-                                setResult(prev => [...prev, data.output]);
-                            }
-                            break;
-                        case 'data':
-                            if (data.data) {
-                                setResult(prev => [...prev, data.data]);
-                            }
-                            break;
+                        // Validate data before using
+                        if (!data) continue;
+
+                        switch (eventType) {
+                            case 'log':
+                                if (typeof data.message === 'string') {
+                                    setLogs(prev => [...prev, data.message]);
+                                }
+                                break;
+                            case 'error':
+                                if (typeof data.error === 'string') {
+                                    setError(data.error);
+                                }
+                                break;
+                            case 'step':
+                                if (data) {
+                                    setSteps(prev => [...prev, data]);
+                                }
+                                break;
+                            case 'complete':
+                                if (data.result !== undefined) {
+                                    setResult(prev => [...prev, data.result]);
+                                }
+                                break;
+                            case 'success':
+                                if (data.data !== undefined) {
+                                    setResult(prev => [...prev, data.data]);
+                                }
+                                break;
+                            case 'output':
+                                if (data.output !== undefined) {
+                                    setResult(prev => [...prev, data.output]);
+                                }
+                                break;
+                            case 'data':
+                                if (data.data !== undefined) {
+                                    setResult(prev => [...prev, data.data]);
+                                }
+                                break;
+                        }
+                    } catch (eventErr) {
+                        console.warn('Error processing event:', eventErr);
+                        continue;
                     }
                 }
             }
 
         } catch (err) {
-            setError('Failed to execute document');
-            console.error(err);
+            console.error('Document execution error:', err);
+            setError(err instanceof Error ? err.message : 'Failed to execute document');
         } finally {
             setLoading(false);
         }

@@ -2,11 +2,13 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "aimx": "0.1.33-beta.2"
+    "aimx": "0.1.33-beta.4"
   },
   "changesets": [
+    "mighty-bags-beg",
     "nice-crews-crash",
     "popular-trainers-fix",
+    "quick-eggs-join",
     "seven-avocados-knock",
     "stale-news-develop"
   ]

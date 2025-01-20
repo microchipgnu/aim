@@ -1,5 +1,17 @@
 # aimx
 
+## 0.1.33-beta.5
+
+### Patch Changes
+
+- improve ui rendering responses
+
+## 0.1.33-beta.4
+
+### Patch Changes
+
+- update ui
+
 ## 0.1.33-beta.3
 
 ### Patch Changes
