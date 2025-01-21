@@ -30,7 +30,8 @@ export const setTagWithRuntime: AIMTag = {
 
         pushStack({
             id,
-            variables
+            variables,
+            scope: execution.scope
         });
 
         return new Tag('set', { id });

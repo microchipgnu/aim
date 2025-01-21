@@ -2,9 +2,10 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "@aim-sdk/core": "0.0.7-beta.3"
+    "@aim-sdk/core": "0.0.7-beta.4"
   },
   "changesets": [
+    "fuzzy-lobsters-repair",
     "late-experts-decide",
     "nice-lobsters-remain",
     "soft-bottles-kneel",

@@ -1,8 +1,8 @@
 import type { Schema } from "@markdoc/markdoc";
 import { Tag } from "@markdoc/markdoc";
 import { aim } from "index";
-import { parser } from "markdoc/parser";
-import { getCurrentConfigFx, pushStack } from "runtime/state";
+import { nanoid } from "nanoid";
+import { pushStack } from "runtime/state";
 import type { AIMRuntime, AIMTag } from "types";
 
 export const flowTag: Schema = {
@@ -65,7 +65,8 @@ export const flowTagWithRuntime: AIMTag = {
 
             // Push flow variables to stack
             pushStack({
-                id: id || 'flow',
+                id: id || nanoid(),
+                scope: execution.scope,
                 variables: {
                     ...input,
                     path,

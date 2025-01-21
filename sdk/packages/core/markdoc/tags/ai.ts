@@ -2,7 +2,7 @@ import type { Schema } from "@markdoc/markdoc";
 import Markdoc, { Tag } from "@markdoc/markdoc";
 import { generateText } from "ai";
 import { getModelProvider } from "runtime/ai/get-model-providers";
-import { $textRegistry, clearTextRegistry, pushStack } from "runtime/state";
+import { clearTextRegistry, getScopedText, pushStack } from "runtime/state";
 import type { AIMRuntime, AIMTag } from "types";
 
 export const aiTag: Schema = {
@@ -23,8 +23,8 @@ export const aiTagWithRuntime: AIMTag = {
         const prompt = Markdoc.renderers.html(promptNode);
 
         // Get accumulated text from registry
-        const contextText = $textRegistry.getState().join('\n');
-        
+        const contextText = getScopedText(execution.scope).join('\n');
+
         const model = attrs.model || "openai/gpt-4o-mini";
         const modelProvider = getModelProvider(model);
 
@@ -40,6 +40,7 @@ export const aiTagWithRuntime: AIMTag = {
 
         pushStack({
             id: attrs.id || 'ai',
+            scope: execution.scope,
             variables: {
                 result: result.text,
                 context: contextText // Make context available in variables
@@ -47,7 +48,7 @@ export const aiTagWithRuntime: AIMTag = {
         });
 
         // Clear registry after AI processing
-        // clearTextRegistry();
+        clearTextRegistry({ scope: execution.scope });
 
         return new Tag('ai', {
             result: result.text,

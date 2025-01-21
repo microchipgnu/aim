@@ -1,6 +1,6 @@
 import type { Schema } from "@markdoc/markdoc";
 import { Tag } from "@markdoc/markdoc";
-import { getCurrentConfigFx, pushStack } from "runtime/state";
+import { pushStack } from "runtime/state";
 import type { AIMRuntime, AIMTag } from "types";
 
 export const inputTag: Schema = {
@@ -69,6 +69,7 @@ export const inputTagWithRuntime: AIMTag = {
         if (inputValue) {
             pushStack({
                 id: name,
+                scope: execution.scope,
                 variables: {
                     value: inputValue,
                     type,

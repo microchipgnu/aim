@@ -1,6 +1,7 @@
-import { type Schema } from "@markdoc/markdoc";
-import { _process } from "runtime";
-import { popStack, pushStack } from "runtime/state";
+import { type RenderableTreeNodes, type Schema } from "@markdoc/markdoc";
+import { nanoid } from "nanoid";
+import { executeNode } from "runtime/process";
+import { clearTextRegistry, popStack, pushStack } from "runtime/state";
 import type { AIMRuntime, AIMTag } from "types";
 
 export const loopTag: Schema = {
@@ -14,7 +15,7 @@ export const loopTag: Schema = {
 
 export const loopTagWithRuntime: AIMTag = {
     ...loopTag,
-    runtime: async ({ node, config, execution }: AIMRuntime) => {
+    runtime: async ({ node, config, execution }: AIMRuntime): Promise<RenderableTreeNodes> => {
         if (!execution.executeNode) {
             throw new Error('Loop tag must have executeNode function');
         }
@@ -23,11 +24,10 @@ export const loopTagWithRuntime: AIMTag = {
 
         const attrs = node.transformAttributes(context);
         const count = typeof attrs.count === 'number' ? attrs.count : attrs.count?.resolve(context);
-        const items = Array.isArray(attrs.items) 
-            ? attrs.items.map(item => item?.resolve ? item.resolve(context) : item) 
+        const items = Array.isArray(attrs.items)
+            ? attrs.items.map(item => item?.resolve ? item.resolve(context) : item)
             : attrs.items?.resolve ? attrs.items.resolve(context) : undefined;
         const id = attrs.id || 'loop';
-        const results = [];
 
         if (!items && !count) {
             throw new Error('Loop tag must have either items or count attribute');
@@ -35,10 +35,17 @@ export const loopTagWithRuntime: AIMTag = {
 
         const iterables = items || Array.from({ length: count });
         const iterations = iterables.length;
+        const loopScope = execution.scope;
 
         for (let i = 0; i < iterations; i++) {
+            const scope = nanoid();
+            // Clear previous iteration's frame if it exists 
+            // popStack({ scope: loopScope });
+
+            // Push new frame for this iteration
             pushStack({
                 id,
+                scope: scope,
                 variables: {
                     index: i + 1,
                     total: iterations,
@@ -48,20 +55,27 @@ export const loopTagWithRuntime: AIMTag = {
                 }
             });
 
-            const iterationResults = [];
             for (const child of node.children) {
-                // TODO: Fix this. There's a bug here
-                const result = await _process({ node: child, config, execution });
-
-                execution.runtime.options?.events?.onData?.(`DATAAAAA ${id}.${child.tag}.${JSON.stringify(result)}`);
-                if (result !== null) {
-                    iterationResults.push(result);
-                }
+                const result = await executeNode({
+                    node: child,
+                    config,
+                    execution: {
+                        ...execution,
+                        scope: scope
+                    }
+                });
+                console.log("RESULT", result)
             }
-            results.push(iterationResults);
 
-            popStack();
+            console.log("popping", scope)
+
+            popStack({ scope: scope });
+            clearTextRegistry({ scope: scope });
         }
-        return "loop"
+
+        // Clean up the last iteration's frame
+        popStack({ scope: loopScope });
+        clearTextRegistry({ scope: loopScope });
+        return "";
     }
 }

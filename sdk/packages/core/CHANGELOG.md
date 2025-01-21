@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.7-beta.5
+
+### Patch Changes
+
+- fix memory leaks
+
 ## 0.0.7-beta.4
 
 ### Patch Changes

@@ -1,37 +1,55 @@
-import type { Config, Schema, Node } from "@markdoc/markdoc";
+import type { Config, Schema, Node, RenderableTreeNodes } from "@markdoc/markdoc";
+
+export type StateBlock = {
+    timestamp: number;
+    action: string;
+    hash: string;
+    previousHash: string;
+    state: RuntimeContext;
+    diff: {
+        stack: number;
+        textRegistry: number;
+        data: number;
+    }
+}
 
 export type AIMConfig = Config & {
     variables: Record<string, any>;
+    tags?: Record<string, Schema>;
+    functions?: Record<string, (...args: any[]) => any>;
 }
+
 export type AIMTag = Schema & {
     /**
      * Runtime execution function for the tag
      * @param runtime Runtime arguments and context
      * @returns Promise resolving to the tag's execution result
      */
-    runtime: (runtime: AIMRuntime) => Promise<unknown>;
+    runtime: (runtime: AIMRuntime) => Promise<RenderableTreeNodes>;
 }
 
 export type StackFrame = {
     /** Unique identifier for the stack frame */
     id: string;
+    /** Scope for the stack frame */
+    scope: string;
     /** Variables stored in this stack frame */
-    variables: Record<string, unknown>;
+    variables: Record<string, any>;
 }
 
 export type RuntimeMethods = {
     /** Add a new frame to the execution stack */
-    pushStack: (frame: StackFrame) => Promise<void>;
-    /** Remove the top frame from the execution stack */
-    popStack: () => Promise<void>;
-    /** Set data in the global store */
-    setData: (data: Record<string, unknown>) => Promise<void>;
+    pushStack: (frame: { id: string; scope: string; variables: Record<string, any> }) => void;
+    /** Remove frames from the execution stack for a given scope */
+    popStack: (params: { scope: string }) => void;
+    /** Set data in the scoped store */
+    setData: (params: { data: Record<string, any>, scope: string }) => void;
     /** Reset the runtime context to initial state */
-    resetContext: () => Promise<void>;
+    resetContext: () => void;
     /** Add text to the registry for AI context */
-    addToTextRegistry: (text: string) => Promise<void>;
-    /** Clear the text registry */
-    clearTextRegistry: () => Promise<void>;
+    addToTextRegistry: (params: { text: string; scope: string }) => void;
+    /** Clear the text registry for a scope */
+    clearTextRegistry: (params: { scope: string }) => void;
     /** Get current config with resolved variables */
     getCurrentConfig: (config: Config) => Promise<Config>;
     /** Get the current runtime context */
@@ -39,12 +57,12 @@ export type RuntimeMethods = {
 }
 
 export type RuntimeContext = {
-    /** Text registry for AI context */
-    textRegistry: Array<string>;
+    /** Text registry for AI context, scoped by key */
+    textRegistry: Record<string, string[]>;
     /** Stack of execution frames */
     stack: Array<StackFrame>;
-    /** Global data store */
-    data: Record<string, unknown>;
+    /** Global data store, scoped by key */
+    data: Record<string, Record<string, any>>;
     /** Registered plugins */
     plugins: Map<string, AIMPlugin>;
     /** Registered adapters */
@@ -70,9 +88,11 @@ export type AIMRuntime = {
     /** Runtime state and execution context */
     execution: {
         runtime: RuntimeState;
+        /** Current scope */
+        scope: string;
         /** Function to execute a node with given config and context */
         executeNode: (runtime: AIMRuntime) => Promise<unknown>;
-    }
+    },
 }
 
 export interface RuntimeOptions {
@@ -105,7 +125,6 @@ export interface RuntimeOptions {
     adapters?: Array<AIMAdapter>;
 }
 
-
 export interface AIMResult {
     ast: Node;
     errors: any[];
@@ -123,7 +142,7 @@ export interface AIMOutput {
 export interface AIMAdapter {
     type: string;
     name: string;
-    init?: () => Promise<void>;
+    init?: () => void;
     handlers: Record<string, (...args: any[]) => Promise<any>>;
 }
 
@@ -138,7 +157,7 @@ export interface AIMPlugin {
         adapters?: Array<{ name: string; versionRange: string }>;
     };
     configSchema?: unknown; // Schema validation object (e.g., Zod, Joi, etc.)
-    init?: (config: AIMConfig, pluginOptions?: unknown) => Promise<void>;
+    init?: (config: AIMConfig, pluginOptions?: unknown) => void;
     tags?: Record<string, AIMTag>;
     functions?: Record<string, (...args: any[]) => any>;
     hooks?: {

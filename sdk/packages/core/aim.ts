@@ -2,6 +2,7 @@ import { functions, tags, type Schema } from "@markdoc/markdoc";
 import * as jsEnvironment from "browser-or-node";
 import { parser } from "markdoc/parser";
 import { aiTag } from "markdoc/tags/ai";
+import { elseTag, ifTag } from "markdoc/tags/conditionals";
 import { flowTag } from "markdoc/tags/flow";
 import { inputTag } from "markdoc/tags/input";
 import { loopTag } from "markdoc/tags/loop";
@@ -10,6 +11,8 @@ import { addToTextRegistry, clearTextRegistry, getCurrentConfigFx, getRuntimeCon
 import { execute } from "./clients";
 import type { RuntimeOptions, StackFrame } from "./types";
 
+export const GLOBAL_SCOPE = "global";
+
 const defaultRuntimeOptions: RuntimeOptions = {
     plugins: [],
     adapters: [],
@@ -17,7 +20,7 @@ const defaultRuntimeOptions: RuntimeOptions = {
     input: {},
     events: {},
     signal: new AbortController().signal,
-    timeout: 3000,
+    timeout: 50000,
     maxRetries: 5,
     environment: jsEnvironment.isBrowser ? "browser" : "node",
     getReferencedFlow: undefined,
@@ -29,7 +32,9 @@ const defaultRuntimeOptions: RuntimeOptions = {
             loop: loopTag,
             set: setTag,
             input: inputTag,
-            flow: flowTag
+            flow: flowTag,
+            if: ifTag,
+            else: elseTag
         },
         functions: {
             ...functions
@@ -38,9 +43,10 @@ const defaultRuntimeOptions: RuntimeOptions = {
 }
 
 export function aim({ content, options = defaultRuntimeOptions }: { content: string, options: RuntimeOptions }) {
+
     // Register plugins in state
     options.plugins?.forEach(p => {
-        registerPlugin({plugin: p.plugin, options: p.options});
+        registerPlugin({ plugin: p.plugin, options: p.options });
     });
 
     // Convert plugins to Markdoc tags
@@ -118,45 +124,54 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
                 id: "frontmatter",
                 variables: {
                     ...inputObject
-                }
+                },
+                scope: GLOBAL_SCOPE
             });
 
             const context = await getRuntimeContextFx();
 
-            await execute({
-                node: ast,
-                config: {
-                    ...runtimeOptions.config,
-                    variables: {
-                        ...runtimeOptions.config.variables,
-                        frontmatter: {
-                            ...frontmatter,
-                            ...inputObject
-                        }
-                    }
-                },
-                execution: {
-                    executeNode: async () => {
-                        return Promise.resolve();
-                    },
-                    runtime: {
-                        context: {
-                            ...context,
-                            methods: {
-                                pushStack: async (frame: StackFrame) => { pushStack(frame) },
-                                popStack: async () => { popStack() },
-                                setData: async (data: Record<string, unknown>) => { setData(data) },
-                                resetContext: async () => { resetContext() },
-                                addToTextRegistry: async (text: string) => { addToTextRegistry(text) },
-                                clearTextRegistry: async () => { clearTextRegistry() },
-                                getCurrentConfig: getCurrentConfigFx,
-                                getRuntimeContext: getRuntimeContextFx
-                            },
-                        },
-                        options: runtimeOptions
-                    }
-                }
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Execution timed out')), runtimeOptions.timeout);
             });
+
+            await Promise.race([
+                execute({
+                    node: ast,
+                    config: {
+                        ...runtimeOptions.config,
+                        variables: {
+                            ...runtimeOptions.config.variables,
+                            frontmatter: {
+                                ...frontmatter,
+                                ...inputObject
+                            }
+                        }
+                    },
+                    execution: {
+                        executeNode: async () => {
+                            return Promise.resolve();
+                        },
+                        runtime: {
+                            context: {
+                                ...context,
+                                methods: {
+                                    pushStack: async (frame: StackFrame) => { pushStack(frame) },
+                                    popStack: async (params: { scope: string }) => { popStack(params) },
+                                    setData: async (params: { data: Record<string, any>; scope: string }) => { setData(params) },
+                                    resetContext: async () => { resetContext() },
+                                    addToTextRegistry: async (params: { text: string; scope: string }) => { addToTextRegistry(params) },
+                                    clearTextRegistry: async (params: { scope: string }) => { clearTextRegistry(params) },
+                                    getCurrentConfig: getCurrentConfigFx,
+                                    getRuntimeContext: getRuntimeContextFx
+                                },
+                            },
+                            options: runtimeOptions
+                        },
+                        scope: GLOBAL_SCOPE
+                    },
+                }),
+                timeoutPromise
+            ]);
         }
     };
 }
