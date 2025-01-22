@@ -28,7 +28,6 @@ export const execute = async ({ node, config, execution }: AIMRuntime): Promise<
         for await (const result of generator) {
             if (result) {
                 options.events?.onLog?.(`Processing result: ${JSON.stringify(result)}`);
-                options.events?.onData?.(result);
                 if (typeof result === 'string' || typeof result === 'object') {
                     results.push(result);
                 }

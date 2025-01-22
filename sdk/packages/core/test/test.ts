@@ -64,18 +64,21 @@ const doc = aim({
     content: content3,
     options: {
         signal: new AbortController().signal,
-        events: {
-            onLog: console.log,
-            onError: console.error,
-            onSuccess: console.log,
-            onAbort: console.warn,
-            onFinish: console.log,
-            onStart: console.log,
-            onStep: console.log,
-            onData: console.log,
-            onOutput: async (output) => { console.log(output) },
-            onUserInput: async (prompt) => { console.log(prompt); return "" },
-        },  
+        settings: {
+            useScoping: false
+        },
+        // events: {
+        //     onLog: console.log,
+        //     onError: console.error,
+        //     onSuccess: console.log,
+        //     onAbort: console.warn,
+        //     onFinish: console.log,
+        //     onStart: console.log,
+        //     onStep: console.log,
+        //     onData: console.log,
+        //     onOutput: async (output) => { console.log(output) },
+        //     onUserInput: async (prompt) => { console.log(prompt); return "" },
+        // },  
         config: {},
         plugins: []
         // plugins: [

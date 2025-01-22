@@ -1,5 +1,6 @@
 import type { Schema } from "@markdoc/markdoc";
 import { Tag } from "@markdoc/markdoc";
+import { GLOBAL_SCOPE } from "aim";
 import { pushStack } from "runtime/state";
 import type { AIMRuntime, AIMTag } from "types";
 
@@ -69,7 +70,7 @@ export const inputTagWithRuntime: AIMTag = {
         if (inputValue) {
             pushStack({
                 id: name,
-                scope: execution.scope,
+                scope: execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE,
                 variables: {
                     value: inputValue,
                     type,

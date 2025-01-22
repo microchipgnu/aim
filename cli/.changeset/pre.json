@@ -2,10 +2,11 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "aimx": "0.1.33-beta.5"
+    "aimx": "0.1.33-beta.6"
   },
   "changesets": [
     "afraid-lamps-heal",
+    "brown-geckos-invite",
     "mighty-bags-beg",
     "nice-crews-crash",
     "popular-trainers-fix",

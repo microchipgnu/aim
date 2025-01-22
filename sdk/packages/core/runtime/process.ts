@@ -6,6 +6,8 @@ import { setTagWithRuntime } from "markdoc/tags/set";
 import type { AIMRuntime } from "types";
 import { runQuickJS } from "./code/quickjs";
 import { addToTextRegistry, getCurrentConfigFx, getRuntimeContextFx, pushStack } from "./state";
+import { GLOBAL_SCOPE } from "aim";
+import { transform } from "markdoc/transform";
 
 export async function executeNode({ node, config, execution }: AIMRuntime): Promise<RenderableTreeNodes> {
     // Get config with current stack state
@@ -33,7 +35,7 @@ export async function executeNode({ node, config, execution }: AIMRuntime): Prom
         case 'th':
         case 'td':
         case 'heading': {
-            const transformedNode = Markdoc.transform(node, currentConfig);
+            const transformedNode = await transform(node, currentConfig);
 
             if (transformedNode) {
                 let content = '';
@@ -51,9 +53,11 @@ export async function executeNode({ node, config, execution }: AIMRuntime): Prom
                 }
 
                 if (content) {
-                    addToTextRegistry({ text: content, scope: execution.scope });
+                    addToTextRegistry({ text: content, scope: execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE });
                 }
             }
+
+            execution.runtime.options.events?.onData?.(transformedNode);
 
             return transformedNode;
         }
@@ -126,12 +130,13 @@ export async function executeNode({ node, config, execution }: AIMRuntime): Prom
                             }
                         }
                     }
-                    return Markdoc.transform(node, currentConfig);
+                    return await transform(node, currentConfig);
                 }
             }
         }
-        default:
-            return Markdoc.transform(node, currentConfig);
+        default: {
+            return await transform(node, currentConfig);
+        }
     }
 }
 
@@ -140,13 +145,18 @@ export async function* process({ node, config, execution }: AIMRuntime) {
     for (const child of node.children) {
         const result = await executeNode({ node: child, config, execution });
 
-        pushStack({
-            id: node.transformAttributes(config).id,
-            variables: {
-                result: result
-            },
-            scope: execution.scope
-        });
+
+        // Store result in stack if id is provided
+        const attrs = node.transformAttributes(config);
+        if (attrs.id) {
+            pushStack({
+                id: attrs.id,
+                variables: {
+                    result: result
+                },
+                scope: execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE
+            });
+        }
 
         yield result;
     }

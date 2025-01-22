@@ -115,6 +115,9 @@ export interface RuntimeOptions {
         }) => Promise<void>;
         onUserInput?: (prompt: string) => Promise<string>;
     };
+    settings: {
+        useScoping: boolean;
+    };
     signal?: AbortSignal;
     timeout?: number;
     maxRetries?: number;

@@ -7,7 +7,7 @@ import { flowTag } from "markdoc/tags/flow";
 import { inputTag } from "markdoc/tags/input";
 import { loopTag } from "markdoc/tags/loop";
 import { setTag } from "markdoc/tags/set";
-import { addToTextRegistry, clearTextRegistry, getCurrentConfigFx, getRuntimeContextFx, popStack, pushStack, registerPlugin, resetContext, setData } from "runtime/state";
+import { addToTextRegistry, clearTextRegistry, getCurrentConfigFx, getRuntimeContextFx, popStack, pushStack, registerPlugin, registerRuntimeState, resetContext, setData } from "runtime/state";
 import { execute } from "./clients";
 import type { RuntimeOptions, StackFrame } from "./types";
 
@@ -24,6 +24,9 @@ const defaultRuntimeOptions: RuntimeOptions = {
     maxRetries: 5,
     environment: jsEnvironment.isBrowser ? "browser" : "node",
     getReferencedFlow: undefined,
+    settings: {
+        useScoping: false
+    },
     config: {
         variables: {},
         tags: {
@@ -120,19 +123,40 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
                 ...inputValues // Include all input values directly
             };
 
-            pushStack({
-                id: "frontmatter",
-                variables: {
-                    ...inputObject
-                },
-                scope: GLOBAL_SCOPE
-            });
+            if(Object.keys(inputObject).length > 0) {
+                pushStack({
+                    id: "frontmatter",
+                    variables: {
+                        ...inputObject
+                    },
+                    scope: GLOBAL_SCOPE
+                });
+            }
 
             const context = await getRuntimeContextFx();
 
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('Execution timed out')), runtimeOptions.timeout);
             });
+
+            const runtimeState = {
+                options: runtimeOptions,
+                context: {
+                    ...context,
+                    methods: {
+                        pushStack: async (frame: StackFrame) => { pushStack(frame) },
+                        popStack: async (params: { scope: string }) => { popStack(params) },
+                        setData: async (params: { data: Record<string, any>; scope: string }) => { setData(params) },
+                        resetContext: async () => { resetContext() },
+                        addToTextRegistry: async (params: { text: string; scope: string }) => { addToTextRegistry(params) },
+                        clearTextRegistry: async (params: { scope: string }) => { clearTextRegistry(params) },
+                        getCurrentConfig: getCurrentConfigFx,
+                        getRuntimeContext: getRuntimeContextFx
+                    },
+                }
+            };
+
+            registerRuntimeState(runtimeState);
 
             await Promise.race([
                 execute({
@@ -151,22 +175,7 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
                         executeNode: async () => {
                             return Promise.resolve();
                         },
-                        runtime: {
-                            context: {
-                                ...context,
-                                methods: {
-                                    pushStack: async (frame: StackFrame) => { pushStack(frame) },
-                                    popStack: async (params: { scope: string }) => { popStack(params) },
-                                    setData: async (params: { data: Record<string, any>; scope: string }) => { setData(params) },
-                                    resetContext: async () => { resetContext() },
-                                    addToTextRegistry: async (params: { text: string; scope: string }) => { addToTextRegistry(params) },
-                                    clearTextRegistry: async (params: { scope: string }) => { clearTextRegistry(params) },
-                                    getCurrentConfig: getCurrentConfigFx,
-                                    getRuntimeContext: getRuntimeContextFx
-                                },
-                            },
-                            options: runtimeOptions
-                        },
+                        runtime: runtimeState,
                         scope: GLOBAL_SCOPE
                     },
                 }),

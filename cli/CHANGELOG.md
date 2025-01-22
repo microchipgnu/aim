@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.33-beta.7
+
+### Patch Changes
+
+- update sdk core
+
 ## 0.1.33-beta.6
 
 ### Patch Changes

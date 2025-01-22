@@ -1,4 +1,5 @@
-import { type RenderableTreeNodes, type Schema } from "@markdoc/markdoc";
+import { Tag, type RenderableTreeNodes, type Schema } from "@markdoc/markdoc";
+import { GLOBAL_SCOPE } from "aim";
 import { nanoid } from "nanoid";
 import { executeNode } from "runtime/process";
 import { clearTextRegistry, popStack, pushStack } from "runtime/state";
@@ -20,25 +21,28 @@ export const loopTagWithRuntime: AIMTag = {
             throw new Error('Loop tag must have executeNode function');
         }
 
-        const context = await execution.runtime.context.methods.getCurrentConfig(config);
+        const currentConfig = await execution.runtime.context.methods.getCurrentConfig(config);
 
-        const attrs = node.transformAttributes(context);
-        const count = typeof attrs.count === 'number' ? attrs.count : attrs.count?.resolve(context);
+        const attrs = node.transformAttributes(currentConfig);
+
+        const count = typeof attrs.count === 'number' ? attrs.count : parseInt(attrs.count?.resolve(currentConfig) || '0');
         const items = Array.isArray(attrs.items)
-            ? attrs.items.map(item => item?.resolve ? item.resolve(context) : item)
-            : attrs.items?.resolve ? attrs.items.resolve(context) : undefined;
+            ? attrs.items.map(item => item?.resolve ? item.resolve(currentConfig) : item)
+            : attrs.items?.resolve ? attrs.items.resolve(currentConfig) : undefined;
         const id = attrs.id || 'loop';
 
-        if (!items && !count) {
-            throw new Error('Loop tag must have either items or count attribute');
+        if (!items && typeof count !== 'number') {
+            throw new Error('Loop tag must have either items array or count number attribute');
         }
 
         const iterables = items || Array.from({ length: count });
         const iterations = iterables.length;
-        const loopScope = execution.scope;
+        const loopScope = execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE;
 
+        execution.runtime.options.events?.onData?.(new Tag('loop', { id: id }, [new Tag("h1", {}, ["Loop"])]))
+        
         for (let i = 0; i < iterations; i++) {
-            const scope = nanoid();
+            const scope = execution.runtime.options.settings.useScoping ? nanoid() : GLOBAL_SCOPE;
             // Clear previous iteration's frame if it exists 
             // popStack({ scope: loopScope });
 
@@ -58,24 +62,30 @@ export const loopTagWithRuntime: AIMTag = {
             for (const child of node.children) {
                 const result = await executeNode({
                     node: child,
-                    config,
+                    config: currentConfig,
                     execution: {
                         ...execution,
                         scope: scope
                     }
                 });
-                console.log("RESULT", result)
+                // Wait for result before continuing
+                await Promise.resolve(result);
             }
 
-            console.log("popping", scope)
-
-            popStack({ scope: scope });
-            clearTextRegistry({ scope: scope });
+            if (execution.runtime.options.settings.useScoping) {
+                popStack({ scope: scope });
+                clearTextRegistry({ scope: scope });
+            }
         }
 
         // Clean up the last iteration's frame
-        popStack({ scope: loopScope });
-        clearTextRegistry({ scope: loopScope });
-        return "";
+        if (execution.runtime.options.settings.useScoping) {
+            popStack({ scope: loopScope });
+            clearTextRegistry({ scope: loopScope });
+        }
+
+        // execution.runtime.options.events?.onData?.("end loop")
+
+        return new Tag('loop');
     }
 }

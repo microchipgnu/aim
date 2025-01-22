@@ -1,4 +1,5 @@
-import { type Schema, tags } from "@markdoc/markdoc";
+import { type Schema, Tag, tags } from "@markdoc/markdoc";
+import { GLOBAL_SCOPE } from "aim";
 import { nanoid } from "nanoid";
 import { executeNode } from "runtime/process";
 import { clearTextRegistry, popStack, pushStack } from "runtime/state";
@@ -32,7 +33,7 @@ export const ifTagWithRuntime: AIMTag = {
             throw new Error('If tag must have executeNode function');
         }
 
-        const conditionalsScope = execution.scope;
+        const conditionalsScope = execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE;
 
         let result = ""
 
@@ -45,9 +46,10 @@ export const ifTagWithRuntime: AIMTag = {
 
         for (const { condition, children, type } of conditions) {
             const resolvedCondition = condition?.resolve ? condition.resolve(currentConfig) : condition;
-
+            
             if (resolvedCondition) {
-                const scope = nanoid();
+                execution.runtime.options.events?.onData?.(new Tag('if'));
+                const scope = execution.runtime.options.settings.useScoping ? nanoid() : GLOBAL_SCOPE;
                 pushStack({
                     id,
                     scope: scope,
@@ -60,10 +62,12 @@ export const ifTagWithRuntime: AIMTag = {
 
                 const branchResults = [];
                 for (const child of children) {
-                    const result = await executeNode({ node: child, config, execution: {
-                        ...execution,
-                        scope: scope
-                    } });
+                    const result = await executeNode({
+                        node: child, config, execution: {
+                            ...execution,
+                            scope: scope
+                        }
+                    });
                     if (result !== null) {
                         branchResults.push(result);
                     }
@@ -71,17 +75,23 @@ export const ifTagWithRuntime: AIMTag = {
                 results.push(branchResults);
                 result = JSON.stringify(branchResults, null, 2);
 
-                popStack({ scope: scope });
-                clearTextRegistry({ scope: scope });
+                // execution.runtime.options.events?.onData?.("end if");
+
+                if (execution.runtime.options.settings.useScoping) {
+                    popStack({ scope: scope });
+                    clearTextRegistry({ scope: scope });
+                }
 
                 break;
             }
         }
 
-        popStack({ scope: conditionalsScope });
-        clearTextRegistry({ scope: conditionalsScope });
+        if (execution.runtime.options.settings.useScoping) {
+            popStack({ scope: conditionalsScope });
+            clearTextRegistry({ scope: conditionalsScope });
+        }
 
-        return result;
+        return new Tag('if', {}, []);
     }
 }
 

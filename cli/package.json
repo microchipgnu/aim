@@ -1,7 +1,7 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.33-beta.6",
+  "version": "0.1.33-beta.7",
   "private": false,
   "type": "commonjs",
   "bin": {
@@ -53,7 +53,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@aim-sdk/core": "0.0.7-beta.4",
+    "@aim-sdk/core": "0.0.7-beta.5",
     "@markdoc/markdoc": "^0.4.0",
     "chalk": "^5.4.1",
     "commander": "^12.1.0",

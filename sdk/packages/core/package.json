@@ -37,7 +37,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "rm -rf dist && tsup --config tsup.config.ts"
+    "build": "rm -rf dist && tsup --config tsup.config.ts",
+    "logs": "bun test/test-logs/index.ts"
   },
   "exports": {
     ".": {

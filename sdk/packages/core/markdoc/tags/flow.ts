@@ -1,6 +1,6 @@
 import type { Schema } from "@markdoc/markdoc";
 import { Tag } from "@markdoc/markdoc";
-import { aim } from "index";
+import { aim, GLOBAL_SCOPE } from "index";
 import { nanoid } from "nanoid";
 import { pushStack } from "runtime/state";
 import type { AIMRuntime, AIMTag } from "types";
@@ -51,6 +51,9 @@ export const flowTagWithRuntime: AIMTag = {
             }
 
             const {ast, errors, execute } = aim({content: flowContent, options: {
+                settings: {
+                    useScoping: execution.runtime.options.settings.useScoping
+                },
                 config: {
                     ...config,
                 }
@@ -66,7 +69,7 @@ export const flowTagWithRuntime: AIMTag = {
             // Push flow variables to stack
             pushStack({
                 id: id || nanoid(),
-                scope: execution.scope,
+                scope: execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE,
                 variables: {
                     ...input,
                     path,

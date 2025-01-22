@@ -1,6 +1,6 @@
 import { type Config } from "@markdoc/markdoc";
 import { createEffect, createEvent, createStore } from 'effector';
-import type { AIMAdapter, AIMConfig, AIMPlugin, RuntimeContext, StateBlock } from "types";
+import type { AIMAdapter, AIMConfig, AIMPlugin, RuntimeContext, RuntimeState, StateBlock } from "types";
 
 // Events
 const events = {
@@ -16,7 +16,8 @@ const events = {
     clearTextRegistry: createEvent<{ scope: string }>(),
     registerPlugin: createEvent<{ plugin: AIMPlugin, options?: unknown }>(),
     registerAdapter: createEvent<AIMAdapter>(),
-    updateState: createEvent<RuntimeContext>()
+    updateState: createEvent<RuntimeContext>(),
+    registerRuntimeState: createEvent<RuntimeState>()
 };
 
 export const {
@@ -28,7 +29,8 @@ export const {
     clearTextRegistry,
     registerPlugin,
     registerAdapter,
-    updateState
+    updateState,
+    registerRuntimeState
 } = events;
 
 const validatePlugin = (plugin: AIMPlugin, state: RuntimeContext) => {
@@ -111,9 +113,30 @@ export const $runtimeContext = createStore<RuntimeContext>({
     textRegistry: {},
 })
     .on(pushStack, (state, stackFrame) => {
+        // Check if frame with same id and scope already exists
+        const existingFrameIndex = state.stack.findIndex(frame => 
+            frame.id === stackFrame.id && frame.scope === stackFrame.scope
+        );
+
+        let newStack;
+        if (existingFrameIndex !== -1) {
+            // Update existing frame's variables
+            newStack = [...state.stack];
+            newStack[existingFrameIndex] = {
+                ...newStack[existingFrameIndex],
+                variables: {
+                    ...newStack[existingFrameIndex].variables,
+                    ...stackFrame.variables
+                }
+            };
+        } else {
+            // Add new frame
+            newStack = [...state.stack, stackFrame];
+        }
+
         const newState = {
             ...state,
-            stack: [...state.stack, stackFrame],
+            stack: newStack,
             currentScope: stackFrame.scope
         };
 
@@ -278,6 +301,29 @@ export const getRuntimeContextFx = createEffect((): RuntimeContext => {
     return $runtimeContext.getState();
 });
 
+// Runtime state store
+export const $runtimeState = createStore<RuntimeState>({
+    options: {
+        config: {} as Config,
+        settings: {
+            useScoping: true
+        }
+    },
+    context: {
+        ...$runtimeContext.getState(),
+        methods: {
+            pushStack,
+            popStack,
+            setData,
+            resetContext,
+            addToTextRegistry,
+            clearTextRegistry,
+            getCurrentConfig: getCurrentConfigFx,
+            getRuntimeContext: getRuntimeContextFx
+        }
+    }
+})
+.on(registerRuntimeState, (_, newState) => newState);
 
 $runtimeContext.watch(async (state) => {
     updateState(state);
