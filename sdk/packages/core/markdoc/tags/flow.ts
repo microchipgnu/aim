@@ -10,6 +10,9 @@ export const flowTag: Schema = {
         path: { type: String, required: true },
         id: { type: String, required: false },
         input: { type: Object, required: false }
+    },
+    transform(node, config) {
+        return new Tag("flow", node.transformAttributes(config), node.transformChildren(config));
     }
 }
 

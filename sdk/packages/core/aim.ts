@@ -14,7 +14,7 @@ import type { RuntimeOptions, RuntimeState, StackFrame } from "./types";
 
 export const GLOBAL_SCOPE = "global";
 
-const defaultRuntimeOptions: RuntimeOptions = {
+export const defaultRuntimeOptions: RuntimeOptions = {
     plugins: [],
     adapters: [],
     variables: {},

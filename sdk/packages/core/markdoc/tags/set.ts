@@ -8,6 +8,9 @@ export const setTag: Schema = {
     selfClosing: true,
     attributes: {
         id: { type: String, required: true },
+    },
+    transform(node, config) {
+        return new Tag("set", node.transformAttributes(config), node.transformChildren(config));
     }
 }
 

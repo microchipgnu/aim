@@ -23,7 +23,30 @@ function renderConditions(node: any) {
     return conditions;
 }
 
-export const ifTag = tags.if;
+export const ifTag = {
+    ...tags.if,
+    transform(node: Node, config: Config) {
+        const attrs = node.transformAttributes(config);
+        const conditions = renderConditions(node);
+        const tags = [];
+
+        for (const { condition, children: conditionChildren, type } of conditions) {
+            if (type === 'if') {
+                tags.push(new Tag("if", {
+                    ...attrs,
+                    "data-condition": condition
+                }, conditionChildren.map(child => child.transform?.(config) || child)));
+            } else {
+                tags.push(new Tag("else", {
+                    ...attrs,
+                    "data-condition": condition
+                }, conditionChildren.map(child => child.transform?.(config) || child)));
+            }
+        }
+
+        return tags;
+    }
+};
 export const elseTag = tags.else;
 
 export async function* if_(node: Node, config: Config) {

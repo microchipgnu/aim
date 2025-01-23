@@ -11,6 +11,9 @@ export const inputTag: Schema = {
         description: { type: String, required: false, default: '' },
         type: { type: String, required: false, default: 'text/plain' },
         src: { type: String, required: false }
+    },
+    transform(node, config) {
+        return new Tag("input", node.transformAttributes(config), node.transformChildren(config));
     }
 }
 

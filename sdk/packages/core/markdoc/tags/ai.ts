@@ -1,8 +1,7 @@
-import { type Config, type Schema, type Node, Tag } from "@markdoc/markdoc";
+import { type Config, type Node, type Schema, Tag } from "@markdoc/markdoc";
 import { generateText } from "ai";
 import { GLOBAL_SCOPE } from "aim";
 import { text } from "markdoc/renderers/text";
-import { walk } from "runtime";
 import { getModelProvider } from "runtime/ai/get-model-providers";
 import { $runtimeState, getScopedText, pushStack } from "runtime/state";
 
@@ -13,6 +12,9 @@ export const aiTag: Schema = {
         model: { type: String, required: true, default: 'openai/gpt-4o-mini' },
         id: { type: String, required: false },
         temperature: { type: Number, required: false, default: 0.5 }
+    },
+    transform(node, config) {
+        return new Tag("ai", node.transformAttributes(config), node.transformChildren(config));
     }
 }
 
@@ -51,18 +53,5 @@ export async function* ai(node: Node, config: Config) {
 
     runtimeState.context.methods.addToTextRegistry({ text: text(result.text), scope: GLOBAL_SCOPE });
 
-    // yield result.text;
-
     aiTag.children = [result.text];
-
-    // const children = [];
-    // for (const child of node.children) {
-    //     for await (const childResult of walk(child)) {
-    //         children.push(childResult);
-    //     }
-    // }
-
-    
-
-    // aiTag.children = [...children, result.text].flat();
 }

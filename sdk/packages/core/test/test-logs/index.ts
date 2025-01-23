@@ -1,6 +1,7 @@
-import { $runtimeState, $stateChain, aim, getCurrentConfigFx, Tag } from "../../index";
+import { $runtimeState, $stateChain, aim, defaultRuntimeOptions, getCurrentConfigFx, Tag } from "../../index";
 import { writeFileSync } from "fs";
 import { html } from "../../markdoc/renderers/html";
+import { transform } from "markdoc/transform";
 
 // Sample test content
 const content = {
@@ -68,15 +69,25 @@ Did we sign the transaction? Answer with yes or no.
 `,
 signEthTransaction: `
 
-{% sign-eth-transaction /%}
+Lets sign the transaction. {% sign-eth-transaction /%}
 
-What is the signed transaction? Answer with the transaction hash. Respond with the transaction hash only and be sure to include the 0x prefix.
+What is the signed transaction?
+
+{% ai model="openai/gpt-4o-mini" /%}
+
+{% if equals(1, 1) %}   
+
+{% loop #loop count=2 %}
+
+This is the loop index: {% $loop.index %}
+
+{% /loop %}
+
+{% else /%}
 
 {% ai model="openai/gpt-4o-mini" /%}
 
-Explain a little bit about this type of format 
-
-{% ai model="openai/gpt-4o-mini" /%}
+{% /if %}
 
 `,
 
@@ -222,6 +233,16 @@ const htmlTemplate = `
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             transition: all 0.2s ease;
         }
+        else {
+            display: block;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid #60a5fa;
+            border-radius: 0.375rem;
+            background-color: #f0f7ff;
+            color: #2563eb;
+            font-weight: 500;
+        }
         ai:hover {
             background-color: #e0f2fe;
             border-color: #3b82f6;
@@ -243,20 +264,23 @@ const htmlTemplate = `
         <div class="bg-white shadow-sm rounded-lg">
             <div class="border-b border-gray-200">
                 <nav class="flex" aria-label="Tabs">
-                    <button onclick="showTab('state')" class="tab-btn active-tab w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="state-tab">
+                    <button class="tab-btn active-tab w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="state-tab">
                         State Chain
                     </button>
-                    <button onclick="showTab('data')" class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="data-tab">
+                    <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="data-tab">
                         Events Log
                     </button>
-                    <button onclick="showTab('output')" class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="output-tab">
+                    <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="output-tab">
                         Output
                     </button>
-                    <button onclick="showTab('ast')" class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="ast-tab">
+                    <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="ast-tab">
                         AST
                     </button>
-                    <button onclick="showTab('content')" class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="content-tab">
+                    <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="content-tab">
                         Raw Content
+                    </button>
+                    <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="html-content-tab">
+                        HTML Content
                     </button>
                 </nav>
             </div>
@@ -267,6 +291,7 @@ const htmlTemplate = `
                 <div id="ast-logs" class="tab-content hidden space-y-6"></div>
                 <div id="output-logs" class="tab-content hidden space-y-6"></div>
                 <div id="content-logs" class="tab-content hidden space-y-6"></div>
+                <div id="html-content-logs" class="tab-content hidden space-y-6"></div>
             </div>
         </div>
     </div>
@@ -277,6 +302,7 @@ const htmlTemplate = `
         const output = OUTPUT_PLACEHOLDER;
         const ast = AST_PLACEHOLDER;
         const rawContent = CONTENT_PLACEHOLDER;
+        const htmlContent = HTML_CONTENT_PLACEHOLDER;
 
         function formatTimestamp(ts) {
             return new Date(ts).toLocaleTimeString('en-US', { 
@@ -395,6 +421,17 @@ const htmlTemplate = `
             \`;
         }
 
+        function renderHtmlContent(content) {
+            return \`
+                <div class="bg-white rounded-lg shadow-md p-6 fade-in hover:shadow-lg transition-shadow duration-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-600">HTML Content</div>
+                    </div>
+                    \${content}
+                </div>
+            \`;
+        }
+
         function toggleState(button) {
             const editorContainer = button.nextElementSibling;
             const isHidden = editorContainer.style.display === 'none';
@@ -419,6 +456,12 @@ const htmlTemplate = `
             url.searchParams.set('tab', tabName);
             window.history.pushState({}, '', url);
         }
+
+        // Add click handlers to tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            const tabName = btn.id.replace('-tab', '');
+            btn.addEventListener('click', () => showTab(tabName));
+        });
 
         // Initialize editors after DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
@@ -453,6 +496,7 @@ const htmlTemplate = `
 
             // Initialize content view
             document.getElementById('content-logs').innerHTML = renderContent(rawContent);
+            document.getElementById('html-content-logs').innerHTML = renderHtmlContent(htmlContent);
 
             // Check URL for tab parameter
             const urlParams = new URLSearchParams(window.location.search);
@@ -543,9 +587,11 @@ async function main() {
                             "sign-eth-transaction": {
                                 render: "sign-eth-transaction",
                                 execute: async function* ({ node, config, state }) {
-                                    state.context.methods.addToTextRegistry({ text: "0x1234567890d3fsasd", scope: "global" });
-                                    yield "0x1234567890d3fsasd";
-                                    yield new Tag("div", { text: "0x1234567890d3fsasd" });
+
+                                    const result = "Here's the signed transaction: 0x1234567890d3fsasd";
+                                    state.context.methods.addToTextRegistry({ text: result, scope: "global" });
+                                    yield result;
+                                    yield new Tag("div", { text: result });
                                 }
                             }
                         }
@@ -554,20 +600,6 @@ async function main() {
             ]
         }
     });
-
-    // for (const node of doc.ast.walk()) {
-    //     const runtimeState = $runtimeState.getState();
-    //     const currentConfig = await getCurrentConfigFx(runtimeState.options.config);
-    //     console.log(currentConfig.variables);
-    //     console.log("========================");
-    //     console.log(node.type);
-    //     console.log(node.attributes);
-    //     console.log(await node.transform(currentConfig));
-    //     console.log("========================");
-    // await new Promise(resolve => setTimeout(resolve, 2000));
-    // }
-
-    // return 
 
     // Execute document
     await doc.execute({
@@ -589,13 +621,16 @@ async function main() {
         .join('');
 
     console.log("📋 HTML Output:", htmlOutput);
+
+    const renderableContent = await transform(doc.ast, defaultRuntimeOptions.config);
         
     const finalHtml = htmlTemplate
         .replace('LOGS_PLACEHOLDER', JSON.stringify(logs, null, 2))
         .replace('DATA_EVENTS_PLACEHOLDER', JSON.stringify(dataEvents, null, 2))
         .replace('OUTPUT_PLACEHOLDER', JSON.stringify(htmlOutput, null, 2))
         .replace('AST_PLACEHOLDER', JSON.stringify(AST, null, 2))
-        .replace('CONTENT_PLACEHOLDER', JSON.stringify(content.test, null, 2));
+        .replace('CONTENT_PLACEHOLDER', JSON.stringify(content.signEthTransaction, null, 2))
+        .replace('HTML_CONTENT_PLACEHOLDER', JSON.stringify(html([renderableContent])));
 
     // Write to file
     writeFileSync('logs.html', finalHtml);
