@@ -1,164 +1,103 @@
-import Markdoc, { Tag, type RenderableTreeNodes } from "@markdoc/markdoc";
-import { aiTagWithRuntime } from "markdoc/tags/ai";
-import { ifTagWithRuntime } from "markdoc/tags/conditionals";
-import { loopTagWithRuntime } from "markdoc/tags/loop";
-import { setTagWithRuntime } from "markdoc/tags/set";
-import type { AIMRuntime } from "types";
-import { runQuickJS } from "./code/quickjs";
-import { addToTextRegistry, getCurrentConfigFx, getRuntimeContextFx, pushStack } from "./state";
+import { type Node, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
+import { fence } from "markdoc/nodes/fence";
+import { text } from "markdoc/renderers/text";
+import { ai } from "markdoc/tags/ai";
+import { if_ } from "markdoc/tags/conditionals";
+import { flow } from "markdoc/tags/flow";
+import { input } from "markdoc/tags/input";
+import { loop } from "markdoc/tags/loop";
+import { set } from "markdoc/tags/set";
 import { transform } from "markdoc/transform";
+import type { AIMRuntime } from "types";
+import { $runtimeState, getCurrentConfigFx } from "./state";
 
-export async function executeNode({ node, config, execution }: AIMRuntime): Promise<RenderableTreeNodes> {
-    // Get config with current stack state
-    const currentConfig = await getCurrentConfigFx(config);
-    const context = await getRuntimeContextFx();
+export async function* walk(node: Node): AsyncGenerator<RenderableTreeNodes> {
+    // Every time we walk a node, we need to get the current state and config
+    const runtimeState = $runtimeState.getState();
+    const config = await getCurrentConfigFx(runtimeState.options.config);
 
-    execution.runtime.options.events?.onStep?.(`Processing ${node.type} ${node.tag ? node.tag : ''}`);
 
+    // TODO: handle more nodes here
     switch (node.type) {
-        case 'text':
-        case 'paragraph':
-        case 'softbreak':
-        case 'hardbreak':
-        case 'strong':
-        case 'em':
-        case 'link':
-        case 'image':
-        case 's':
-        case 'list':
-        case 'item':
-        case 'table':
-        case 'thead':
-        case 'tbody':
-        case 'tr':
-        case 'th':
-        case 'td':
-        case 'heading': {
-            const transformedNode = await transform(node, currentConfig);
-
-            if (transformedNode) {
-                let content = '';
-
-                if (typeof transformedNode === 'string') {
-                    content = transformedNode;
-                } else if (Array.isArray(transformedNode)) {
-                    content = transformedNode.map(n => {
-                        if (typeof n === 'string') return n;
-                        if (Tag.isTag(n)) return n.children?.join('') || '';
-                        return '';
-                    }).join('');
-                } else if (Tag.isTag(transformedNode)) {
-                    content = transformedNode.children?.join('') || '';
-                }
-
-                if (content) {
-                    addToTextRegistry({ text: content, scope: execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE });
-                }
+        case "paragraph":
+        case "inline":
+            for (const child of node.children) {
+                yield* walk(child);
             }
+            break;
+        case "text":
+            const result = await transform?.(node, config);
 
-            execution.runtime.options.events?.onData?.(transformedNode);
+            runtimeState.context.methods.addToTextRegistry({ text: text(result), scope: GLOBAL_SCOPE });
 
-            return transformedNode;
+            yield result;
+            break;
+
+        case "fence":
+            yield* fence(node, config);
+            break;
+        case "tag":
+            yield* handleTag(node);
+            break;
+        default:
+            break;
+    }
+}
+
+async function* handleTag(node: Node) {
+    const runtimeState = $runtimeState.getState();
+    const config = await getCurrentConfigFx(runtimeState.options.config);
+
+    switch (node.tag) {
+        case "loop": {
+            yield* loop(node, config);
+            break;
         }
-
-        case 'fence': {
-            const attrs = node.transformAttributes(currentConfig);
-
-            const id = attrs.id || 'code';
-
-            let language = node.attributes.language;
-            if (!language) {
-                // Try to detect language from content
-                const content = attrs.content || '';
-                if (content.includes('console.log') || content.includes('const ') || content.includes('let ') || content.includes('function')) {
-                    language = 'javascript';
-                } else if (content.includes('print(') || content.includes('def ') || content.includes('import ')) {
-                    language = 'python';
-                } else {
-                    language = 'text';
-                }
-            }
-
-            const { evalCode } = await runQuickJS({
-                env: {
-                    __AIM_VARIABLES__: JSON.stringify(currentConfig.variables),
-                },
-            });
-
-            const evalResult = await evalCode(`
-                import { aimVariables } from "load-vars";
-                ${node.attributes.content}
-            `);
-
-            const result = evalResult.ok ? JSON.stringify(evalResult.data) : "";
-
-            pushStack({
-                id,
-                variables: {
-                    result: evalResult.ok ? JSON.stringify(evalResult.data) : "",
-                    error: !evalResult.ok ? JSON.stringify(evalResult.error) : "",
-                },
-                scope: execution.scope
-            });
-
-            return [new Tag('code', {
-                language,
-            }, node.attributes.content), result]
+        case "ai": {
+            yield* ai(node, config);
+            break;
         }
-        case 'tag': {
-            switch (node.tag) {
-                case 'set': {
-                    return await setTagWithRuntime.runtime({ node, config, execution });
-                }
-                case 'loop': {
-                    return await loopTagWithRuntime.runtime({ node, config, execution });
-                }
-                case 'ai': {
-                    return await aiTagWithRuntime.runtime({ node, config, execution });
-                }
-                case 'if': {
-                    return await ifTagWithRuntime.runtime({ node, config, execution });
-                }
-                default: {
-                    if (node.tag) {
-                        const plugin = context.plugins.get(node.tag);
-                        if (plugin?.tags && node.tag in plugin.tags) {
-                            const tagConfig = plugin.tags[node.tag];
-                            if ('runtime' in tagConfig) {
-                                return await tagConfig.runtime({ node, config, execution });
-                            }
-                        }
-                    }
-                    return await transform(node, currentConfig);
-                }
-            }
+        case "set": {
+            yield* set(node, config);
+            break;
+        }
+        case "if": {
+            yield* if_(node, config);
+            break;
+        }
+        case "flow": {
+            yield* flow(node, config);
+            break;
+        }
+        case "input": {
+            yield* input(node, config);
+            break;
         }
         default: {
-            return await transform(node, currentConfig);
+            // TODO: handle plugins
+            const context = runtimeState.context;
+            const plugins = context.plugins;
+
+            const plugin = node.tag ? plugins.get(node.tag) : undefined;
+            
+            if (plugin?.tags && node.tag && node.tag in plugin.tags) {
+                const tagConfig = plugin.tags[node.tag];
+                if ('execute' in tagConfig) {
+                    plugin.hooks?.beforeExecution?.(context);
+                    const result = yield* tagConfig.execute({ node, config, state: runtimeState });
+                    plugin.hooks?.afterExecution?.(context, result);
+                }
+            }
+            break;
         }
     }
 }
 
-export async function* process({ node, config, execution }: AIMRuntime) {
-
+export async function* process({ node }: AIMRuntime) {
     for (const child of node.children) {
-        const result = await executeNode({ node: child, config, execution });
-
-
-        // Store result in stack if id is provided
-        const attrs = node.transformAttributes(config);
-        if (attrs.id) {
-            pushStack({
-                id: attrs.id,
-                variables: {
-                    result: result
-                },
-                scope: execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE
-            });
+        for await (const result of walk(child)) {
+            yield result;
         }
-
-        yield result;
     }
 }
-

@@ -1,9 +1,7 @@
-import type { Schema } from "@markdoc/markdoc";
-import { Tag } from "@markdoc/markdoc";
+import { Tag, type Config, type Node, type Schema } from "@markdoc/markdoc";
 import { aim, GLOBAL_SCOPE } from "index";
 import { nanoid } from "nanoid";
 import { pushStack } from "runtime/state";
-import type { AIMRuntime, AIMTag } from "types";
 
 export const flowTag: Schema = {
     render: 'flow',
@@ -15,76 +13,70 @@ export const flowTag: Schema = {
     }
 }
 
-export const flowTagWithRuntime: AIMTag = {
-    ...flowTag,
-    runtime: async ({ node, config, execution }: AIMRuntime) => {
-        const attrs = node.transformAttributes(config);
-        const context = await execution.runtime.context.methods.getCurrentConfig(config);
+export async function* flow(node: Node, config: Config) {
+    const attrs = node.transformAttributes(config);
 
-        const path = attrs.path?.resolve ? attrs.path.resolve(context) : attrs.path;
-        const id = attrs.id;
-        const input = attrs.input ? Object.fromEntries(
-            Object.entries(attrs.input).map(([key, value]) => [
-                key,
-                (value as any)?.resolve ? (value as any).resolve(context) : value
-            ])
-        ) : {};
+    let flowTag = new Tag("flow");
+    yield flowTag;
 
-        if (!path) {
-            throw new Error('Flow tag must have a path attribute');
+    const path = attrs.path;
+    const id = attrs.id || nanoid();
+    const input = attrs.input || {};
+
+    if (!path) {
+        throw new Error('Flow tag must have a path attribute');
+    }
+
+    try {
+        // Determine environment and load flow content
+        const isNode = typeof window === 'undefined';
+        let flowContent: string;
+
+        if (isNode) {
+            const fs = await import('fs/promises');
+            flowContent = await fs.readFile(path, 'utf-8');
+        } else {
+            const response = await fetch(path);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch flow from '${path}'`);
+            }
+            flowContent = await response.text();
         }
 
-        try {
-            // Determine environment and load flow content
-            const isNode = typeof window === 'undefined';
-            let flowContent: string;
-
-            if (isNode) {
-                const fs = await import('fs/promises');
-                flowContent = await fs.readFile(path, 'utf-8');
-            } else {
-                const response = await fetch(path);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch flow from '${path}'`);
-                }
-                flowContent = await response.text();
-            }
-
-            const {ast, errors, execute } = aim({content: flowContent, options: {
+        const { ast, errors, execute } = aim({
+            content: flowContent,
+            options: {
                 settings: {
-                    useScoping: execution.runtime.options.settings.useScoping
+                    useScoping: true
                 },
-                config: {
-                    ...config,
-                }
-            }})
-
-
-            if (errors && errors.length > 0) {
-                throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
+                config
             }
+        });
 
-            await execute();
-
-            // Push flow variables to stack
-            pushStack({
-                id: id || nanoid(),
-                scope: execution.runtime.options.settings.useScoping ? execution.scope : GLOBAL_SCOPE,
-                variables: {
-                    ...input,
-                    path,
-                    content: flowContent
-                }
-            });
-
-            return new Tag('flow', {
-                path,
-                input: JSON.stringify(input),
-                document: document
-            });
-
-        } catch (error) {
-            throw new Error(`Failed to execute flow '${path}': ${error}`);
+        if (errors && errors.length > 0) {
+            throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
         }
+
+        await execute();
+
+        // Push flow variables to stack
+        pushStack({
+            id,
+            scope: GLOBAL_SCOPE,
+            variables: {
+                ...input,
+                path,
+                content: flowContent
+            }
+        });
+
+        flowTag.children = [JSON.stringify({
+            path,
+            input,
+            content: flowContent
+        })];
+
+    } catch (error) {
+        throw new Error(`Failed to execute flow '${path}': ${error}`);
     }
 }

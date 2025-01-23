@@ -1,5 +1,6 @@
-import { functions, tags, type Schema } from "@markdoc/markdoc";
+import { functions, nodes, tags, type Schema } from "@markdoc/markdoc";
 import * as jsEnvironment from "browser-or-node";
+import { fenceNode } from "markdoc/nodes/fence";
 import { parser } from "markdoc/parser";
 import { aiTag } from "markdoc/tags/ai";
 import { elseTag, ifTag } from "markdoc/tags/conditionals";
@@ -8,8 +9,8 @@ import { inputTag } from "markdoc/tags/input";
 import { loopTag } from "markdoc/tags/loop";
 import { setTag } from "markdoc/tags/set";
 import { addToTextRegistry, clearTextRegistry, getCurrentConfigFx, getRuntimeContextFx, popStack, pushStack, registerPlugin, registerRuntimeState, resetContext, setData } from "runtime/state";
-import { execute } from "./clients";
-import type { RuntimeOptions, StackFrame } from "./types";
+import { execute } from "./runtime/execute";
+import type { RuntimeOptions, RuntimeState, StackFrame } from "./types";
 
 export const GLOBAL_SCOPE = "global";
 
@@ -29,6 +30,10 @@ const defaultRuntimeOptions: RuntimeOptions = {
     },
     config: {
         variables: {},
+        nodes: {
+            ...nodes,
+            fence: fenceNode
+        },
         tags: {
             ...tags,
             ai: aiTag,
@@ -104,6 +109,7 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
         frontmatter,
         errors: errors,
         warnings: warnings,
+        runtimeOptions,
         execute: async (variables?: Record<string, any>) => {
             // Get input variables from document frontmatter
             const inputVariables = frontmatter?.input || [];
@@ -139,8 +145,20 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
                 setTimeout(() => reject(new Error('Execution timed out')), runtimeOptions.timeout);
             });
 
-            const runtimeState = {
-                options: runtimeOptions,
+            const runtimeState: RuntimeState = {
+                options: {
+                    ...runtimeOptions,
+                    config: {
+                        ...runtimeOptions.config,
+                        variables: {
+                            ...runtimeOptions.config.variables,
+                            frontmatter: {
+                                ...frontmatter,
+                                ...inputObject
+                            }
+                        }
+                    }
+                },
                 context: {
                     ...context,
                     methods: {
@@ -161,23 +179,7 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
             await Promise.race([
                 execute({
                     node: ast,
-                    config: {
-                        ...runtimeOptions.config,
-                        variables: {
-                            ...runtimeOptions.config.variables,
-                            frontmatter: {
-                                ...frontmatter,
-                                ...inputObject
-                            }
-                        }
-                    },
-                    execution: {
-                        executeNode: async () => {
-                            return Promise.resolve();
-                        },
-                        runtime: runtimeState,
-                        scope: GLOBAL_SCOPE
-                    },
+                    state: runtimeState
                 }),
                 timeoutPromise
             ]);

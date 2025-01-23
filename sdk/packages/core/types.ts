@@ -19,14 +19,7 @@ export type AIMConfig = Config & {
     functions?: Record<string, (...args: any[]) => any>;
 }
 
-export type AIMTag = Schema & {
-    /**
-     * Runtime execution function for the tag
-     * @param runtime Runtime arguments and context
-     * @returns Promise resolving to the tag's execution result
-     */
-    runtime: (runtime: AIMRuntime) => Promise<RenderableTreeNodes>;
-}
+export type AIMTag = Schema;
 
 export type StackFrame = {
     /** Unique identifier for the stack frame */
@@ -83,16 +76,8 @@ export type RuntimeState = {
 export type AIMRuntime = {
     /** Current Markdoc node being processed */
     node: Node;
-    /** Markdoc configuration */
-    config: Config;
     /** Runtime state and execution context */
-    execution: {
-        runtime: RuntimeState;
-        /** Current scope */
-        scope: string;
-        /** Function to execute a node with given config and context */
-        executeNode: (runtime: AIMRuntime) => Promise<unknown>;
-    },
+    state: RuntimeState;
 }
 
 export interface RuntimeOptions {
@@ -161,7 +146,7 @@ export interface AIMPlugin {
     };
     configSchema?: unknown; // Schema validation object (e.g., Zod, Joi, etc.)
     init?: (config: AIMConfig, pluginOptions?: unknown) => void;
-    tags?: Record<string, AIMTag>;
+    tags?: Record<string, AIMTag & { execute: (params: { node: Node, config: Config, state: RuntimeState }) => AsyncGenerator<any> }>;
     functions?: Record<string, (...args: any[]) => any>;
     hooks?: {
         beforeExecution?: (context: RuntimeContext) => Promise<void>;

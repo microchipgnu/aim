@@ -1,4 +1,4 @@
-import { $stateChain, aim } from "../../index";
+import { $runtimeState, $stateChain, aim, getCurrentConfigFx, Tag } from "../../index";
 import { writeFileSync } from "fs";
 import { html } from "../../markdoc/renderers/html";
 
@@ -35,7 +35,51 @@ Let's do the {% $frontmatter.input.count %} times table. Output just the next nu
     {% $loop.index %} x {% $frontmatter.input.count %} = {% ai model="openai/gpt-4o-mini" /%}
 
 {% /loop %}
-`
+`,
+test: `---
+input:
+    - name: count
+      type: number
+      description: The number of times to repeat the block
+---
+
+Respond the solution to the following math problem. Only respond with the solution.
+
+{% loop #loop count=$frontmatter.input.count %}
+
+    {% if equals(1, $loop.index) %}
+        FIRST, NOT USING AI
+        {% set #yo yo="asd" /%}
+
+        {% $yo.yo %}
+
+    {% else /%}
+        {% $loop.index %} x {% $loop.index %} = {% ai model="openai/gpt-4o" /%}
+    {% /if %}
+
+{% /loop %}
+
+{% sign-eth-transaction /%}
+
+Did we sign the transaction? Answer with yes or no.
+
+{% ai model="openai/gpt-4o" /%}
+
+`,
+signEthTransaction: `
+
+{% sign-eth-transaction /%}
+
+What is the signed transaction? Answer with the transaction hash. Respond with the transaction hash only and be sure to include the 0x prefix.
+
+{% ai model="openai/gpt-4o-mini" /%}
+
+Explain a little bit about this type of format 
+
+{% ai model="openai/gpt-4o-mini" /%}
+
+`,
+
 };
 
 // Create HTML template
@@ -47,6 +91,8 @@ const htmlTemplate = `
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIM Runtime State Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <style>
         .fade-in {
             animation: fadeIn 0.3s ease-in;
@@ -94,8 +140,70 @@ const htmlTemplate = `
             border: 2px solid #e5e7eb;
             border-radius: 0.5rem;
             background-color: #f9fafb;
+            position: relative;
+        }
+        
+        loop::before {
+            content: '↻';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 1.25rem;
+            color: #9ca3af;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         if {
+            display: block;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 2px solid #60a5fa;
+            border-radius: 0.375rem;
+            background-color: #eff6ff;
+            position: relative;
+        }
+
+        if::before {
+            content: '?';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background-color: #60a5fa;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        if[data-condition="true"] {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+
+        if[data-condition="true"]::before {
+            content: '✓';
+            background-color: #22c55e;
+        }
+
+        if[data-condition="false"] {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            opacity: 0.75;
+        }
+
+        if[data-condition="false"]::before {
+            content: '✕';
+            background-color: #ef4444;
+        }
+        set {
             display: block;
             padding: 0.75rem;
             margin: 0.5rem 0;
@@ -103,21 +211,35 @@ const htmlTemplate = `
             background-color: #eff6ff;
         }
         ai {
-            display: inline;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border-left: 4px solid #60a5fa;
-            background-color: #eff6ff;
+            display: inline-block;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0.25rem;
+            border: 1px solid #60a5fa;
+            border-radius: 0.375rem;
+            background-color: #f0f7ff;
+            color: #2563eb;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+        ai:hover {
+            background-color: #e0f2fe;
+            border-color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        fence {
+            display: none;
+        }
+        .jsoneditor {
+            border: none !important;
+        }
+        .jsoneditor-menu {
+            display: none;
         }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <div class="max-w-7xl mx-auto p-6">
-        <header class="bg-white shadow-sm rounded-lg mb-8 p-6">
-            <h1 class="text-3xl font-bold text-gray-900">AIM SDK Logs Visualizer</h1>
-            <p class="text-gray-600 mt-2">Real-time visualization of runtime state and events</p>
-        </header>
-        
+    <div class="max-w-7xl mx-auto p-6">        
         <div class="bg-white shadow-sm rounded-lg">
             <div class="border-b border-gray-200">
                 <nav class="flex" aria-label="Tabs">
@@ -130,13 +252,21 @@ const htmlTemplate = `
                     <button onclick="showTab('output')" class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="output-tab">
                         Output
                     </button>
+                    <button onclick="showTab('ast')" class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="ast-tab">
+                        AST
+                    </button>
+                    <button onclick="showTab('content')" class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200" id="content-tab">
+                        Raw Content
+                    </button>
                 </nav>
             </div>
 
             <div class="p-6">
                 <div id="state-logs" class="tab-content space-y-6"></div>
                 <div id="data-logs" class="tab-content hidden space-y-6"></div>
+                <div id="ast-logs" class="tab-content hidden space-y-6"></div>
                 <div id="output-logs" class="tab-content hidden space-y-6"></div>
+                <div id="content-logs" class="tab-content hidden space-y-6"></div>
             </div>
         </div>
     </div>
@@ -145,6 +275,8 @@ const htmlTemplate = `
         const logs = LOGS_PLACEHOLDER;
         const dataEvents = DATA_EVENTS_PLACEHOLDER;
         const output = OUTPUT_PLACEHOLDER;
+        const ast = AST_PLACEHOLDER;
+        const rawContent = CONTENT_PLACEHOLDER;
 
         function formatTimestamp(ts) {
             return new Date(ts).toLocaleTimeString('en-US', { 
@@ -165,7 +297,7 @@ const htmlTemplate = `
             return \`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \${className}">\${prefix}\${value}</span>\`;
         }
 
-        function renderLogEntry(log) {
+        function renderLogEntry(log, index) {
             return \`
                 <div class="bg-white rounded-lg shadow-md p-6 fade-in hover:shadow-lg transition-shadow duration-200">
                     <div class="flex items-center justify-between mb-4">
@@ -191,8 +323,8 @@ const htmlTemplate = `
                         </div>
                     </div>
                     <div class="relative">
-                        <button onclick="toggleState(this)" class="text-sm text-blue-600 hover:text-blue-800 mb-2">Toggle State</button>
-                        <pre class="hidden bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm">\${JSON.stringify(log.state, null, 2)}</pre>
+                        <button onclick="toggleState(this)" class="text-sm text-blue-600 hover:text-blue-800 mb-2">Show State</button>
+                        <div id="jsoneditor-\${index}" style="height: 400px; display: none;"></div>
                     </div>
                 </div>
             \`;
@@ -241,10 +373,33 @@ const htmlTemplate = `
             \`;
         }
 
+        function renderAST(ast) {
+            return \`
+                <div class="bg-white rounded-lg shadow-md p-6 fade-in hover:shadow-lg transition-shadow duration-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-600">AST</div>
+                    </div>
+                    <div id="ast-editor" style="height: 600px;"></div>
+                </div>
+            \`;
+        }
+
+        function renderContent(content) {
+            return \`
+                <div class="bg-white rounded-lg shadow-md p-6 fade-in hover:shadow-lg transition-shadow duration-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-600">Raw Content</div>
+                    </div>
+                    <pre class="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm">\${content}</pre>
+                </div>
+            \`;
+        }
+
         function toggleState(button) {
-            const pre = button.nextElementSibling;
-            pre.classList.toggle('hidden');
-            button.textContent = pre.classList.contains('hidden') ? 'Toggle State' : 'Hide State';
+            const editorContainer = button.nextElementSibling;
+            const isHidden = editorContainer.style.display === 'none';
+            editorContainer.style.display = isHidden ? 'block' : 'none';
+            button.textContent = isHidden ? 'Hide State' : 'Show State';
         }
 
         function showTab(tabName) {
@@ -258,14 +413,52 @@ const htmlTemplate = `
             const activeTab = document.getElementById(\`\${tabName}-tab\`);
             activeTab.classList.add('border-blue-500', 'text-blue-600', 'active-tab');
             activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+
+            // Update URL with tab parameter
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabName);
+            window.history.pushState({}, '', url);
         }
 
-        document.getElementById('state-logs').innerHTML = logs.map(renderLogEntry).join('');
-        document.getElementById('data-logs').innerHTML = dataEvents.map(renderDataEvent).join('');
-        document.getElementById('output-logs').innerHTML = output;
-        
-        // Initialize first tab
-        showTab('state');
+        // Initialize editors after DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize state logs
+            document.getElementById('state-logs').innerHTML = logs.map(renderLogEntry).join('');
+            logs.forEach((log, index) => {
+                const container = document.getElementById(\`jsoneditor-\${index}\`);
+                if (container) {
+                    const editor = new JSONEditor(container, {
+                        mode: 'view',
+                        modes: ['view', 'form', 'code', 'tree'],
+                        navigationBar: false
+                    });
+                    editor.set(log.state);
+                }
+            });
+
+            // Initialize data logs
+            document.getElementById('data-logs').innerHTML = dataEvents.map(renderDataEvent).join('');
+            
+            // Initialize output logs
+            document.getElementById('output-logs').innerHTML = output;
+            
+            // Initialize AST view
+            document.getElementById('ast-logs').innerHTML = renderAST(ast);
+            const astEditor = new JSONEditor(document.getElementById('ast-editor'), {
+                mode: 'view',
+                modes: ['view', 'form', 'code', 'tree'],
+                navigationBar: false
+            });
+            astEditor.set(ast);
+
+            // Initialize content view
+            document.getElementById('content-logs').innerHTML = renderContent(rawContent);
+
+            // Check URL for tab parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab') || 'state';
+            showTab(activeTab);
+        });
     </script>
 </body>
 </html>
@@ -276,7 +469,7 @@ async function main() {
 
     // Initialize AIM document
     const doc = aim({
-        content: content.calculator,
+        content: content.signEthTransaction,
         options: {
             events: {
                 onStart: (msg: string) => {
@@ -341,9 +534,40 @@ async function main() {
                 useScoping: false
             },
             config: {},
-            plugins: []
+            plugins: [
+                {
+                    plugin: {
+                        name: 'sign-eth-transaction',
+                        version: '0.0.1',
+                        tags: {
+                            "sign-eth-transaction": {
+                                render: "sign-eth-transaction",
+                                execute: async function* ({ node, config, state }) {
+                                    state.context.methods.addToTextRegistry({ text: "0x1234567890d3fsasd", scope: "global" });
+                                    yield "0x1234567890d3fsasd";
+                                    yield new Tag("div", { text: "0x1234567890d3fsasd" });
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
         }
     });
+
+    // for (const node of doc.ast.walk()) {
+    //     const runtimeState = $runtimeState.getState();
+    //     const currentConfig = await getCurrentConfigFx(runtimeState.options.config);
+    //     console.log(currentConfig.variables);
+    //     console.log("========================");
+    //     console.log(node.type);
+    //     console.log(node.attributes);
+    //     console.log(await node.transform(currentConfig));
+    //     console.log("========================");
+    // await new Promise(resolve => setTimeout(resolve, 2000));
+    // }
+
+    // return 
 
     // Execute document
     await doc.execute({
@@ -354,6 +578,7 @@ async function main() {
 
     // Get state chain logs
     const logs = $stateChain.getState();
+    const AST = doc.ast;
 
     console.log("📋 Data Events:", dataEvents);
 
@@ -368,7 +593,9 @@ async function main() {
     const finalHtml = htmlTemplate
         .replace('LOGS_PLACEHOLDER', JSON.stringify(logs, null, 2))
         .replace('DATA_EVENTS_PLACEHOLDER', JSON.stringify(dataEvents, null, 2))
-        .replace('OUTPUT_PLACEHOLDER', JSON.stringify(htmlOutput, null, 2));
+        .replace('OUTPUT_PLACEHOLDER', JSON.stringify(htmlOutput, null, 2))
+        .replace('AST_PLACEHOLDER', JSON.stringify(AST, null, 2))
+        .replace('CONTENT_PLACEHOLDER', JSON.stringify(content.test, null, 2));
 
     // Write to file
     writeFileSync('logs.html', finalHtml);

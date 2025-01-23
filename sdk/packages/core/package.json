@@ -21,6 +21,7 @@
     "@markdoc/markdoc": "^0.4.0",
     "@openrouter/ai-sdk-provider": "^0.0.6",
     "@sebastianwessel/quickjs": "^1.3.0",
+    "ai": "^4.1.1",
     "browser-or-node": "^3.0.0",
     "chrome-ai": "^1.11.1",
     "effector": "^23.2.3",
