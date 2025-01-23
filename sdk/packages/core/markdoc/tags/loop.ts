@@ -39,7 +39,6 @@ export async function* loop(node: Node, config: Config) {
 
     const iterables = items || Array.from({ length: numericCount });
     const iterations = iterables.length;
-    const children = [];
 
     for (let i = 0; i < iterations; i++) {
         pushStack({
@@ -56,10 +55,14 @@ export async function* loop(node: Node, config: Config) {
 
         for (const child of node.children) {
             for await (const result of walk(child)) {
-                children.push(result);
+                for await (const result of walk(child)) {
+                    if (Array.isArray(result)) {
+                        loopTag.children.push(...result);
+                    } else {
+                        loopTag.children.push(result);
+                    }
+                }
             }
         }
     }
-
-    loopTag.children = children.flat().map(child => new Tag("div", {}, [child]));
 }
