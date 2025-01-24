@@ -92,6 +92,9 @@ program
         config: {},
         events: {
           onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
+        },
+        settings: {
+          useScoping: false
         }
       } });
 
@@ -150,6 +153,9 @@ program
         config: {},
         events: {
           onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
+        },
+        settings: {
+          useScoping: false
         }
       } });
 

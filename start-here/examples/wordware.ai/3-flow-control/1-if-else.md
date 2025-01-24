@@ -31,25 +31,24 @@ If the if expression evaluates to true that block will be included. If no if exp
 Write a {% $frontmatter.input.type %} about {% $frontmatter.input.topic %}
 
 {% if equals($frontmatter.input.tone, "happy") %}
-Make it full of joy and happiness. 
+  Make it full of joy and happiness. 
 
-{% else equals($frontmatter.input.tone, "sad") /%}
+  {% else equals($frontmatter.input.tone, "sad") /%}
 
-generate a sad prompt
+  generate a sad prompt
 
-{% ai #sad-prompt model="openai/gpt-4o-mini" /%}
+  {% ai #sad-prompt model="openai/gpt-4o-mini" /%}
 
-{% $sad-prompt.result %}
+  {% $sad-prompt.result %}
 
-{% else equals($frontmatter.input.tone, "silly") /%}
-Make it full of sadness and despair. 
+  {% else equals($frontmatter.input.tone, "silly") /%}
 
-{% else /%}
+  Make it full of sadness and despair. 
 
-It should have the following tone: {% $frontmatter.input.tone %}
+  {% else /%}
+
+  It should have the following tone: {% $frontmatter.input.tone %}
 
 {% /if %}
 
 {% ai #output model="openai/gpt-4o-mini" /%}
-
-{% $output.result %}

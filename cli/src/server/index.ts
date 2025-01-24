@@ -76,12 +76,16 @@ export async function createServer(config: ServerConfig) {
                 try {
                     console.log(chalk.dim(`GET /${apiPath} - Serving AST`));
                     const content = await fs.readFile(route.filePath, 'utf-8');
+                    
                     const aimDocument = aim({
                         content,
                         options: {
                             config: {},
                             events: {
                                 onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
+                            },
+                            settings: {
+                                useScoping: false
                             }
                         }
                     });
@@ -115,6 +119,14 @@ export async function createServer(config: ServerConfig) {
                     res.setHeader('Cache-Control', 'no-cache');
                     res.setHeader('Connection', 'keep-alive');
 
+                    // Create a new AbortController for this request
+                    const abortController = new AbortController();
+
+                    // Clean up on client disconnect
+                    req.on('close', () => {
+                        abortController.abort();
+                    });
+
                     const aimDocument = aim({
                         content,
                         options: {
@@ -122,11 +134,11 @@ export async function createServer(config: ServerConfig) {
                             events: {
                                 onLog: (message) => {
                                     console.log(chalk.dim(`Log: ${message}`));
-                                    res.write(`event: log\ndata: ${JSON.stringify({message})}\n\n`);
+                                    res.write(`event: log\ndata: ${JSON.stringify({ message })}\n\n`);
                                 },
                                 onError: (error) => {
                                     console.error(error);
-                                    res.write(`event: error\ndata: ${JSON.stringify({error})}\n\n`);
+                                    res.write(`event: error\ndata: ${JSON.stringify({ error })}\n\n`);
                                 },
                                 onSuccess: (data) => {
                                     console.log(data);
@@ -134,7 +146,7 @@ export async function createServer(config: ServerConfig) {
                                 },
                                 onAbort: (reason) => {
                                     console.warn(reason);
-                                    res.write(`event: abort\ndata: ${JSON.stringify({reason})}\n\n`);
+                                    res.write(`event: abort\ndata: ${JSON.stringify({ reason })}\n\n`);
                                 },
                                 onFinish: (data) => {
                                     console.log(data);
@@ -146,15 +158,15 @@ export async function createServer(config: ServerConfig) {
                                 },
                                 onStep: (data) => {
                                     console.log(data);
-                                    res.write(`event: step\ndata: ${JSON.stringify({data})}\n\n`);
+                                    res.write(`event: step\ndata: ${JSON.stringify({ data })}\n\n`);
                                 },
                                 onData: (data) => {
                                     console.log(data);
-                                    res.write(`event: data\ndata: ${JSON.stringify({data})}\n\n`);
+                                    res.write(`event: data\ndata: ${JSON.stringify({ data })}\n\n`);
                                 },
                                 onOutput: async (output) => {
                                     console.log(output);
-                                    res.write(`event: output\ndata: ${JSON.stringify({output})}\n\n`);
+                                    res.write(`event: output\ndata: ${JSON.stringify({ output })}\n\n`);
                                 },
                                 onUserInput: async (prompt) => {
                                     console.log(prompt);
@@ -162,7 +174,10 @@ export async function createServer(config: ServerConfig) {
                                     return "";
                                 }
                             },
-                            config: {}
+                            config: {},
+                            settings: {
+                                useScoping: false
+                            }
                         }
                     });
 

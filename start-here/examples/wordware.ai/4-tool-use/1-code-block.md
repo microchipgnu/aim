@@ -20,7 +20,7 @@ Don't worry if you can't code, you probably won't need to write the code yoursel
 
 You can add a code execution block by typing /code -->
 
-```js {#example} 
+```js {% #example %} 
 // The code execution node will execute the given JavaScript code
 
 // For example we can write functions ...
@@ -35,10 +35,10 @@ const sum = addNumbers(1, 1);
 console.log("1 + 1 =", sum);
 
 // ... and even mention values from outside the code
-const greeting = `Hello {{ input.name }}, you're looking good today 🔥`;
+const greeting = `Hello ${aimVariables.frontmatter.input.name}, you're looking good today 🔥`;
 
 // If we return a value it'll be included in the prompt
-return greeting;
+export default greeting;
 ```
 
 The code returned: {% $example.result %}

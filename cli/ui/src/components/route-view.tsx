@@ -34,7 +34,7 @@ const components = {
     Ai: (props: any) => (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 text-blue-700 my-2">
             <Terminal className="h-5 w-5" />
-            <span className="font-medium">{props?.result}</span>
+            <span className="font-medium">{props?.children}</span>
         </div>
     ),
     If: () => (

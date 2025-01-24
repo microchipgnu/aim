@@ -15,7 +15,8 @@ Here's a maths question:
 
 <!-- Then we tell it to write some code to solve the question: -->
 
-Write the JavaScript code to solve this question. Use comments to explain your reasoning. Log just the final answer. Output just the code.
+Write a JavaScript function that returns the result of this question. Do not log anything. Output just the code and a call to the function.
+
 
 {% ai #generated_code model="mistral/7b" /%}
 
@@ -23,14 +24,14 @@ Write the JavaScript code to solve this question. Use comments to explain your r
 
 {% $generated_code.result %}
 
-```js
-// We pass code that was generated as a string into `eval` which will execute it 
+```js {% #eval %}
+// We pass code that was generated as a string into \`eval\` which will execute it 
 // First we remove any backticks/wrappers around the code
-const code = {{ generated_code }}.replaceAll(/\`\`\`javascript/g, "").replaceAll(/\`\`\`js/g, "").replaceAll(/\`\`\`JavaScript/g, "").replaceAll(/\`\`\`JS/g, "").replaceAll(/\`\`\`/g, "");
+const code = aimVariables.generated_code.result.replaceAll(/\`\`\`javascript/g, "").replaceAll(/\`\`\`js/g, "").replaceAll(/\`\`\`JavaScript/g, "").replaceAll(/\`\`\`JS/g, "").replaceAll(/\`\`\`/g, "");
 
-return eval(code);
+export default eval(code);
 ```
 
-The answer is: {% $answer.result %}
+The answer is: {% $eval.result %}
 
 <!-- The LLM got the answer right! 🎉 -->
