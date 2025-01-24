@@ -25,9 +25,19 @@ export default defineConfig({
     options.drop = ['console', 'debugger'] // Remove console.logs and debugger statements
     options.pure = ['console.log'] // Mark console.log calls as pure for removal
     options.legalComments = 'none' // Remove license comments
-    options.mangleProps = /^_/ // Mangle private properties starting with underscore
+    
+    // Remove mangleProps to prevent mangling of module names
+    // options.mangleProps = /^_/
+    
     options.minifyIdentifiers = true
     options.minifySyntax = true
     options.minifyWhitespace = true
+    
+    // Add reserved names that shouldn't be minified
+    options.keepNames = true
+    options.mangleQuoted = false // Prevent mangling of quoted strings
+    
+    // Reserve specific identifiers from minification
+    options.reserveProps = /^(load-vars|eval-code|aimVariables|evaluate)$/
   },
 })

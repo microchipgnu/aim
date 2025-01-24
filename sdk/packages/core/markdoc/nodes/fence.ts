@@ -41,7 +41,13 @@ export async function* fence(node: Node, config: Config) {
 
     const evalResult = await evalCode(`
         import { aimVariables } from "load-vars";
-        ${node.attributes.content}
+        import { evaluate } from "eval-code";
+
+        const run = async () => {
+            ${node.attributes.content}
+        }
+
+        export default await run();
     `);
 
     const result = evalResult.ok ? JSON.stringify(evalResult.data) : "";

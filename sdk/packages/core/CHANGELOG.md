@@ -1,5 +1,23 @@
 # @aim-sdk/core
 
+## 0.0.8-beta.0
+
+### Patch Changes
+
+- update loop and a few other things
+
+## 0.0.7
+
+### Patch Changes
+
+- 67f1ea4: fix memory leaks
+- 4742b47: up
+- 4742b47: test
+- 4742b47: test
+- rework runtime
+- 7a5a069: update code blocks to reference runtime variables and update set to take any args
+- 4742b47: test
+
 ## 0.0.7-beta.5
 
 ### Patch Changes

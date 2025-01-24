@@ -3,6 +3,8 @@ import { writeFileSync } from "fs";
 import { html } from "../../markdoc/renderers/html";
 import { transform } from "markdoc/transform";
 
+
+
 // Sample test content
 const content = {
     main: `
@@ -38,35 +40,25 @@ Let's do the {% $frontmatter.input.count %} times table. Output just the next nu
 {% /loop %}
 `,
 test: `---
+title: Loop
+description: Use loops to repeat a block of code multiple times.
 input:
     - name: count
       type: number
       description: The number of times to repeat the block
 ---
 
-Respond the solution to the following math problem. Only respond with the solution.
+Let's do the {% $frontmatter.input.count %} times table. 
+
+Output just the next number.
 
 {% loop #loop count=$frontmatter.input.count %}
 
-    {% if equals(1, $loop.index) %}
-        FIRST, NOT USING AI
-        {% set #yo yo="asd" /%}
-
-        {% $yo.yo %}
-
-    {% else /%}
-        {% $loop.index %} x {% $loop.index %} = {% ai model="openai/gpt-4o" /%}
-    {% /if %}
+  {% add($loop.index, 1) %} x {% $frontmatter.input.count %} = {% ai #result model="openai/gpt-4o-mini" /%}
 
 {% /loop %}
 
-{% sign-eth-transaction /%}
-
-Did we sign the transaction? Answer with yes or no.
-
-{% ai model="openai/gpt-4o" /%}
-
-`,
+Yay, we're done!`,
 signEthTransaction: `
 
 Lets sign the transaction. {% sign-eth-transaction /%}
@@ -90,6 +82,257 @@ This is the loop index: {% $loop.index %}
 {% /if %}
 
 `,
+
+headsTails: `---
+title: "Heads or Tails 🪙"
+description: "A coin flip game with conditional responses"
+---
+
+We just tossed a coin, was it heads or tails?
+
+The last tosses were heads, heads, tails, heads, tails, heads, heads, heads.
+
+Output 'heads' or 'tails' only.
+
+{% ai #flip model="openai/gpt-4o-mini" /%}
+
+<!-- We reference the value of the flip in this if-else block -->
+
+{% if equals($flip.result, "heads") %}
+
+    Heads, I win!
+
+    Should I gloat? Write yes or no only.
+
+    {% ai #gloat model="openai/gpt-4o-mini" /%}
+
+    GLOAT {% $gloat.result %}
+
+<!-- It's possible to nest container blocks inside other container blocks. In fact you can put all the same things in the body of a container block as you can in a prompt -->
+
+        {% if equals($gloat.result, "yes") %}
+
+            Now, write a gloating song. Output just the song.
+
+            {% ai #song model="openai/gpt-4o-mini" /%}
+
+        {% /if %}
+
+        {% else /%}
+
+            Now, be humble and congratulate the loser on their well played match.
+
+            {% ai #humble model="openai/gpt-4o-mini" /%}
+
+        {% /if %}
+
+        {% if equals($flip.result, "tails") %}
+
+            Tails, you lose! 😏
+
+        {% /if %}
+
+    {% else /%}
+
+    Neither heads nor tails, everyone loses 🤷‍♂️
+
+{% /if %}
+
+{% $flip.result %}
+`,
+ifElse: `---
+title: "If else"
+description: "An example of how to use AIM to create a document."
+input:
+  - name: topic
+    type: string
+    description: "The topic to write about"
+  - name: type
+    type: string
+    description: "The type of writing to create"
+  - name: tone
+    type: string
+    description: "The emotional tone to use"
+---
+
+Write a {% $frontmatter.input.type %} about {% $frontmatter.input.topic %}
+
+{% if equals($frontmatter.input.tone, "happy") %}
+Make it full of joy and happiness. 
+
+{% else equals($frontmatter.input.tone, "sad") /%}
+
+generate a sad prompt
+
+{% ai #sad-prompt model="openai/gpt-4o-mini" /%}
+
+{% $sad-prompt.result %}
+
+{% else equals($frontmatter.input.tone, "silly") /%}
+Make it full of sadness and despair. 
+
+{% else /%}
+
+It should have the following tone: {% $frontmatter.input.tone %}
+
+{% /if %}
+
+{% ai #output model="openai/gpt-4o-mini" /%}
+`,
+loopUntil: `
+
+Output a random number between 1 and 100. Output just the number.
+
+{% loop lessThanOrEqual($value.result, 30) #loop %}
+
+    {% ai #value model="openai/gpt-4o" /%}
+    
+{% /loop %}
+
+Yay, we're done! The number is {% $value.result %} and it took {% $loop.index %} tries.
+`,
+greeting: `
+
+
+\`\`\`js {% #example %} 
+// The code execution node will execute the given JavaScript code
+
+// For example we can write functions ...
+function addNumbers(n1, n2) {
+  return n1 + n2;
+}
+
+// ... call those functions ...
+const sum = addNumbers(1, 1);
+
+// ... log outputs ...
+console.log("1 + 1 =", sum);
+
+// ... and even mention values from outside the code
+const greeting = \`Hello \${aimVariables.frontmatter.input.name}, you're looking good today 🔥\`;
+
+// If we return a value it'll be included in the prompt
+export default greeting;
+\`\`\`
+
+The code returned: {% $example.result %}
+
+`,
+mathsQuestion: `---
+title: "Calculator 🧮"
+description: "Using code blocks to solve math problems"
+input:
+  - name: maths_question
+    type: string
+    description: "The math question to solve"
+---
+
+Here's a maths question:
+
+{% $frontmatter.input.maths_question %}
+
+Write a JavaScript function that returns the result of this question. Do not log anything. Output just the code and a call to the function.
+
+{% ai #generated_code model="openai/gpt-4o" /%}
+
+\`\`\`js {% #eval %}
+// We pass code that was generated as a string into \`eval\` which will execute it 
+// First we remove any backticks/wrappers around the code
+const code = aimVariables.generated_code.result.replaceAll(/\`\`\`javascript/g, "").replaceAll(/\`\`\`js/g, "").replaceAll(/\`\`\`JavaScript/g, "").replaceAll(/\`\`\`JS/g, "").replaceAll(/\`\`\`/g, "");
+
+console.log(code);
+export default eval(code);
+\`\`\`
+
+The answer is: {% $eval.result %}
+`,
+wikipediaResults: `---
+title: "Q&A with Wikipedia 📚"
+description: "Using code blocks to query Wikipedia"
+input:
+  - name: question
+    type: string
+    description: "The question to answer"
+---
+
+<!-- The code block is connected to the web so it can be used to hit external APIs too. This can be very useful in a number of ways. Here we show how it can be used to query for up-to-date information from Wikipedia. -->
+
+Retrieval assisted (RAG) question answering using Wikipedia.
+e.g. Try asking "When did OceanGate sink?", "How tall is the tallest penguin species?"
+
+Question: {% $frontmatter.input.question %}
+
+<!-- First we get the language model to generate a search term -->
+
+Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term.
+
+{% ai #search_term model="openai/gpt-4o-mini" /%}
+
+<!-- This chunk of code will hit Wikipedia's API and extract the top 3 articles -->
+
+
+\`\`\`js {% #wikipedia_results %}
+
+// Read the term generated by the language model
+let input;
+try {
+    input = aimVariables.search_term.result.trim().replace(/^"+|"+$/g, '');
+} catch (error) {
+    console.error("Error reading search term:", error);
+    return { result: "", error: error.toString() };
+}
+
+console.log("Searching for the term", input);
+
+try {
+    const maxResults = 3;
+    const searchTerm = encodeURIComponent(input.trim());
+    const url = \`https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch=\${searchTerm}&srlimit=\${maxResults}&utf8=&origin=*\`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const fetchExtract = async (title) => {
+        console.log("Retrieving", title);
+        const extractUrl = \`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=\${encodeURIComponent(title)}&redirects=1&origin=*\`;
+        const extractResponse = await fetch(extractUrl);
+        const extractData = await extractResponse.json();
+        const pageId = Object.keys(extractData.query.pages)[0];
+        const extract = extractData.query.pages[pageId].extract;
+        return [title, extract];
+    }
+
+    try {
+        if (data.query.search.length > 0) {
+            console.log("Got some results extracting top", data.query.search.length);
+            const extracts = await Promise.all(data.query.search.map(result => fetchExtract(result.title)));
+            return { result: extracts, error: null };
+        } else {
+            return { result: "No results found.", error: null };
+        }
+    } catch (error) {
+        console.error("Error extracting Wikipedia results:", error);
+        return { result: "", error: error.toString() };
+    }
+} catch (error) {
+    console.error("Error processing Wikipedia results:", error);
+    return { result: "", error: error.toString() };
+}
+    
+\`\`\`
+<!-- The code returns the top 3 Wikipedia articles that match the search term -->
+
+## Answer:
+
+Based on the information above give the most helpful answer to the question.
+
+Question: {% $frontmatter.input.question %}
+
+Results: {% debug($wikipedia_results) %}
+
+{% ai #answer model="openai/gpt-4o-mini" /%}
+
+{% $answer.result %}
+`
 
 };
 
@@ -513,7 +756,7 @@ async function main() {
 
     // Initialize AIM document
     const doc = aim({
-        content: content.signEthTransaction,
+        content: run,
         options: {
             events: {
                 onStart: (msg: string) => {
@@ -604,7 +847,13 @@ async function main() {
     // Execute document
     await doc.execute({
         input: {
-            count: 2
+            topic: "The future of AI",
+            type: "sentence",
+            tone: "sad",
+            count: 10,
+            name: "Micro",
+            maths_question: "What is 1 + 1?",
+            question: "What is the capital of France?"
         }
     });
 
@@ -629,7 +878,7 @@ async function main() {
         .replace('DATA_EVENTS_PLACEHOLDER', JSON.stringify(dataEvents, null, 2))
         .replace('OUTPUT_PLACEHOLDER', JSON.stringify(htmlOutput, null, 2))
         .replace('AST_PLACEHOLDER', JSON.stringify(AST, null, 2))
-        .replace('CONTENT_PLACEHOLDER', JSON.stringify(content.signEthTransaction, null, 2))
+        .replace('CONTENT_PLACEHOLDER', JSON.stringify(run, null, 2))
         .replace('HTML_CONTENT_PLACEHOLDER', JSON.stringify(html([renderableContent])));
 
     // Write to file
@@ -639,4 +888,7 @@ async function main() {
     process.exit(0);
 }
 
+const run = content.wikipediaResults
+
 main().catch(console.error);
+

@@ -6,6 +6,17 @@ const defaultModules = {
             const aimVariables = JSON.parse(env.__AIM_VARIABLES__ || '{}');
             export { aimVariables };
         `
+    },
+    "eval-code": {
+        "index.js": `
+            export function evaluate(code) {
+                try {
+                    return eval(code);
+                } catch (error) {
+                    return { error: error.message };
+                }
+            }
+        `
     }
 }
 

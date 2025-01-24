@@ -11,7 +11,14 @@ export function resolveValue(value: any, context: any): any {
 
     // Handle Markdoc Function type
     if ('$$mdtype' in value && value.$$mdtype === 'Function') {
-        return value.resolve(context);
+        // Resolve any variables in the function parameters first
+        const resolvedParams = Object.fromEntries(
+            Object.entries(value.parameters).map(([k, v]) => [k, resolveValue(v, context)])
+        );
+        // Create new function object with resolved parameters
+        const resolvedFunction = Object.create(value);
+        resolvedFunction.parameters = resolvedParams;
+        return resolvedFunction.resolve(context);
     }
 
     // Handle Markdoc Variable type

@@ -8,6 +8,7 @@ import { flowTag } from "markdoc/tags/flow";
 import { inputTag } from "markdoc/tags/input";
 import { loopTag } from "markdoc/tags/loop";
 import { setTag } from "markdoc/tags/set";
+import { greaterThan, greaterThanOrEqual, lessThan, lessThanOrEqual, includes, add, subtract, multiply, divide } from "markdoc/functions/functions";
 import { addToTextRegistry, clearTextRegistry, getCurrentConfigFx, getRuntimeContextFx, popStack, pushStack, registerPlugin, registerRuntimeState, resetContext, setData } from "runtime/state";
 import { execute } from "./runtime/execute";
 import type { RuntimeOptions, RuntimeState, StackFrame } from "./types";
@@ -45,13 +46,21 @@ export const defaultRuntimeOptions: RuntimeOptions = {
             else: elseTag
         },
         functions: {
-            ...functions
+            ...functions,
+            greaterThan,
+            lessThan,
+            greaterThanOrEqual,
+            lessThanOrEqual,
+            includes,
+            add,
+            subtract,
+            multiply,
+            divide
         }
     }
 }
 
 export function aim({ content, options = defaultRuntimeOptions }: { content: string, options: RuntimeOptions }) {
-
     // Register plugins in state
     options.plugins?.forEach(p => {
         registerPlugin({ plugin: p.plugin, options: p.options });
