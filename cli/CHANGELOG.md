@@ -1,5 +1,19 @@
 # aimx
 
+## 0.1.33
+
+### Patch Changes
+
+- 4c95311: update sdk to 0.0.7-beta.4
+- dbc5f2f: update sdk core
+- daac179: update ui
+- 4742b47: up
+- 4742b47: up
+- daac179: improve ui rendering responses
+- update sdk
+- bd67cad: fix path resolution
+- 4742b47: test
+
 ## 0.1.33-beta.7
 
 ### Patch Changes

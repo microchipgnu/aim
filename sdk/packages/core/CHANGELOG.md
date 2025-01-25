@@ -1,5 +1,13 @@
 # @aim-sdk/core
 
+## 0.0.8
+
+### Patch Changes
+
+- b2082a4: update loop and a few other things
+- update state
+- 4adb7ad: update state
+
 ## 0.0.8-beta.1
 
 ### Patch Changes

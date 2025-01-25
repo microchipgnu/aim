@@ -10,6 +10,12 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
 import Markdoc from "@markdoc/markdoc";
 import { AlertCircle, FileText, ListChecks, PlayCircle, Terminal } from "lucide-react";
 import React from 'react';
@@ -34,19 +40,39 @@ const components = {
     Ai: (props: any) => (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 text-blue-700 my-2">
             <Terminal className="h-5 w-5" />
-            <span className="font-medium">{props?.children}</span>
+            <span className="font-medium">{JSON.stringify(props?.children)}</span>
         </div>
     ),
-    If: () => (
-        <div className="flex items-center gap-2 p-2 rounded bg-gray-100">
-            <span className="font-mono">if</span>
+    If: (props: any) => (
+        <div className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50 my-2">
+            <div className="flex items-center gap-2">
+                <span className="font-mono text-sm bg-gray-200 px-2 py-1 rounded">if {props.condition}</span>
+            </div>
+            <div className="pl-4 border-l-2 border-gray-200">
+                {props.children}
+            </div>
         </div>
     ),
-    Else: () => (
-        <div className="flex items-center gap-2 p-2 rounded bg-gray-100">
-            <span className="font-mono">else</span>
+    Else: (props: any) => (
+        <div className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50 my-2">
+            <div className="flex items-center gap-2">
+                <span className="font-mono text-sm bg-gray-200 px-2 py-1 rounded">else</span>
+            </div>
+            <div className="pl-4 border-l-2 border-gray-200">
+                {props.children}
+            </div>
         </div>
-    )
+    ),
+    Loop: (props: any) => (
+        <div className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50 my-2">
+            <div className="flex items-center gap-2">
+                <span className="font-mono text-sm bg-gray-200 px-2 py-1 rounded">loop {props.count} times</span>
+            </div>
+            <div className="pl-4 border-l-2 border-gray-200">
+                {props.children}
+            </div>
+        </div>
+    ),
 }
 
 export function RouteView({ path }: { path: string }) {
@@ -59,6 +85,12 @@ export function RouteView({ path }: { path: string }) {
     const [errors, setErrors] = React.useState<DocumentError[]>([]);
     const [logs, setLogs] = React.useState<string[]>([]);
     const [steps, setSteps] = React.useState<any[]>([]);
+    const [dataEvents, setDataEvents] = React.useState<any[]>([]);
+    const [output, setOutput] = React.useState<string>('');
+    const [rawContent, setRawContent] = React.useState<string>('');
+    const [htmlContent, setHtmlContent] = React.useState<string>('');
+
+    console.log(output, htmlContent)
 
     React.useEffect(() => {
         // Clear all state when path changes
@@ -72,6 +104,10 @@ export function RouteView({ path }: { path: string }) {
         setErrors([]);
         setLogs([]);
         setSteps([]);
+        setDataEvents([]);
+        setOutput('');
+        setRawContent('');
+        setHtmlContent('');
 
         fetchAst();
     }, [path]);
@@ -85,6 +121,8 @@ export function RouteView({ path }: { path: string }) {
             setWarnings(data.warnings);
             setErrors(data.errors);
             setFrontmatter(data.frontmatter);
+            setRawContent(data.rawContent || '');
+            setHtmlContent(data.htmlContent || '');
         } catch (err) {
             setError('Failed to load document');
             console.error(err);
@@ -97,6 +135,8 @@ export function RouteView({ path }: { path: string }) {
             setSteps([]);
             setResult([]);
             setError(null);
+            setDataEvents([]);
+            setOutput('');
             setLoading(true);
 
             const response = await fetch(`/api/${path}`, {
@@ -164,11 +204,13 @@ export function RouteView({ path }: { path: string }) {
                                 break;
                             case 'output':
                                 if (data.output !== undefined) {
+                                    setOutput(data.output);
                                     setResult(prev => [...prev, data.output]);
                                 }
                                 break;
                             case 'data':
                                 if (data.data !== undefined) {
+                                    setDataEvents(prev => [...prev, data]);
                                     setResult(prev => [...prev, data.data]);
                                 }
                                 break;
@@ -378,79 +420,151 @@ export function RouteView({ path }: { path: string }) {
                     </div>
 
                     <div className="col-span-12 lg:col-span-8">
-                        {result.length > 0 && (
-                            <Card className="shadow-sm border-slate-200">
-                                <CardHeader className="border-b border-slate-100">
-                                    <CardTitle className="flex items-center gap-2.5 text-lg font-semibold">
-                                        <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Execution Results
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-0">
-                                    <ScrollArea className="h-[600px]">
-                                        <div className="p-6">
-                                            {result.map((item, index) => {
-                                                // Skip empty arrays
-                                                if (Array.isArray(item) && item.length === 0) {
-                                                    return null;
-                                                }
+                        <Tabs defaultValue="output" className="w-full">
+                            <TabsList>
+                                <TabsTrigger value="output">Output</TabsTrigger>
+                                <TabsTrigger value="state">State</TabsTrigger>
+                                <TabsTrigger value="data">Data</TabsTrigger>
+                                <TabsTrigger value="ast">AST</TabsTrigger>
+                                <TabsTrigger value="content">Content</TabsTrigger>
+                            </TabsList>
 
-                                                let content = item;
-                                                
-                                                const processMarkdocTag = (tag: any): any => {
-                                                    if (tag?.$$mdtype === 'Tag') {
-                                                        try {
-                                                            // Ensure first letter of tag is uppercase to match component keys
-                                                            if (tag.name && components[tag.name.charAt(0).toUpperCase() + tag.name.slice(1) as keyof typeof components]) {
-                                                                tag.name = tag.name.charAt(0).toUpperCase() + tag.name.slice(1);
-                                                            }
-
-                                                            // Process children recursively
-                                                            if (tag.children) {
-                                                                tag.children = tag.children.map((child: any) => processMarkdocTag(child));
-                                                            }
-
-                                                            // Parse the Markdoc tag into React elements
-                                                            return Markdoc.renderers.react(tag, React, { components });
-                                                        } catch (err) {
-                                                            console.error('Error rendering Markdoc:', err);
+                            <TabsContent value="output">
+                                {result.length > 0 && (
+                                    <Card className="shadow-sm border-slate-200">
+                                        <CardHeader className="border-b border-slate-100">
+                                            <CardTitle className="flex items-center gap-2.5 text-lg font-semibold">
+                                                <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                Execution Results
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="p-0">
+                                            <ScrollArea className="h-[600px]">
+                                                <div className="p-6">
+                                                    {result.map((item, index) => {
+                                                        // Skip empty arrays
+                                                        if (Array.isArray(item) && item.length === 0) {
                                                             return null;
                                                         }
-                                                    }
-                                                    return tag;
-                                                };
 
-                                                if (item?.$$mdtype === 'Tag') {
-                                                    content = processMarkdocTag(item);
-                                                }
+                                                        let content = item;
+                                                        
+                                                        const processMarkdocTag = (tag: any): any => {
+                                                            if (tag?.$$mdtype === 'Tag') {
+                                                                try {
+                                                                    // Ensure first letter of tag is uppercase to match component keys
+                                                                    if (tag.name && components[tag.name.charAt(0).toUpperCase() + tag.name.slice(1) as keyof typeof components]) {
+                                                                        tag.name = tag.name.charAt(0).toUpperCase() + tag.name.slice(1);
+                                                                    }
 
-                                                if (!content) {
-                                                    return null;
-                                                }
+                                                                    // Process children recursively
+                                                                    if (tag.children) {
+                                                                        tag.children = tag.children.map((child: any) => processMarkdocTag(child));
+                                                                    }
 
-                                                // Handle arrays that contain Markdoc tags
-                                                if (Array.isArray(content)) {
-                                                    content = content.map((item) => {
+                                                                    // Parse the Markdoc tag into React elements
+                                                                    return Markdoc.renderers.react(tag, React, { components });
+                                                                } catch (err) {
+                                                                    console.error('Error rendering Markdoc:', err);
+                                                                    return null;
+                                                                }
+                                                            }
+                                                            return tag;
+                                                        };
+
                                                         if (item?.$$mdtype === 'Tag') {
-                                                            return processMarkdocTag(item);
+                                                            content = processMarkdocTag(item);
                                                         }
-                                                        return item;
-                                                    });
-                                                }
 
-                                                return (
-                                                    <div key={index} className="mb-5 last:mb-0">
-                                                        {typeof content === 'string' ? content : React.createElement(React.Fragment, null, content)}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </ScrollArea>
-                                </CardContent>
-                            </Card>
-                        )}
+                                                        if (!content) {
+                                                            return null;
+                                                        }
+
+                                                        // Handle arrays that contain Markdoc tags
+                                                        if (Array.isArray(content)) {
+                                                            content = content.map((item) => {
+                                                                if (item?.$$mdtype === 'Tag') {
+                                                                    return processMarkdocTag(item);
+                                                                }
+                                                                return item;
+                                                            });
+                                                        }
+
+                                                        return (
+                                                            <div key={index} className="mb-5 last:mb-0">
+                                                                {typeof content === 'string' ? content : React.createElement(React.Fragment, null, content)}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </ScrollArea>
+                                        </CardContent>
+                                    </Card>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="state">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>State Logs</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ScrollArea className="h-[600px]">
+                                            <pre className="text-sm font-mono whitespace-pre-wrap">
+                                                {logs.join('\n')}
+                                            </pre>
+                                        </ScrollArea>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="data">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Data Events</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ScrollArea className="h-[600px]">
+                                            <pre className="text-sm font-mono whitespace-pre-wrap">
+                                                {JSON.stringify(dataEvents, null, 2)}
+                                            </pre>
+                                        </ScrollArea>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="ast">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>AST</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ScrollArea className="h-[600px]">
+                                            <pre className="text-sm font-mono whitespace-pre-wrap">
+                                                {JSON.stringify(ast, null, 2)}
+                                            </pre>
+                                        </ScrollArea>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="content">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Raw Content</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ScrollArea className="h-[600px]">
+                                            <pre className="text-sm font-mono whitespace-pre-wrap">
+                                                {rawContent}
+                                            </pre>
+                                        </ScrollArea>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </div>
             </div>
