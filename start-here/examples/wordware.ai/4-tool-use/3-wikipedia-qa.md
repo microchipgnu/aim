@@ -39,13 +39,13 @@ console.log("Searching for the term", input);
 try {
     const maxResults = 3;
     const searchTerm = encodeURIComponent(input.trim());
-    const url = `https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch=\${searchTerm}&srlimit=\${maxResults}&utf8=&origin=*`;
+    const url = `https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch=${searchTerm}&srlimit=${maxResults}&utf8=&origin=*`;
     const response = await fetch(url);
     const data = await response.json();
 
     const fetchExtract = async (title) => {
         console.log("Retrieving", title);
-        const extractUrl = `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=\${encodeURIComponent(title)}&redirects=1&origin=*`;
+        const extractUrl = `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=${encodeURIComponent(title)}&redirects=1&origin=*`;
         const extractResponse = await fetch(extractUrl);
         const extractData = await extractResponse.json();
         const pageId = Object.keys(extractData.query.pages)[0];
@@ -53,10 +53,12 @@ try {
         return [title, extract];
     }
 
+    console.log("data", data);
+
     try {
-        if (data.query.search.length > 0) {
-            console.log("Got some results extracting top", data.query.search.length);
-            const extracts = await Promise.all(data.query.search.map(result => fetchExtract(result.title)));
+        if (data?.query?.search?.length > 0) {
+            console.log("Got some results extracting top", data?.query?.search?.length);
+            const extracts = await Promise.all(data?.query?.search?.map(result => fetchExtract(result.title)));
             return { result: extracts, error: null };
         } else {
             return { result: "No results found.", error: null };
@@ -77,10 +79,10 @@ try {
 
 Based on the information above give the most helpful answer to the question.
 
-Question: {% $frontmatter.input.question %}
 
 Results: {% debug($wikipedia_results) %}
 
+Question: {% $frontmatter.input.question %}
 {% ai #answer model="openai/gpt-4o-mini" /%}
 
 {% $answer.result %}

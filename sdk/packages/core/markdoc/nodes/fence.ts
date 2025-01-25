@@ -1,7 +1,7 @@
 import { nodes, Tag, type Config, type Node } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
-import { $runtimeState, getCurrentConfigFx, pushStack } from "runtime";
 import { runQuickJS } from "runtime/code/quickjs";
+import type { StateManager } from "runtime/state";
 
 export const fenceNode = {
     ...nodes.fence,
@@ -11,8 +11,8 @@ export const fenceNode = {
     }
 }
 
-export async function* fence(node: Node, config: Config) {
-    const currentConfig = await getCurrentConfigFx(config);
+export async function* fence(node: Node, config: Config, stateManager: StateManager) {
+    const currentConfig = stateManager.getCurrentConfig(config);
     const attrs = node.transformAttributes(config);
 
     let fenceTag = new Tag("fence");
@@ -52,7 +52,7 @@ export async function* fence(node: Node, config: Config) {
 
     const result = evalResult.ok ? JSON.stringify(evalResult.data) : "";
 
-    pushStack({
+    stateManager.pushStack({
         id,
         variables: {
             result: evalResult.ok ? JSON.stringify(evalResult.data) : "",
@@ -60,8 +60,6 @@ export async function* fence(node: Node, config: Config) {
         },
         scope: GLOBAL_SCOPE
     });
-
-    // $runtimeState.getState().options.events?.onData?.(result);
 
     fenceTag.children = [
         new Tag('code', { language }, [node.attributes.content]),

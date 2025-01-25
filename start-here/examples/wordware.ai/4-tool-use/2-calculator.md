@@ -18,7 +18,7 @@ Here's a maths question:
 Write a JavaScript function that returns the result of this question. Do not log anything. Output just the code and a call to the function.
 
 
-{% ai #generated_code model="mistral/7b" /%}
+{% ai #generated_code model="openai/gpt-4o" /%}
 
 <!-- Then we run the code that the LLM wrote: -->
 
@@ -29,7 +29,9 @@ Write a JavaScript function that returns the result of this question. Do not log
 // First we remove any backticks/wrappers around the code
 const code = aimVariables.generated_code.result.replaceAll(/\`\`\`javascript/g, "").replaceAll(/\`\`\`js/g, "").replaceAll(/\`\`\`JavaScript/g, "").replaceAll(/\`\`\`JS/g, "").replaceAll(/\`\`\`/g, "");
 
-export default eval(code);
+console.log("vars", code);
+
+return eval(code);
 ```
 
 The answer is: {% $eval.result %}

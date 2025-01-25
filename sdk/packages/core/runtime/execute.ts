@@ -3,8 +3,9 @@ import * as jsEnvironment from "browser-or-node";
 import { process as runtimeProcess } from "./process";
 import type { AIMRuntime } from "../types";
 
-export const execute = async ({ node, state }: AIMRuntime): Promise<void> => {
-    const options = state?.options || {};
+export const execute = async ({ node, stateManager }: AIMRuntime): Promise<void> => {
+    const options = stateManager?.getRuntimeState().options;
+
     options.variables = options.variables || {};
 
     // Handle Node.js specific setup
@@ -16,31 +17,31 @@ export const execute = async ({ node, state }: AIMRuntime): Promise<void> => {
         rl.close();
     }
 
-    options?.events?.onStart?.("Execution started!");
+    stateManager.runtimeOptions?.events?.onStart?.("Execution started!");
     let results: (string | object)[] = [];
 
     try {
-        const generator = runtimeProcess({ node, state });
+        const generator = runtimeProcess({ node, stateManager });
         for await (const result of generator) {
             if (result) {
-                options.events?.onLog?.(`Processing result: ${JSON.stringify(result)}`);
-                options.events?.onData?.(result);
+                stateManager.runtimeOptions.events?.onLog?.(`Processing result: ${JSON.stringify(result)}`);
+                stateManager.runtimeOptions.events?.onData?.(result);
                 if (typeof result === 'string' || typeof result === 'object') {
                     results.push(result);
                 }
             }
         }
 
-        options.events?.onFinish?.("Execution finished!");
-        options.events?.onSuccess?.("Execution completed successfully!");
+        stateManager.runtimeOptions.events?.onFinish?.("Execution finished!");
+        stateManager.runtimeOptions.events?.onSuccess?.("Execution completed successfully!");
     } catch (error) {
         if (
             (jsEnvironment.isBrowser && error instanceof DOMException && error.name === "AbortError") ||
             (jsEnvironment.isNode && error instanceof Error && error.name === "AbortError")
         ) {
-            options.events?.onAbort?.("Execution aborted!");
+            stateManager.runtimeOptions.events?.onAbort?.("Execution aborted!");
         } else {
-            options.events?.onError?.(`Execution error: ${error}`);
+            stateManager.runtimeOptions.events?.onError?.(`Execution error: ${error}`);
         }
         throw error;
     }

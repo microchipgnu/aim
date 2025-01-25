@@ -1,7 +1,6 @@
 import { Tag, type Config, type Node, type Schema } from "@markdoc/markdoc";
-import { aim, GLOBAL_SCOPE } from "index";
+import { aim, GLOBAL_SCOPE, StateManager } from "index";
 import { nanoid } from "nanoid";
-import { pushStack } from "runtime/state";
 
 export const flowTag: Schema = {
     render: 'flow',
@@ -16,7 +15,7 @@ export const flowTag: Schema = {
     }
 }
 
-export async function* flow(node: Node, config: Config) {
+export async function* flow(node: Node, config: Config, stateManager: StateManager) {
     const attrs = node.transformAttributes(config);
 
     let flowTag = new Tag("flow");
@@ -63,7 +62,7 @@ export async function* flow(node: Node, config: Config) {
         await execute();
 
         // Push flow variables to stack
-        pushStack({
+        stateManager.pushStack({
             id,
             scope: GLOBAL_SCOPE,
             variables: {

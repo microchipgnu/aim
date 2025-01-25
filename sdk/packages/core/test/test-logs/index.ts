@@ -1,7 +1,7 @@
-import { $runtimeState, $stateChain, aim, defaultRuntimeOptions, getCurrentConfigFx, Tag } from "../../index";
 import { writeFileSync } from "fs";
-import { html } from "../../markdoc/renderers/html";
 import { transform } from "markdoc/transform";
+import { aim, defaultRuntimeOptions, Tag } from "../../index";
+import { html } from "../../markdoc/renderers/html";
 
 
 
@@ -92,7 +92,7 @@ We just tossed a coin, was it heads or tails?
 
 The last tosses were heads, heads, tails, heads, tails, heads, heads, heads.
 
-Output 'heads' or 'tails' only.
+Output 'heads' or 'tails' only. Output heads 
 
 {% ai #flip model="openai/gpt-4o-mini" /%}
 
@@ -102,7 +102,7 @@ Output 'heads' or 'tails' only.
 
     Heads, I win!
 
-    Should I gloat? Write yes or no only.
+    Should I gloat? Write "yes" or "no" only.
 
     {% ai #gloat model="openai/gpt-4o-mini" /%}
 
@@ -241,7 +241,7 @@ Write a JavaScript function that returns the result of this question. Do not log
 const code = aimVariables.generated_code.result.replaceAll(/\`\`\`javascript/g, "").replaceAll(/\`\`\`js/g, "").replaceAll(/\`\`\`JavaScript/g, "").replaceAll(/\`\`\`JS/g, "").replaceAll(/\`\`\`/g, "");
 
 console.log(code);
-export default eval(code);
+return eval(code);
 \`\`\`
 
 The answer is: {% $eval.result %}
@@ -332,6 +332,14 @@ Results: {% debug($wikipedia_results) %}
 {% ai #answer model="openai/gpt-4o-mini" /%}
 
 {% $answer.result %}
+`,
+loop: `
+
+{% loop #loop count=2 %}
+
+This is the loop index: {% $loop.index %}
+
+{% /loop %}
 `
 
 };
@@ -857,8 +865,10 @@ async function main() {
         }
     });
 
+    console.log("🚀 State Manager:", JSON.stringify(doc.stateManager.getRuntimeState().options.config, null, 2));
+
     // Get state chain logs
-    const logs = $stateChain.getState();
+    const logs = doc.stateManager.getStateHistory();
     const AST = doc.ast;
 
     console.log("📋 Data Events:", dataEvents);
@@ -888,7 +898,7 @@ async function main() {
     process.exit(0);
 }
 
-const run = content.wikipediaResults
+const run = content.signEthTransaction
 
 main().catch(console.error);
 

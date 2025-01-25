@@ -1,6 +1,6 @@
 {
   "name": "@aim-sdk/core",
-  "version": "0.0.8-beta.0",
+  "version": "0.0.8-beta.1",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -30,6 +30,7 @@
     "ollama-ai-provider": "^1.0.0",
     "react": "^19.0.0",
     "replicate": "^1.0.1",
+    "rxjs": "^7.8.1",
     "semver": "^7.6.3",
     "zod": "^3.24.1"
   },
@@ -39,7 +40,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "rm -rf dist && tsup --config tsup.config.ts",
-    "logs": "bun test/test-logs/index.ts"
+    "logs": "bun test/test-logs/index.ts",
+    "test": "bun test"
   },
   "exports": {
     ".": {

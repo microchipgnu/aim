@@ -1,8 +1,8 @@
 import { type Config, type Node, Tag, tags } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import { nanoid } from "nanoid";
+import type { StateManager } from "runtime/state";
 import { walk } from "runtime/process";
-import { pushStack } from "runtime/state";
 
 type Condition = { condition: any; children: any[]; type: 'if' | 'else' };
 
@@ -49,7 +49,7 @@ export const ifTag = {
 };
 export const elseTag = tags.else;
 
-export async function* if_(node: Node, config: Config) {
+export async function* if_(node: Node, config: Config, stateManager: StateManager) {
     const attrs = node.transformAttributes(config);
     const conditions = renderConditions(node);
 
@@ -63,7 +63,7 @@ export async function* if_(node: Node, config: Config) {
         const resolvedCondition = condition?.resolve ? condition.resolve(config) : condition;
         
         if (resolvedCondition) {
-            pushStack({
+            stateManager.pushStack({
                 id,
                 scope: GLOBAL_SCOPE,
                 variables: {
@@ -74,7 +74,7 @@ export async function* if_(node: Node, config: Config) {
             });
 
             for (const child of conditionChildren) {
-                for await (const result of walk(child)) {
+                for await (const result of walk(child, stateManager)) {
                     children.push(result);
                 }
             }

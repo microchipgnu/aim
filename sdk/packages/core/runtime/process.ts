@@ -10,20 +10,18 @@ import { loop } from "markdoc/tags/loop";
 import { set } from "markdoc/tags/set";
 import { transform } from "markdoc/transform";
 import type { AIMRuntime } from "types";
-import { $runtimeState, getCurrentConfigFx } from "./state";
+import { StateManager } from "./state";
 
-export async function* walk(node: Node): AsyncGenerator<RenderableTreeNodes> {
-    // Every time we walk a node, we need to get the current state and config
-    const runtimeState = $runtimeState.getState();
-    const config = await getCurrentConfigFx(runtimeState.options.config);
-
+export async function* walk(node: Node, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
+    const runtimeState = stateManager.getRuntimeState();
+    const config = stateManager.getCurrentConfig(runtimeState.options.config);
 
     // TODO: handle more nodes here
     switch (node.type) {
         case "paragraph":
         case "inline":
             for (const child of node.children) {
-                yield* walk(child);
+                yield* walk(child, stateManager);
             }
             break;
         case "text":
@@ -35,43 +33,43 @@ export async function* walk(node: Node): AsyncGenerator<RenderableTreeNodes> {
             break;
 
         case "fence":
-            yield* fence(node, config);
+            yield* fence(node, config, stateManager);
             break;
         case "tag":
-            yield* handleTag(node);
+            yield* handleTag(node, stateManager);
             break;
         default:
             break;
     }
 }
 
-async function* handleTag(node: Node) {
-    const runtimeState = $runtimeState.getState();
-    const config = await getCurrentConfigFx(runtimeState.options.config);
+async function* handleTag(node: Node, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const config = stateManager.getCurrentConfig(runtimeState.options.config);
 
     switch (node.tag) {
         case "loop": {
-            yield* loop(node, config);
+            yield* loop(node, config, stateManager);
             break;
         }
         case "ai": {
-            yield* ai(node, config);
+            yield* ai(node, config, stateManager);
             break;
         }
         case "set": {
-            yield* set(node, config);
+            yield* set(node, config, stateManager);
             break;
         }
         case "if": {
-            yield* if_(node, config);
+            yield* if_(node, config, stateManager);
             break;
         }
         case "flow": {
-            yield* flow(node, config);
+            yield* flow(node, config, stateManager);
             break;
         }
         case "input": {
-            yield* input(node, config);
+            yield* input(node, config, stateManager);
             break;
         }
         default: {
@@ -94,9 +92,9 @@ async function* handleTag(node: Node) {
     }
 }
 
-export async function* process({ node }: AIMRuntime) {
-    for (const child of node.children) {
-        for await (const result of walk(child)) {
+export async function* process({ node, stateManager }: AIMRuntime) {
+for (const child of node.children) {
+        for await (const result of walk(child, stateManager)) {
             yield result;
         }
     }

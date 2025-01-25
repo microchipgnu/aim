@@ -38,7 +38,7 @@ console.log("1 + 1 =", sum);
 const greeting = `Hello ${aimVariables.frontmatter.input.name}, you're looking good today 🔥`;
 
 // If we return a value it'll be included in the prompt
-export default greeting;
+return greeting;
 ```
 
 The code returned: {% $example.result %}

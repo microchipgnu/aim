@@ -1,4 +1,5 @@
 import type { Config, Schema, Node, RenderableTreeNodes } from "@markdoc/markdoc";
+import type { StateManager } from "runtime/state";
 
 export type StateBlock = {
     timestamp: number;
@@ -13,11 +14,7 @@ export type StateBlock = {
     }
 }
 
-export type AIMConfig = Config & {
-    variables: Record<string, any>;
-    tags?: Record<string, Schema>;
-    functions?: Record<string, (...args: any[]) => any>;
-}
+export type AIMConfig = Config
 
 export type AIMTag = Schema;
 
@@ -77,7 +74,7 @@ export type AIMRuntime = {
     /** Current Markdoc node being processed */
     node: Node;
     /** Runtime state and execution context */
-    state: RuntimeState;
+    stateManager: StateManager;
 }
 
 export interface RuntimeOptions {

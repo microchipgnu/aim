@@ -3,7 +3,7 @@ import { generateText } from "ai";
 import { GLOBAL_SCOPE } from "aim";
 import { text } from "markdoc/renderers/text";
 import { getModelProvider } from "runtime/ai/get-model-providers";
-import { $runtimeState, getScopedText, pushStack } from "runtime/state";
+import type { StateManager } from "runtime/state";
 
 export const aiTag: Schema = {
     render: 'ai',
@@ -18,13 +18,12 @@ export const aiTag: Schema = {
     }
 }
 
-export async function* ai(node: Node, config: Config) {
-    const runtimeState = $runtimeState.getState();
+export async function* ai(node: Node, config: Config, stateManager: StateManager) {
     const attrs = node.transformAttributes(config);
 
-    const contextText = getScopedText(GLOBAL_SCOPE).join('\n');
+    const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join('\n');
 
-    runtimeState.options.events?.onLog?.(`Context: ${contextText}`);
+    stateManager.runtimeOptions.events?.onLog?.(`Context: ${contextText}`);
 
     const model = attrs.model || "openai/gpt-4o-mini";
     const modelProvider = getModelProvider(model);
@@ -42,7 +41,7 @@ export async function* ai(node: Node, config: Config) {
     let aiTag = new Tag("ai");
     yield aiTag;
 
-    pushStack({
+    stateManager.pushStack({
         id: attrs.id || 'ai',
         scope: GLOBAL_SCOPE,
         variables: {
@@ -51,7 +50,7 @@ export async function* ai(node: Node, config: Config) {
         }
     });
 
-    runtimeState.context.methods.addToTextRegistry({ text: text(result.text), scope: GLOBAL_SCOPE });
+    stateManager.addToTextRegistry(text(result.text), GLOBAL_SCOPE);
 
     aiTag.children = [result.text];
 }

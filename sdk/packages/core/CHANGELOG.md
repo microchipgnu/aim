@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.8-beta.1
+
+### Patch Changes
+
+- update state
+
 ## 0.0.8-beta.0
 
 ### Patch Changes

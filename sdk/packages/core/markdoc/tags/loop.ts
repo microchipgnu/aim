@@ -1,7 +1,6 @@
 import { type Schema, type Node, type Config, Tag } from "@markdoc/markdoc";
-import { getCurrentConfigFx, pushStack } from "runtime/state";
 import { resolveValue } from "markdoc/utils";
-import { walk } from "runtime";
+import { StateManager, walk } from "runtime";
 import { GLOBAL_SCOPE } from "index";
 
 export function truthy(value: any) {
@@ -23,7 +22,7 @@ export const loopTag: Schema = {
     }
 }
 
-export async function* loop(node: Node, config: Config) {
+export async function* loop(node: Node, config: Config, stateManager: StateManager) {
     const attrs = node.transformAttributes(config);
 
     const count = resolveValue(attrs.count, config);
@@ -38,6 +37,14 @@ export async function* loop(node: Node, config: Config) {
     const hasItems = Array.isArray(items) && items.length > 0;
     const hasCondition = condition !== undefined && condition !== null;
 
+    // Validate that only one loop type is specified
+    const loopTypes = [hasValidCount, hasItems, hasCondition].filter(Boolean).length;
+    if (loopTypes === 0) {
+        throw new Error('Loop must specify either count, items, or a condition');
+    }
+    if (loopTypes > 1) {
+        throw new Error('Loop cannot specify multiple of: count, items, or condition');
+    }
 
     let loopTag = new Tag("loop");
     yield loopTag;
@@ -45,22 +52,27 @@ export async function* loop(node: Node, config: Config) {
     const iterables = items || (hasValidCount ? Array.from({ length: numericCount }) : [null]);
     let i = 0;
 
-    // Initialize loop variables and any potential condition variables before first iteration
-    pushStack({
-        id,
-        scope: GLOBAL_SCOPE,
-        variables: {
-            index: 0,
-            count: i + 1,
-            isFirst: true,
-            isLast: false,
-            item: iterables[0]
-        }
-    });
+    // Initialize loop state before first iteration
+    const updateLoopState = () => {
+        stateManager.pushStack({
+            id,
+            scope: GLOBAL_SCOPE,
+            variables: {
+                index: i,
+                count: i + 1,
+                isFirst: i === 0,
+                isLast: hasItems ? i === iterables.length - 1 : i === numericCount - 1,
+                item: hasItems ? iterables[i] : undefined
+            }
+        });
+    };
+
+    updateLoopState();
 
     do {
+        // Process child nodes
         for (const child of node.children) {
-            for await (const result of walk(child)) {
+            for await (const result of walk(child, stateManager)) {
                 if (Array.isArray(result)) {
                     loopTag.children.push(...result);
                 } else {
@@ -71,35 +83,24 @@ export async function* loop(node: Node, config: Config) {
 
         i++;
 
-        // Break if we've exceeded items/count after first iteration
-        if (i >= iterables.length && !hasCondition) {
+        // Handle loop termination
+        if (!hasCondition && i >= iterables.length) {
             break;
         }
 
-        // Update loop variables for next iteration
-        pushStack({
-            id,
-            scope: GLOBAL_SCOPE,
-            variables: {
-                index: i,
-                count: i + 1,
-                isFirst: i === 0,
-                isLast: hasItems ? i === iterables.length - 1 : false,
-                item: iterables[i]
-            }
-        });
+        // Update state for next iteration
+        updateLoopState();
 
-        // For condition-based loops, evaluate condition for next iteration
+        // Evaluate condition for condition-based loops
         if (hasCondition) {
-            const currentConfig = await getCurrentConfigFx(config);
-
-            console.log("currentConfig", currentConfig.variables);
-
+            const currentConfig = stateManager.getCurrentConfig(config);
             const resolvedCondition = resolveValue(condition, currentConfig);
-
             if (!truthy(resolvedCondition)) {
                 break;
             }
         }
     } while (true);
+
+    // Clean up loop state
+    // stateManager.popStack(GLOBAL_SCOPE);
 }

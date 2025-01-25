@@ -2,9 +2,10 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "@aim-sdk/core": "0.0.7"
+    "@aim-sdk/core": "0.0.8-beta.0"
   },
   "changesets": [
-    "angry-avocados-rescue"
+    "angry-avocados-rescue",
+    "thirty-waves-visit"
   ]
 }

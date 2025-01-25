@@ -1,7 +1,7 @@
 import { Tag, type Config, type Node, type Schema } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import { resolveValue } from "markdoc/utils";
-import { pushStack } from "runtime/state";
+import type { StateManager } from "runtime/state";
 
 export const inputTag: Schema = {
     render: 'input',
@@ -17,7 +17,7 @@ export const inputTag: Schema = {
     }
 }
 
-export async function* input(node: Node, config: Config) {
+export async function* input(node: Node, config: Config, stateManager: StateManager) {
     const attrs = node.transformAttributes(config);
 
     let inputTag = new Tag("input");
@@ -63,7 +63,7 @@ export async function* input(node: Node, config: Config) {
     const inputValue = 'test';
 
     if (inputValue) {
-        pushStack({
+        stateManager.pushStack({
             id: name,
             scope: GLOBAL_SCOPE,
             variables: {

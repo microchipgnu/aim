@@ -1,5 +1,6 @@
 import { functions, nodes, tags, type Schema } from "@markdoc/markdoc";
 import * as jsEnvironment from "browser-or-node";
+import { add, divide, greaterThan, greaterThanOrEqual, includes, lessThan, lessThanOrEqual, multiply, subtract } from "markdoc/functions/functions";
 import { fenceNode } from "markdoc/nodes/fence";
 import { parser } from "markdoc/parser";
 import { aiTag } from "markdoc/tags/ai";
@@ -8,10 +9,9 @@ import { flowTag } from "markdoc/tags/flow";
 import { inputTag } from "markdoc/tags/input";
 import { loopTag } from "markdoc/tags/loop";
 import { setTag } from "markdoc/tags/set";
-import { greaterThan, greaterThanOrEqual, lessThan, lessThanOrEqual, includes, add, subtract, multiply, divide } from "markdoc/functions/functions";
-import { addToTextRegistry, clearTextRegistry, getCurrentConfigFx, getRuntimeContextFx, popStack, pushStack, registerPlugin, registerRuntimeState, resetContext, setData } from "runtime/state";
+import { StateManager } from "runtime/state";
 import { execute } from "./runtime/execute";
-import type { RuntimeOptions, RuntimeState, StackFrame } from "./types";
+import type { RuntimeOptions } from "./types";
 
 export const GLOBAL_SCOPE = "global";
 
@@ -61,9 +61,17 @@ export const defaultRuntimeOptions: RuntimeOptions = {
 }
 
 export function aim({ content, options = defaultRuntimeOptions }: { content: string, options: RuntimeOptions }) {
+
+    const stateManager = new StateManager({
+        ...options.config,
+        variables: {
+            ...options.config.variables
+        }
+    }, options);
+
     // Register plugins in state
     options.plugins?.forEach(p => {
-        registerPlugin({ plugin: p.plugin, options: p.options });
+        stateManager.registerPlugin(p.plugin, p.options);
     });
 
     // Convert plugins to Markdoc tags
@@ -98,6 +106,11 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
         }
     }
 
+    stateManager.$runtimeState.next({
+        ...stateManager.getRuntimeState(),
+        options: runtimeOptions
+    });
+
     const { ast, validation, frontmatter } = parser(content, runtimeOptions);
 
     const warnings = validation
@@ -119,6 +132,7 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
         errors: errors,
         warnings: warnings,
         runtimeOptions,
+        stateManager,
         execute: async (variables?: Record<string, any>) => {
             // Get input variables from document frontmatter
             const inputVariables = frontmatter?.input || [];
@@ -139,7 +153,7 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
             };
 
             if(Object.keys(inputObject).length > 0) {
-                pushStack({
+                stateManager.pushStack({
                     id: "frontmatter",
                     variables: {
                         ...inputObject
@@ -148,47 +162,14 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
                 });
             }
 
-            const context = await getRuntimeContextFx();
-
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('Execution timed out')), runtimeOptions.timeout);
             });
 
-            const runtimeState: RuntimeState = {
-                options: {
-                    ...runtimeOptions,
-                    config: {
-                        ...runtimeOptions.config,
-                        variables: {
-                            ...runtimeOptions.config.variables,
-                            frontmatter: {
-                                ...frontmatter,
-                                ...inputObject
-                            }
-                        }
-                    }
-                },
-                context: {
-                    ...context,
-                    methods: {
-                        pushStack: async (frame: StackFrame) => { pushStack(frame) },
-                        popStack: async (params: { scope: string }) => { popStack(params) },
-                        setData: async (params: { data: Record<string, any>; scope: string }) => { setData(params) },
-                        resetContext: async () => { resetContext() },
-                        addToTextRegistry: async (params: { text: string; scope: string }) => { addToTextRegistry(params) },
-                        clearTextRegistry: async (params: { scope: string }) => { clearTextRegistry(params) },
-                        getCurrentConfig: getCurrentConfigFx,
-                        getRuntimeContext: getRuntimeContextFx
-                    },
-                }
-            };
-
-            registerRuntimeState(runtimeState);
-
             await Promise.race([
                 execute({
                     node: ast,
-                    state: runtimeState
+                    stateManager
                 }),
                 timeoutPromise
             ]);
