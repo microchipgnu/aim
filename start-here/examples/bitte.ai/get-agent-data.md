@@ -1,4 +1,6 @@
 ---
+title: Get Agent Data
+description: Get agent data from bitte.ai
 input:
   - name: agentId
     type: string
@@ -10,7 +12,7 @@ input:
 
 const getBitteData = async () => {
 
-    const agentId = JSON.parse(env.I).frontmatter.input.agentId;
+    const agentId = aimVariables.frontmatter.input.agentId;
 
     const response = await fetch('https://wallet.bitte.ai/api/ai-assistants');
     const data = await response.json();
@@ -91,9 +93,11 @@ const getBitteData = async () => {
     };
 }
 
+const agentData = await getBitteData();
+
 // export default await getBitteData(JSON.parse(env).frontmatter.input.agentId);
 
-export default await getBitteData();
+return agentData;
 
 ```
 
@@ -101,6 +105,6 @@ export default await getBitteData();
 
 Summarize the agent's instructions in a simple sentence
 
-{% ai #agentDescription model="openai/gpt-4o-mini" /%}
+{% ai #agentDescription model="openai/gpt-4o" /%}
 
 {% $agentDescription.result %}

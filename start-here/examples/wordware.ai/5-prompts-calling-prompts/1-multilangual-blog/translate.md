@@ -12,9 +12,7 @@ input:
 
 <!-- This prompt is called from the multilingual blog example to translate text into different languages -->
 
-Translate the following into {% $frontmatter.input.language %}:
-
-{% $frontmatter.input.input %}
+Translate the "{% $frontmatter.input.input %}" into {% $frontmatter.input.language %}:
 
 {% ai #translation model="openai/gpt-3.5-turbo" /%}
 
