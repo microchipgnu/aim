@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.35
+
+### Patch Changes
+
+- update ui
+
 ## 0.1.34
 
 ### Patch Changes

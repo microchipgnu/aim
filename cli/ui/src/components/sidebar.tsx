@@ -9,9 +9,17 @@ import {
     SidebarMenuButton,
     SidebarMenuItem
 } from "@/components/ui/sidebar";
-import { ChevronDown, ChevronRight, FileCode, Folder, FolderOpen, Home } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileCode, Folder, FolderOpen, Home, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Route {
   path: string;
@@ -132,7 +140,7 @@ export function AppSidebar({ routes }: SidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center p-4">
+        <div className="flex items-center justify-between p-4">
           <span className="text-lg font-bold">AIM</span>
         </div>
       </SidebarHeader>
@@ -163,6 +171,23 @@ export function AppSidebar({ routes }: SidebarProps) {
               Documentation
             </a>
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full">
+                <User className="h-4 w-4 mr-2" />
+                <span>Account</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>API Keys</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Sign out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </SidebarFooter>
     </Sidebar>

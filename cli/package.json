@@ -1,7 +1,7 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.34",
+  "version": "0.1.35",
   "private": false,
   "type": "commonjs",
   "bin": {
@@ -26,9 +26,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && cd ui && bun run build && cd .. && tsup --config tsup.config.ts",
-    "dev": "concurrently \"cd ui && bun run dev\" \"tsup --config tsup.config.ts --watch --no-dts\"",
-    "dev:ui": "cd ui && bun run dev",
-    "dev:cli": "tsup --config tsup.config.ts --watch --no-dts",
+    "dev": "tsup --config tsup.dev.config.ts --no-dts",
     "dev:test": "concurrently \"bun run dev\" \"wait-on dist/index.mjs && bun --watch run ./dist/index.mjs start -d ../start-here/examples/ --ui\"",
     "build-binary": "bun run typecheck && bun build ./index.ts --compile --outfile aimx",
     "typecheck": "tsc --noEmit",

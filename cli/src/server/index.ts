@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { aim } from '@aim-sdk/core';
+import { aim, defaultRuntimeOptions, transform, renderers } from '@aim-sdk/core';
 import { promises as fs } from 'node:fs';
 import { getAIMRoutes } from './resolution';
 import chalk from 'chalk';
@@ -80,7 +80,7 @@ export async function createServer(config: ServerConfig) {
                     const aimDocument = aim({
                         content,
                         options: {
-                            config: {},
+                            config: defaultRuntimeOptions.config,
                             events: {
                                 onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
                             },
@@ -97,8 +97,12 @@ export async function createServer(config: ServerConfig) {
                         console.log(chalk.yellow(`⚠️  ${aimDocument.warnings.length} warnings found in ${route.path}`));
                     }
 
+
+
                     res.json({
                         document: aimDocument.ast,
+                        rawContent: content,
+                        rawHtml: renderers.html([transform(aimDocument.ast, defaultRuntimeOptions.config)]),
                         errors: aimDocument.errors,
                         warnings: aimDocument.warnings,
                         frontmatter: aimDocument.frontmatter
