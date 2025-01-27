@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.34
+
+### Patch Changes
+
+- add search functionality
+
 ## 0.1.33
 
 ### Patch Changes
