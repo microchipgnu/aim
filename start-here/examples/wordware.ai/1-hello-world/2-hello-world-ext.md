@@ -9,7 +9,6 @@ input:
     type: string
     description: "The style to use"
 ---
----
 
 Say hello to {% $frontmatter.input.name %}.
 
