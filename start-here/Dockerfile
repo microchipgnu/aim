@@ -3,7 +3,7 @@ FROM node:slim
 WORKDIR /app
 
 # Install aimx using npm
-RUN npm install -g aimx@0.1.34
+RUN npm install -g aimx@0.1.35
 
 # Echo aimx version
 RUN aimx -V
