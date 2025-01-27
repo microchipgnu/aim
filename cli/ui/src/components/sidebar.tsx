@@ -9,9 +9,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem
 } from "@/components/ui/sidebar";
-import { FileCode, Folder, FolderOpen, Home } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileCode, Folder, FolderOpen, Home } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 interface Route {
   path: string;
@@ -33,6 +33,19 @@ interface FolderStructure {
 
 export function AppSidebar({ routes }: SidebarProps) {
   const location = useLocation();
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['/']));
+
+  const toggleFolder = (folderPath: string) => {
+    setExpandedFolders(prev => {
+      const next = new Set(prev);
+      if (next.has(folderPath)) {
+        next.delete(folderPath);
+      } else {
+        next.add(folderPath);
+      }
+      return next;
+    });
+  };
 
   const folderStructure = useMemo(() => {
     const structure: FolderStructure = {
@@ -67,37 +80,53 @@ export function AppSidebar({ routes }: SidebarProps) {
   }, [routes]);
 
   const renderFolder = (structure: FolderStructure, path: string = '') => {
-    return Object.entries(structure).map(([folderName, content]) => (
-      <div key={folderName}>
-        {folderName !== '/' && (
-          <SidebarMenuItem>
-            <div className="flex items-center px-2 py-1.5 text-sm">
-              {content.folders && Object.keys(content.folders).length > 0 ? (
-                <FolderOpen className="w-4 h-4 mr-2" />
-              ) : (
-                <Folder className="w-4 h-4 mr-2" />
-              )}
-              <span>{folderName}</span>
-            </div>
-          </SidebarMenuItem>
-        )}
-        <div className="ml-4">
-          {content.files.map((route, index) => (
-            <SidebarMenuItem key={index}>
-              <SidebarMenuButton asChild isActive={location.pathname === `/${route.path}`}>
-                <Link to={`/${route.path}`}>
-                  <FileCode className="w-4 h-4 mr-2" />
-                  <span>{route.path.split('/').pop() || route.path}</span>
-                </Link>
-              </SidebarMenuButton>
+    return Object.entries(structure).map(([folderName, content]) => {
+      const fullPath = path ? `${path}/${folderName}` : folderName;
+      const isExpanded = expandedFolders.has(fullPath);
+      const hasSubContent = content.files.length > 0 || Object.keys(content.folders).length > 0;
+
+      return (
+        <div key={folderName}>
+          {folderName !== '/' && (
+            <SidebarMenuItem>
+              <div 
+                className="flex items-center px-2 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                onClick={() => hasSubContent && toggleFolder(fullPath)}
+              >
+                {hasSubContent && (
+                  isExpanded ? 
+                    <ChevronDown className="w-4 h-4 mr-1" /> : 
+                    <ChevronRight className="w-4 h-4 mr-1" />
+                )}
+                {content.folders && Object.keys(content.folders).length > 0 ? (
+                  <FolderOpen className="w-4 h-4 mr-2" />
+                ) : (
+                  <Folder className="w-4 h-4 mr-2" />
+                )}
+                <span>{folderName}</span>
+              </div>
             </SidebarMenuItem>
-          ))}
-          {Object.entries(content.folders).map(([subFolder, subContent]) => 
-            renderFolder({ [subFolder]: subContent }, `${path}/${subFolder}`)
+          )}
+          {isExpanded && (
+            <div className="ml-4">
+              {content.files.map((route, index) => (
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuButton asChild isActive={location.pathname === `/${route.path}`}>
+                    <Link to={`/${route.path}`}>
+                      <FileCode className="w-4 h-4 mr-2" />
+                      <span>{route.path.split('/').pop() || route.path}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              {Object.entries(content.folders).map(([subFolder, subContent]) => 
+                renderFolder({ [subFolder]: subContent }, fullPath)
+              )}
+            </div>
           )}
         </div>
-      </div>
-    ));
+      );
+    });
   };
 
   return (
