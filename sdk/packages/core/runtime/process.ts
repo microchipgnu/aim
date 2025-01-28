@@ -11,6 +11,7 @@ import { set } from "markdoc/tags/set";
 import { transform } from "markdoc/transform";
 import type { AIMRuntime } from "types";
 import { StateManager } from "./state";
+import { parallel } from "markdoc/tags/parallel";
 
 export async function* walk(node: Node, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
@@ -19,6 +20,9 @@ export async function* walk(node: Node, stateManager: StateManager): AsyncGenera
     // TODO: handle more nodes here
     switch (node.type) {
         case "paragraph":
+        case "heading":
+        case "list":
+        case "item":
         case "inline":
             for (const child of node.children) {
                 yield* walk(child, stateManager);
@@ -70,6 +74,10 @@ async function* handleTag(node: Node, stateManager: StateManager) {
         }
         case "input": {
             yield* input(node, config, stateManager);
+            break;
+        }
+        case "parallel": {
+            yield* parallel(node, config, stateManager);
             break;
         }
         default: {

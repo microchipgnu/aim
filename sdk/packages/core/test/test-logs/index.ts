@@ -340,7 +340,43 @@ loop: `
 This is the loop index: {% $loop.index %}
 
 {% /loop %}
-`
+`,
+parallel: `
+
+{% parallel #parallel %}
+
+    {% loop #loop1 count=2 %}
+
+        This is the loop index: {% $loop1.index %}
+
+    {% /loop %}
+
+    {% loop #loop2 count=2 %}
+
+        This is the loop index: {% $loop2.index %}
+
+    {% /loop %}
+
+{% /parallel %}
+`,
+structuredOutputs: `
+
+Create a recipe for chocholate cake
+
+{% ai #output1 model="openai/gpt-4o" structuredOutputs={recipe: "string", ingredients: "string[]", instructions: "string[]"} /%}
+
+# {% $output1.structuredOutputs.recipe %}
+
+# Ingredients:
+
+{% loop #loop1 items=$output1.structuredOutputs.ingredients %}
+
+# {% $loop1.count %}. {% $loop1.item %}
+
+{% /loop %}
+
+`,
+
 
 };
 
@@ -501,6 +537,18 @@ const htmlTemplate = `
         }
         fence {
             display: none;
+        }
+        parallel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid #60a5fa;
+            border-radius: 0.375rem;
+            background-color: #f0f7ff;
+            color: #2563eb;
+            font-weight: 500;
         }
         .jsoneditor {
             border: none !important;
@@ -898,7 +946,7 @@ async function main() {
     process.exit(0);
 }
 
-const run = content.signEthTransaction
+const run = content.structuredOutputs
 
 main().catch(console.error);
 

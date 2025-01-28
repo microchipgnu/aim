@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.9
+
+### Patch Changes
+
+- up
+
 ## 0.0.8
 
 ### Patch Changes
