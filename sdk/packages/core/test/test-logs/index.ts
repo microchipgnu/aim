@@ -809,11 +809,15 @@ const htmlTemplate = `
 
 async function main() {
     const dataEvents: any[] = [];
+    const abortController = new AbortController();
 
     // Initialize AIM document
     const doc = aim({
         content: run,
         options: {
+            signals: {
+                abort: abortController.signal
+            },
             events: {
                 onStart: (msg: string) => {
                     console.log("🚀 Started:", msg);
@@ -872,9 +876,6 @@ async function main() {
                     });
                 }
             },
-            signals: {
-                abort: new AbortController().signal
-            },
             settings: {
                 useScoping: false
             },
@@ -903,17 +904,42 @@ async function main() {
     });
 
     // Execute document
-    await doc.execute({
+    // await doc.execute({
+    //     input: {
+    //         topic: "The future of AI",
+    //         type: "sentence",
+    //         tone: "sad",
+    //         count: 10,
+    //         name: "Micro",
+    //         maths_question: "What is 1 + 1?",
+    //         question: "What is the capital of France?"
+    //     }
+    // });
+
+    // Execute document with generator
+    let resultCount = 0;
+    for await (const result of doc.executeWithGenerator({
         input: {
             topic: "The future of AI",
-            type: "sentence",
+            type: "sentence", 
             tone: "sad",
             count: 10,
             name: "Micro",
             maths_question: "What is 1 + 1?",
             question: "What is the capital of France?"
         }
-    });
+    })) {
+        console.log("🔄 Generator Result:", result);
+        resultCount++;
+        if (resultCount >= 2) {
+            console.log("🚀 Aborting execution...");
+            abortController.abort();
+            break;
+        }
+    }
+
+
+    
 
     console.log("🚀 State Manager:", JSON.stringify(doc.stateManager.getRuntimeState().options.config, null, 2));
 

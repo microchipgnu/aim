@@ -10,7 +10,7 @@ import { inputTag } from "markdoc/tags/input";
 import { loopTag } from "markdoc/tags/loop";
 import { setTag } from "markdoc/tags/set";
 import { StateManager } from "runtime/state";
-import { execute } from "./runtime/execute";
+import { execute, executeGenerator } from "./runtime/execute";
 import type { RuntimeOptions } from "./types";
 
 export const GLOBAL_SCOPE = "global";
@@ -180,6 +180,55 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
                 timeoutPromise,
                 abortPromise
             ]);
+        },
+        executeWithGenerator: async function*(variables?: Record<string, any>) {
+            // Get input variables from document frontmatter
+            const inputVariables = frontmatter?.input || [];
+            const resolvedVariables: Record<string, any> = {};
+
+            // First try to get values from passed variables, then options.input or options.variables
+            const inputValues = variables || runtimeOptions.input || runtimeOptions.variables || {};
+
+            // Map input variables using provided values or defaults from schema
+            for (const variable of inputVariables) {
+                const value = inputValues[variable.name];
+                resolvedVariables[variable.name] = value ?? variable.schema?.default;
+            }
+
+            // Create a nested input object for frontmatter access
+            const inputObject = {
+                ...inputValues // Include all input values directly
+            };
+
+            if(Object.keys(inputObject).length > 0) {
+                stateManager.pushStack({
+                    id: "frontmatter",
+                    variables: {
+                        ...inputObject
+                    },
+                    scope: GLOBAL_SCOPE
+                });
+            }
+
+            const generator = executeGenerator({
+                node: ast,
+                stateManager
+            });
+
+            const timeoutId = setTimeout(() => {
+                generator.throw(new Error('Execution timed out'));
+            }, runtimeOptions.timeout);
+
+            try {
+                for await (const result of generator) {
+                    if (runtimeOptions.signals.abort.aborted) {
+                        throw new Error('Execution aborted');
+                    }
+                    yield result;
+                }
+            } finally {
+                clearTimeout(timeoutId);
+            }
         }
     };
 }
