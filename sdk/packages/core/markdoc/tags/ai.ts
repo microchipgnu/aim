@@ -21,7 +21,15 @@ export const aiTag: Schema = {
 }
 
 export async function* ai(node: Node, config: Config, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+
     const attrs = node.transformAttributes(config);
+
+    // Check abort signal before processing
+    if (signal.aborted) {
+        throw new Error('AI execution aborted');
+    }
 
     const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join('\n');
 
@@ -34,14 +42,25 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
         throw new Error(`Invalid model provider for model: ${model}`);
     }
 
+    // Check abort signal before text generation
+    if (signal.aborted) {
+        throw new Error('AI execution aborted');
+    }
+
     const result = await generateText({
         model: modelProvider,
         prompt: contextText,
         temperature: attrs.temperature || 0.5,
+        abortSignal: signal
     });
 
     let structuredOutputs;
     if (attrs.structuredOutputs) {
+        // Check abort signal before structured outputs generation
+        if (signal.aborted) {
+            throw new Error('AI execution aborted');
+        }
+
         // Convert Markdoc schema object to Zod schema
         // const zodSchema = z.object(
         //     Object.entries(attrs.structuredOutputs).reduce((schema, [key, value]) => {
@@ -126,7 +145,8 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
             model: modelProvider,
             prompt: `Create an object that matches the following schema: ${JSON.stringify(attrs.structuredOutputs)}\n Here is the context: ${contextText}`,
             temperature: attrs.temperature || 0.5,
-            output: "no-schema"
+            output: "no-schema",
+            abortSignal: signal
         });
 
         structuredOutputs = structuredOutputsRequest.object;
@@ -134,6 +154,11 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
 
     let aiTag = new Tag("ai");
     yield aiTag;
+
+    // Check abort signal before finalizing
+    if (signal.aborted) {
+        throw new Error('AI execution aborted');
+    }
 
     stateManager.pushStack({
         id: attrs.id || 'ai',

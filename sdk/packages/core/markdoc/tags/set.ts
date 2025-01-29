@@ -15,6 +15,9 @@ export const setTag: Schema = {
 }
 
 export async function* set(node: Node, config: Config, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+
     const attrs = node.transformAttributes(config);
 
     const id = attrs.id;
@@ -25,11 +28,21 @@ export async function* set(node: Node, config: Config, stateManager: StateManage
     let setTag = new Tag("set");
     yield setTag;
 
+    // Check abort signal before processing
+    if (signal.aborted) {
+        throw new Error('Set execution aborted');
+    }
+
     const variables = Object.fromEntries(
         Object.entries(node.attributes)
             .filter(([key]) => key !== 'id')
             .map(([key, value]) => [key, resolveValue(value, config)])
     );
+
+    // Check abort signal before pushing state
+    if (signal.aborted) {
+        throw new Error('Set execution aborted');
+    }
 
     stateManager.pushStack({
         id,
@@ -37,9 +50,12 @@ export async function* set(node: Node, config: Config, stateManager: StateManage
         scope: GLOBAL_SCOPE
     });
 
+    // Check abort signal before finalizing
+    if (signal.aborted) {
+        throw new Error('Set execution aborted');
+    }
 
     setTag.children = [JSON.stringify(variables)];
-
 
     // const children = [];
     // for (const child of node.children) {

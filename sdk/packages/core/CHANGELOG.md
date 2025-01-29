@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.11
+
+### Patch Changes
+
+- update abort signals
+
 ## 0.0.10
 
 ### Patch Changes

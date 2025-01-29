@@ -16,10 +16,18 @@ export const flowTag: Schema = {
 }
 
 export async function* flow(node: Node, config: Config, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+
     const attrs = node.transformAttributes(config);
 
     let flowTag = new Tag("flow");
     yield flowTag;
+
+    // Check abort signal before processing
+    if (signal.aborted) {
+        throw new Error('Flow execution aborted');
+    }
 
     const path = attrs.path;
     const id = attrs.id || nanoid();
@@ -30,6 +38,11 @@ export async function* flow(node: Node, config: Config, stateManager: StateManag
     }
 
     try {
+        // Check abort signal before loading content
+        if (signal.aborted) {
+            throw new Error('Flow execution aborted');
+        }
+
         // Determine environment and load flow content
         const isNode = typeof window === 'undefined';
         let flowContent: string;
@@ -45,13 +58,21 @@ export async function* flow(node: Node, config: Config, stateManager: StateManag
             flowContent = await response.text();
         }
 
+        // Check abort signal before compilation
+        if (signal.aborted) {
+            throw new Error('Flow execution aborted');
+        }
+
         const { ast, errors, execute } = aim({
             content: flowContent,
             options: {
                 settings: {
                     useScoping: true
                 },
-                config
+                config,
+                signals: {
+                    abort: signal
+                }
             }
         });
 
@@ -59,7 +80,17 @@ export async function* flow(node: Node, config: Config, stateManager: StateManag
             throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
         }
 
+        // Check abort signal before execution
+        if (signal.aborted) {
+            throw new Error('Flow execution aborted');
+        }
+
         await execute();
+
+        // Check abort signal before finalizing
+        if (signal.aborted) {
+            throw new Error('Flow execution aborted');
+        }
 
         // Push flow variables to stack
         stateManager.pushStack({

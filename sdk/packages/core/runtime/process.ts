@@ -15,6 +15,12 @@ import { parallel } from "markdoc/tags/parallel";
 
 export async function* walk(node: Node, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+
+    if (signal.aborted) {
+        throw new Error('Operation aborted');
+    }
+
     const config = stateManager.getCurrentConfig(runtimeState.options.config);
 
     // TODO: handle more nodes here
@@ -101,7 +107,13 @@ async function* handleTag(node: Node, stateManager: StateManager) {
 }
 
 export async function* process({ node, stateManager }: AIMRuntime) {
-for (const child of node.children) {
+    const signal = stateManager.getRuntimeState().options.signals.abort;
+    
+    for (const child of node.children) {
+        if (signal.aborted) {
+            throw new Error('Operation aborted');
+        }
+
         for await (const result of walk(child, stateManager)) {
             yield result;
         }

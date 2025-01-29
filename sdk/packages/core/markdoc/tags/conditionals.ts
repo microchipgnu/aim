@@ -50,16 +50,29 @@ export const ifTag = {
 export const elseTag = tags.else;
 
 export async function* if_(node: Node, config: Config, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+
     const attrs = node.transformAttributes(config);
     const conditions = renderConditions(node);
 
     let ifTag = new Tag("if");
     yield ifTag;
 
+    // Check abort signal before processing
+    if (signal.aborted) {
+        throw new Error('If execution aborted');
+    }
+
     const children = [];
     const id = attrs.id || nanoid();
 
     for (const { condition, children: conditionChildren, type } of conditions) {
+        // Check abort signal before evaluating each condition
+        if (signal.aborted) {
+            throw new Error('If execution aborted');
+        }
+
         const resolvedCondition = condition?.resolve ? condition.resolve(config) : condition;
         
         if (resolvedCondition) {
@@ -73,14 +86,28 @@ export async function* if_(node: Node, config: Config, stateManager: StateManage
                 }
             });
 
+            // Check abort signal before processing children
+            if (signal.aborted) {
+                throw new Error('If execution aborted');
+            }
+
             for (const child of conditionChildren) {
                 for await (const result of walk(child, stateManager)) {
+                    // Check abort signal during child processing
+                    if (signal.aborted) {
+                        throw new Error('If execution aborted');
+                    }
                     children.push(result);
                 }
             }
 
             break;
         }
+    }
+
+    // Check abort signal before finalizing
+    if (signal.aborted) {
+        throw new Error('If execution aborted');
     }
 
     ifTag.children = children.flat();

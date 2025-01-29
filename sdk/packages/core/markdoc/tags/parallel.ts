@@ -13,16 +13,29 @@ export const parallelTag: Schema = {
 }
 
 export async function* parallel(node: Node, config: Config, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+
     const attrs = node.transformAttributes(config);
     const id = attrs?.id || 'parallel';
 
     let parallelTag = new Tag("parallel");
     yield parallelTag;
 
+    // Check abort signal before processing
+    if (signal.aborted) {
+        throw new Error('Parallel execution aborted');
+    }
+
     // Create an array of promises for each child node
     const childPromises = node.children.map(async (child) => {
         const results = [];
         for await (const result of walk(child, stateManager)) {
+            // Check abort signal during child processing
+            if (signal.aborted) {
+                throw new Error('Parallel execution aborted');
+            }
+
             if (Array.isArray(result)) {
                 results.push(...result);
             } else {
@@ -32,8 +45,18 @@ export async function* parallel(node: Node, config: Config, stateManager: StateM
         return results;
     });
 
-    // Execute all children in parallel
-    const results = await Promise.all(childPromises);
+    // Execute all children in parallel with abort handling
+    const results = await Promise.race([
+        Promise.all(childPromises),
+        new Promise<never>((_, reject) => {
+            signal.addEventListener('abort', () => reject(new Error('Parallel execution aborted')));
+        })
+    ]);
+
+    // Check abort signal before finalizing
+    if (signal.aborted) {
+        throw new Error('Parallel execution aborted'); 
+    }
 
     // Flatten and add all results to parallel tag children
     parallelTag.children = results.flat();

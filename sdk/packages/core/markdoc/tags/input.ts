@@ -18,10 +18,18 @@ export const inputTag: Schema = {
 }
 
 export async function* input(node: Node, config: Config, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+
     const attrs = node.transformAttributes(config);
 
     let inputTag = new Tag("input");
     yield inputTag;
+
+    // Check abort signal before processing
+    if (signal.aborted) {
+        throw new Error('Input execution aborted');
+    }
 
     const name = resolveValue(attrs.name, config);
     const description = resolveValue(attrs.description, config);
@@ -57,6 +65,11 @@ export async function* input(node: Node, config: Config, stateManager: StateMana
                 type = 'image/png';
                 break;
         }
+    }
+
+    // Check abort signal before handling input
+    if (signal.aborted) {
+        throw new Error('Input execution aborted');
     }
 
     // TODO: Handle user input

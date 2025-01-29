@@ -23,6 +23,9 @@ export const loopTag: Schema = {
 }
 
 export async function* loop(node: Node, config: Config, stateManager: StateManager) {
+    const runtimeState = stateManager.getRuntimeState();
+    const signal = runtimeState.options.signals.abort;
+    
     const attrs = node.transformAttributes(config);
 
     const count = resolveValue(attrs.count, config);
@@ -70,6 +73,11 @@ export async function* loop(node: Node, config: Config, stateManager: StateManag
     updateLoopState();
 
     do {
+        // Check abort signal at start of each iteration
+        if (signal.aborted) {
+            throw new Error('Loop execution aborted');
+        }
+
         // Process child nodes
         for (const child of node.children) {
             for await (const result of walk(child, stateManager)) {
