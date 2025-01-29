@@ -97,10 +97,12 @@ export interface RuntimeOptions {
         }) => Promise<void>;
         onUserInput?: (prompt: string) => Promise<string>;
     };
+    signals: {
+        abort: AbortSignal;
+    };
     settings: {
         useScoping: boolean;
     };
-    signal?: AbortSignal;
     timeout?: number;
     maxRetries?: number;
     variables?: Record<string, unknown>;

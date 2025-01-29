@@ -872,7 +872,9 @@ async function main() {
                     });
                 }
             },
-            signal: new AbortController().signal,
+            signals: {
+                abort: new AbortController().signal
+            },
             settings: {
                 useScoping: false
             },

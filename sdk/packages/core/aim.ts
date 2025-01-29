@@ -21,7 +21,9 @@ export const defaultRuntimeOptions: RuntimeOptions = {
     variables: {},
     input: {},
     events: {},
-    signal: new AbortController().signal,
+    signals: {
+        abort: new AbortController().signal
+    },
     timeout: 50000,
     maxRetries: 5,
     environment: jsEnvironment.isBrowser ? "browser" : "node",
@@ -166,12 +168,17 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
                 setTimeout(() => reject(new Error('Execution timed out')), runtimeOptions.timeout);
             });
 
+            const abortPromise = new Promise((_, reject) => {
+                runtimeOptions.signals.abort.addEventListener('abort', () => reject(new Error('Execution aborted')));
+            });
+
             await Promise.race([
                 execute({
                     node: ast,
                     stateManager
                 }),
-                timeoutPromise
+                timeoutPromise,
+                abortPromise
             ]);
         }
     };
