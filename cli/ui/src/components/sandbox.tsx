@@ -6,10 +6,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
-import { unicodeToBase64 } from "@/lib/encode";
 import MonacoEditor from '@monaco-editor/react';
 import { FileText, PlayIcon, RotateCcw, SaveIcon, Settings2, StopCircle, Upload } from "lucide-react";
 import React from 'react';
+import { unicodeToBase64 } from "../../../utils/encode-decode";
 
 export function Sandbox() {
   const [code, setCode] = React.useState<string>('');

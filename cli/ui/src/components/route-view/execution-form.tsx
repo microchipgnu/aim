@@ -5,7 +5,7 @@ import { Input } from "../ui/input";
 import { Alert, AlertDescription } from "../ui/alert";
 import { ScrollArea } from "../ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { unicodeToBase64 } from "@/lib/encode";
+import { unicodeToBase64 } from "../../../../utils/encode-decode";
 
 interface ExecutionFormProps {
     frontmatter: any;

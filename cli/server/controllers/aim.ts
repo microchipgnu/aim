@@ -3,26 +3,7 @@ import { abortManager } from '../services/abort-manager';
 import { aimManager } from '../services/aim-manager';
 import chalk from 'chalk';
 import { nanoid } from 'nanoid';
-
-function unicodeToBase64(str: string) {
-    const encoder = new TextEncoder();
-    const utf8Bytes = encoder.encode(str);
-    let binary = "";
-    for (let i = 0; i < utf8Bytes.length; i++) {
-      binary += String.fromCharCode(utf8Bytes[i]);
-    }
-    return btoa(binary);
-  }
-
-function base64ToUnicode(base64: string) {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return new TextDecoder().decode(bytes);
-  }
-  
+import { base64ToUnicode } from '../../utils/encode-decode';
 
 export function setupAIMRoutes(app: Express) {
     app.post('/api/aim/process', async (req: Request, res: Response) => {

@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.39
+
+### Patch Changes
+
+- fix encoder and decoder
+
 ## 0.1.38
 
 ### Patch Changes
