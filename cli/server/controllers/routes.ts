@@ -4,6 +4,7 @@ import path from 'path';
 import chalk from 'chalk';
 import express from 'express';
 import { aimManager, type AIMResponse } from '../services/aim-manager';
+import { getAIMRoutes } from '../resolution';
 
 interface Route {
     path: string;
@@ -12,30 +13,8 @@ interface Route {
 
 export async function setupRouteHandlers(app: Express, routesDir: string) {
     try {
-        // Ensure routes directory exists
-        const routesDirExists = await fs.access(routesDir)
-            .then(() => true)
-            .catch(() => false);
-
-        if (!routesDirExists) {
-            console.warn(chalk.yellow(`Routes directory not found: ${routesDir}`));
-            return;
-        }
-
-        // Read all route files
-        const files = await fs.readdir(routesDir);
-        const routes: Route[] = [];
-
-        // Build routes array
-        for (const file of files) {
-            if (file.endsWith('.aim') || file.endsWith('.md')) {
-                const filePath = path.join(routesDir, file);
-                const extension = path.extname(file);
-                const routePath = `api/${path.basename(file, extension)}`;
-                routes.push({ path: routePath, filePath });
-            }
-        }
-
+        // Get all AIM routes using the resolution helper
+        const routes = await getAIMRoutes(routesDir);
         console.log(chalk.dim(`Found ${routes.length} routes`));
 
         // Add index route that lists all routes
@@ -43,14 +22,16 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
             try {
                 console.log(chalk.dim(`GET /api - Listing ${routes.length} routes`));
 
-                const routeInfo = routes.map((route: Route) => ({
-                    path: route.path.replace(/^api\//, ''),
+                // Map routes and add additional metadata
+                const routeInfo = routes.map(route => ({
+                    path: route.path.replace(/^api\//, ''), // Remove the 'api/' prefix for client display
                     file: route.filePath,
                     type: route.path.includes('[') ? 'dynamic' : 'static',
                     segments: route.path.split('/').filter(Boolean).length,
                     extension: path.extname(route.filePath).slice(1)
                 }));
 
+                // Sort routes by segments and path for consistent ordering
                 routeInfo.sort((a, b) => {
                     if (a.segments === b.segments) {
                         return a.path.localeCompare(b.path);
@@ -70,14 +51,24 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
 
         // Add individual routes
         for (const route of routes) {
-            const apiPath = route.path;
+            const apiPath = route.path; // Path already includes 'api/' prefix from resolution.ts
 
             // GET handler for route AST/info
             app.get(`/${apiPath}`, async (req, res) => {
                 try {
                     console.log(chalk.dim(`GET /${apiPath} - Serving AST`));
+                    const content = await fs.readFile(route.filePath, 'utf-8');
                     const ast = await aimManager.getDocumentAST(route.filePath);
-                    res.json(ast);
+
+                    // Include additional info like warnings and frontmatter
+                    res.json({
+                        document: ast.document,
+                        rawContent: content,
+                        rawHtml: ast.rawHtml,
+                        errors: ast.errors,
+                        warnings: ast.warnings,
+                        frontmatter: ast.frontmatter
+                    });
                 } catch (error) {
                     console.error(chalk.red(`Error serving AST for ${apiPath}:`), error);
                     res.status(500).json({ error: 'Failed to serve AST' });
@@ -100,11 +91,27 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
                         throw new Error('Missing or invalid X-Request-ID header');
                     }
 
+                    // Create response wrapper for SSE
                     const aimResponse: AIMResponse = {
                         writableEnded: false,
                         write: (data: string) => res.write(data),
-                        end: () => res.end()
+                        end: () => {
+                            res.end();
+                            aimResponse.writableEnded = true;
+                        }
                     };
+
+                    // Handle client disconnect
+                    req.on('close', () => {
+                        if (!aimResponse.writableEnded) {
+                            console.log(chalk.dim(`Client disconnected for request ${requestId}`));
+                            aimResponse.write(`event: abort\ndata: ${JSON.stringify({ 
+                                reason: 'Client disconnected',
+                                requestId 
+                            })}\n\n`);
+                            aimResponse.end();
+                        }
+                    });
 
                     await aimManager.executeDocument(content, req.body || {}, requestId, aimResponse);
 
