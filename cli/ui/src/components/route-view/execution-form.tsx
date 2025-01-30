@@ -5,6 +5,7 @@ import { Input } from "../ui/input";
 import { Alert, AlertDescription } from "../ui/alert";
 import { ScrollArea } from "../ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { unicodeToBase64 } from "@/lib/encode";
 
 interface ExecutionFormProps {
     frontmatter: any;
@@ -194,7 +195,7 @@ export function ExecutionForm({ frontmatter, loading, onExecute, onAbort, rawCon
                                 variant="outline" 
                                 size="icon"
                                 onClick={() => {
-                                    window.location.href = `/_aim_/sandbox/?content=${btoa(rawContent)}`;
+                                    window.location.href = `/_aim_/sandbox/?content=${unicodeToBase64(rawContent)}`;
                                 }}
                             >
                                 <Edit2 className="h-4 w-4" />

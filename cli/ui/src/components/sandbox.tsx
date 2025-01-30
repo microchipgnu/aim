@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
+import { unicodeToBase64 } from "@/lib/encode";
 import MonacoEditor from '@monaco-editor/react';
 import { FileText, PlayIcon, RotateCcw, SaveIcon, Settings2, StopCircle, Upload } from "lucide-react";
 import React from 'react';
@@ -65,9 +66,8 @@ export function Sandbox() {
 
   const handleRun = async () => {
     try {
-      const encodedContent = btoa(code);
       const response = await fetch('/api/aim/info?' + new URLSearchParams({
-        content: encodedContent
+        content: unicodeToBase64(code)
       }), {
         method: 'GET',
         headers: {
@@ -136,7 +136,7 @@ export function Sandbox() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          content: code,
+          content: unicodeToBase64(code),
           input: variables
         }),
         signal
