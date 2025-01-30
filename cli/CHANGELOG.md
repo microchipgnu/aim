@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.36
+
+### Patch Changes
+
+- refactor
+
 ## 0.1.35
 
 ### Patch Changes
