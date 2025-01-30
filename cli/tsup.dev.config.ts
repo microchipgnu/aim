@@ -53,7 +53,7 @@ export default defineConfig({
       const uiDir = join(__dirname, 'ui')
       const uiBuildDir = join(uiDir, 'dist')
       const uiDistDir = join(__dirname, 'dist', 'ui')
-      const srcDir = join(__dirname, 'src')
+      const srcDir = join(__dirname, 'server')
       const testFilesDir = join(__dirname, 'test-files')
       
       let serverProcess: any = null;

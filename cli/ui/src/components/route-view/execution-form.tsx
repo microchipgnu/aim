@@ -1,17 +1,20 @@
-import { PlayCircle, AlertCircle } from "lucide-react";
+import { PlayCircle, AlertCircle, Edit2, StopCircle } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Alert, AlertDescription } from "../ui/alert";
 import { ScrollArea } from "../ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface ExecutionFormProps {
     frontmatter: any;
     loading: boolean;
     onExecute: (values: Record<string, any>) => void;
+    onAbort?: () => void;
+    rawContent: string;
 }
 
-export function ExecutionForm({ frontmatter, loading, onExecute }: ExecutionFormProps) {
+export function ExecutionForm({ frontmatter, loading, onExecute, onAbort, rawContent }: ExecutionFormProps) {
     return (
         <Card className="h-full max-h-[calc(100vh-6rem)] sticky top-24 shadow-sm border-slate-200 flex flex-col">
             <CardHeader className="flex-none">
@@ -157,24 +160,51 @@ export function ExecutionForm({ frontmatter, loading, onExecute }: ExecutionForm
                     </ScrollArea>
                 </form>
             </CardContent>
-            <CardFooter className="flex-none">
-                <Button 
-                    type="submit"
-                    form="execution-form"
-                    disabled={loading} 
-                    className="w-full font-medium shadow-sm transition-all hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary"
-                    aria-label={loading ? "Executing document..." : "Run"}
-                >
-                    {loading ? (
+            <CardFooter className="flex-none gap-2">
+                {loading ? (
+                    <Button 
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (onAbort) onAbort();
+                        }}
+                        variant="destructive"
+                        className="flex-1 font-medium shadow-sm transition-all hover:shadow-md"
+                        aria-label="Stop execution"
+                    >
                         <span className="flex items-center justify-center gap-2.5">
-                            <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Executing...
+                            <StopCircle className="h-4 w-4" />
+                            Stop Execution
                         </span>
-                    ) : 'Run'}
-                </Button>
+                    </Button>
+                ) : (
+                    <Button 
+                        type="submit"
+                        form="execution-form"
+                        className="flex-1 font-medium shadow-sm transition-all hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary"
+                        aria-label="Run"
+                    >
+                        Run
+                    </Button>
+                )}
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button 
+                                variant="outline" 
+                                size="icon"
+                                onClick={() => {
+                                    window.location.href = `/_aim_/sandbox/?content=${btoa(rawContent)}`;
+                                }}
+                            >
+                                <Edit2 className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Use sandbox to edit and run code</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </CardFooter>
         </Card>
     );

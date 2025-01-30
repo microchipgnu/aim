@@ -1,0 +1,145 @@
+# Guide to Creating Code with AIM
+
+AIM (AI Markdown) is a powerful framework that combines Markdown with AI capabilities to create interactive and intelligent documents. Here's how to use it effectively:
+
+## Basic Structure
+
+An AIM document is written in Markdown with special extensions. Here's the basic structure:
+
+```aim
+---
+title: Your Document Title
+description: "Document description"
+input:
+  - name: parameterName
+    type: string
+    description: "Parameter description"
+---
+
+# Your Content Here
+
+{% ai #uniqueId model="openai/gpt-4o-mini" /%}
+```
+
+## Key Features
+
+1. **AI Integration**
+   - Use the `ai` tag to integrate AI inference
+   - Example: `{% ai #chatbot model="openai/gpt-4o-mini" temperature=0.7 /%}`
+   - Access results with `{% $chatbot.result %}`
+
+2. **Variables**
+   - Define with `{% set #varName value="content" /%}`
+   - Reference with `{% $varName %}`
+   - Scopes: Global, Block, and Flow
+
+3. **Control Flow**
+   - Conditionals:
+     ```aim
+     {% if $condition %}
+       Content if true
+     {% else /%}
+       Content if false
+     {% /if %}
+     ```
+   - Loops:
+     ```aim
+     {% loop #loopId items=["item1", "item2"] /%}
+     {% loop #countLoop count=5 /%}
+     ```
+
+4. **Code Execution**
+   ```aim
+   ```js {% #codeBlock %}
+   const result = "Hello, World!";
+   export default result;
+   ```
+   {% $codeBlock.result %}
+   ```
+
+## Best Practices
+
+1. **Document Organization**
+   - Start with clear frontmatter
+   - Use meaningful IDs for AI blocks
+   - Structure content hierarchically with headings
+
+2. **AI Integration**
+   - Set appropriate temperature (0.0-1.0) for desired randomness
+   - Use descriptive IDs for AI blocks
+   - Chain AI responses using variables
+
+3. **Variables and State**
+   - Use descriptive variable names
+   - Leverage scoping for better organization
+   - Set default values when needed
+
+4. **Error Handling**
+   - Use conditional blocks for error cases
+   - Provide fallback content
+   - Validate inputs when necessary
+
+## Common Patterns
+
+1. **Chaining AI Responses**
+   ```aim
+   {% ai #firstResponse model="openai/gpt-4o-mini" /%}
+   {% set #context value=$firstResponse.result /%}
+   {% ai #secondResponse model="openai/gpt-4o-mini" context=$context /%}
+   ```
+
+2. **Dynamic Content**
+   ```aim
+   {% set #userInput string="Hello" /%}
+   {% ai #response model="openai/gpt-4o-mini" %}
+   Respond to: {% $userInput %}
+   {% /ai %}
+   ```
+
+3. **Conditional Execution**
+   ```aim
+   {% if equals($environment, "production") %}
+     {% ai #prodAI model="openai/gpt-4" /%}
+   {% else /%}
+     {% ai #devAI model="openai/gpt-4o-mini" /%}
+   {% /if %}
+   ```
+
+## Advanced Features
+
+1. **Media Integration**
+   ```aim
+   {% media type="image" src="path/to/image.jpg" /%}
+   ```
+
+2. **External Flows**
+   ```aim
+   {% flow #externalFlow src="path/to/flow.aim" /%}
+   ```
+
+3. **Rich Tables**
+   ```aim
+   {% table %}
+   * Header 1
+   * Header 2
+   ---
+   * Row 1 Cell 1
+   * Row 1 Cell 2
+   {% /table %}
+   ```
+
+## Tips for Success
+
+1. Keep your AIM documents modular and focused
+2. Use meaningful IDs and variable names
+3. Leverage the built-in functions (equals, and, or, not, default, debug)
+4. Document your flows with comments
+5. Test your AI interactions with different temperatures
+6. Use appropriate model selection based on your needs
+
+## Debugging
+
+- Use the `debug` function: `{% debug($variable) %}`
+- Add comments for clarity: `<!-- Debug note -->`
+- Test AI responses with different parameters
+- Validate variable values in conditional blocks

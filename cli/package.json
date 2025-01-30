@@ -51,13 +51,14 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@aim-sdk/core": "0.0.8",
+    "@aim-sdk/core": "0.0.12",
     "@markdoc/markdoc": "^0.4.0",
     "chalk": "^5.4.1",
     "commander": "^12.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "inquirer": "^12.3.0",
+    "nanoid": "^5.0.9",
     "ora": "^8.1.1",
     "vite": "^6.0.7",
     "wait-on": "^8.0.2"

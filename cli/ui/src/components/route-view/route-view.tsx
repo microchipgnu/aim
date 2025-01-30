@@ -35,6 +35,8 @@ export function RouteView({ path, isFullscreen }: { path: string, isFullscreen: 
     const [output, setOutput] = React.useState<string>('');
     const [rawContent, setRawContent] = React.useState<string>('');
     const [htmlContent, setHtmlContent] = React.useState<string>('');
+    const abortControllerRef = React.useRef<AbortController | null>(null);
+    const requestIdRef = React.useRef<string>('');
 
     const fetchAst = async () => {
         try {
@@ -54,22 +56,62 @@ export function RouteView({ path, isFullscreen }: { path: string, isFullscreen: 
         }
     };
 
-    React.useEffect(() => {
-        // Clear all state when path changes
+    const resetState = (shouldFetchAst: boolean = true) => {
+        // Reset execution state
         setLoading(false);
-        setAst(null);
         setResult([]);
         setError(null);
-        setFrontmatter(null);
-        setWarnings([]);
-        setErrors([]);
         setLogs([]);
         setOutput('');
-        setRawContent('');
-        setHtmlContent('');
 
-        fetchAst();
+        // Reset document state if fetching AST
+        if (shouldFetchAst) {
+            setAst(null);
+            setFrontmatter(null);
+            setWarnings([]);
+            setErrors([]);
+            setRawContent('');
+            setHtmlContent('');
+            fetchAst();
+        }
+
+        // Reset request state
+        abortControllerRef.current = null;
+        requestIdRef.current = '';
+    };
+
+    React.useEffect(() => {
+        resetState(true);
     }, [path]);
+
+    const handleAbort = async () => {
+        if (requestIdRef.current) {
+            try {
+                // First abort the client-side request
+                if (abortControllerRef.current) {
+                    abortControllerRef.current.abort();
+                }
+                
+                // Then notify the server to abort the request
+                const response = await fetch(`/api/abort/${requestIdRef.current}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to abort request');
+                }
+
+                // Reset state but don't fetch AST since we're just aborting
+                resetState(false);
+                setLogs(prev => [...prev, 'Execution aborted by user']);
+                setError('Execution aborted by user');
+            } catch (err) {
+                console.error('Failed to abort execution:', err);
+                setError(err instanceof Error ? err.message : 'Failed to abort execution');
+            }
+        }
+    };
 
     const executeDocument = async (variables: Record<string, any> = {}) => {
         try {
@@ -79,10 +121,25 @@ export function RouteView({ path, isFullscreen }: { path: string, isFullscreen: 
             setOutput('');
             setLoading(true);
 
+            // Create new AbortController and request ID for this execution
+            abortControllerRef.current = new AbortController();
+            requestIdRef.current = Math.random().toString(36).substring(7);
+            const signal = abortControllerRef.current.signal;
+
             const response = await fetch(`/api/${path}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(variables)
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream',
+                    'X-Request-ID': requestIdRef.current
+                },
+                body: JSON.stringify(variables),
+                signal
+            }).catch(err => {
+                if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+                    throw new Error('Connection refused - Server may be down');
+                }
+                throw err;
             });
 
             const reader = response.body?.getReader();
@@ -130,9 +187,7 @@ export function RouteView({ path, isFullscreen }: { path: string, isFullscreen: 
                                 }
                                 break;
                             case 'complete':
-                                if (data.result !== undefined) {
-                                    setResult(prev => [...prev, data.result]);
-                                }
+                                setLoading(false);
                                 break;
                             case 'success':
                                 if (data.data !== undefined) {
@@ -150,6 +205,13 @@ export function RouteView({ path, isFullscreen }: { path: string, isFullscreen: 
                                     setResult(prev => [...prev, data.data]);
                                 }
                                 break;
+                            case 'abort':
+                                setLoading(false);
+                                setError(data.reason || 'Execution aborted');
+                                // Clean up abort controller on server-side abort
+                                abortControllerRef.current = null;
+                                requestIdRef.current = '';
+                                break;
                         }
                     } catch (err) {
                         console.error('Error processing event:', err);
@@ -157,12 +219,36 @@ export function RouteView({ path, isFullscreen }: { path: string, isFullscreen: 
                 }
             }
         } catch (err) {
-            setError('Failed to execute document');
-            console.error(err);
+            if (err instanceof Error) {
+                if (err.name === 'AbortError') {
+                    console.log('Fetch aborted');
+                    setError('Execution aborted');
+                } else {
+                    setError(err.message || 'Failed to execute document');
+                    console.error(err);
+                }
+            } else {
+                setError('Failed to execute document');
+                console.error(err);
+            }
         } finally {
             setLoading(false);
+            // Only clean up if not already cleaned up by abort event
+            if (abortControllerRef.current) {
+                abortControllerRef.current = null;
+                requestIdRef.current = '';
+            }
         }
     };
+
+    React.useEffect(() => {
+        return () => {
+            // Clean up any active request when component unmounts
+            if (requestIdRef.current) {
+                handleAbort();
+            }
+        };
+    }, []);
 
     return (
         <div className="min-h-screen w-full bg-background">
@@ -198,6 +284,8 @@ export function RouteView({ path, isFullscreen }: { path: string, isFullscreen: 
                             frontmatter={frontmatter}
                             loading={loading}
                             onExecute={executeDocument}
+                            onAbort={handleAbort}
+                            rawContent={rawContent}
                         />
                     </div>
 

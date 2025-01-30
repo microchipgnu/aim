@@ -4,7 +4,7 @@ import "dotenv/config";
 import { promises as fs } from 'node:fs';
 import * as readline from 'node:readline';
 import pkg from "./package.json" assert { type: "json" };
-import { createServer } from "./src/server";
+import { createServer } from "./server";
 import chalk from 'chalk';
 import type { ValidateError, ValidationError } from "@markdoc/markdoc";
 import ora from 'ora';
@@ -89,6 +89,9 @@ program
       const content = await fs.readFile(filepath, 'utf-8');
       const aimDocument = aim({ content, options: {
         variables: {},
+        signals: {
+          abort: new AbortController().signal
+        },
         config: {},
         events: {
           onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
@@ -150,6 +153,9 @@ program
       const aimContent = await fs.readFile(filepath, 'utf-8');
       const aimDocument = aim({ content: aimContent, options: {
         variables: {},
+        signals: {
+          abort: new AbortController().signal
+        },
         config: {},
         events: {
           onLog: (message) => console.log(chalk.dim(`Log: ${message}`))

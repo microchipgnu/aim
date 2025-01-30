@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReactJson from 'react-json-view';
 import { ScrollArea } from "@/components/ui/scroll-area";
+import MonacoEditor from '@monaco-editor/react';
+import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
 
 interface ContentTabProps {
     rawContent: string;
@@ -27,9 +29,26 @@ export function ContentTab({ rawContent, htmlContent, ast }: ContentTabProps) {
 
                     <ScrollArea className="h-[calc(100%-44px)]">
                         <TabsContent value="markdown" className="p-6 m-0">
-                            <pre className="bg-slate-50 p-4 rounded-md text-sm font-mono text-slate-800 whitespace-pre-wrap">
-                                {rawContent}
-                            </pre>
+                            <MonacoEditor
+                                height="400px"
+                                defaultLanguage="aim"
+                                theme="aim-light"
+                                value={rawContent}
+                                beforeMount={configurePrismSyntax}
+                                options={{
+                                    readOnly: true,
+                                    minimap: { enabled: false },
+                                    fontSize: 14,
+                                    wordWrap: 'on',
+                                    lineNumbers: 'off',
+                                    folding: false,
+                                    lineDecorationsWidth: 0,
+                                    lineNumbersMinChars: 0,
+                                    glyphMargin: false,
+                                    scrollBeyondLastLine: false,
+                                    padding: { top: 8 }
+                                }}
+                            />
                         </TabsContent>
 
                         <TabsContent value="html" className="p-6 m-0">
