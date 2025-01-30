@@ -1,10 +1,9 @@
+import chalk from 'chalk';
 import type { Express } from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
-import chalk from 'chalk';
-import express from 'express';
-import { aimManager, type AIMResponse } from '../services/aim-manager';
 import { getAIMRoutes } from '../resolution';
+import { aimManager, type AIMResponse } from '../services/aim-manager';
 
 interface Route {
     path: string;

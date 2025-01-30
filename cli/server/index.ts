@@ -8,6 +8,7 @@ import { setupUI } from './middleware/ui';
 import { setupAbortController } from './controllers/abort';
 import { setupAIMRoutes } from './controllers/aim';
 import { setupRouteHandlers } from './controllers/routes';
+import { setupManifests } from './controllers/openapi';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -23,7 +24,8 @@ export async function createServer(config: ServerConfig) {
     // Setup controllers
     setupAbortController(app);
     setupAIMRoutes(app);
-
+    setupManifests(app, config.routesDir);
+    
     try {
         // Setup route handlers (includes sandbox and dynamic routes)
         await setupRouteHandlers(app, config.routesDir);
