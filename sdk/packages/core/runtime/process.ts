@@ -12,6 +12,7 @@ import { transform } from "markdoc/transform";
 import type { AIMRuntime } from "types";
 import { StateManager } from "./state";
 import { parallel } from "markdoc/tags/parallel";
+import { media } from "markdoc/tags/media";
 
 export async function* walk(node: Node, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
@@ -84,6 +85,10 @@ async function* handleTag(node: Node, stateManager: StateManager) {
         }
         case "parallel": {
             yield* parallel(node, config, stateManager);
+            break;
+        }
+        case "media": {
+            yield* media(node, config, stateManager);
             break;
         }
         default: {

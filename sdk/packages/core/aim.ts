@@ -12,6 +12,7 @@ import { setTag } from "markdoc/tags/set";
 import { StateManager } from "runtime/state";
 import { execute, executeGenerator } from "./runtime/execute";
 import type { RuntimeOptions } from "./types";
+import { mediaTag } from "markdoc/tags/media";
 
 export const GLOBAL_SCOPE = "global";
 
@@ -45,7 +46,8 @@ export const defaultRuntimeOptions: RuntimeOptions = {
             input: inputTag,
             flow: flowTag,
             if: ifTag,
-            else: elseTag
+            else: elseTag,
+            media: mediaTag
         },
         functions: {
             ...functions,
