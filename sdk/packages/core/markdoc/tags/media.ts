@@ -1,4 +1,4 @@
-import { Tag, type Config, type Node, type Schema } from "@markdoc/markdoc";
+import { Tag, type Config, type Node, type Schema, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import type { StateManager } from "runtime/state";
 
@@ -16,14 +16,13 @@ export const mediaTag: Schema = {
     }
 }
 
-export async function* media(node: Node, config: Config, stateManager: StateManager) {
+export async function* media(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const signal = runtimeState.options.signals.abort;
 
     const attrs = node.transformAttributes(config);
 
     let mediaTag = new Tag("media");
-    yield mediaTag;
 
     // Check abort signal before processing
     if (signal.aborted) {
@@ -96,4 +95,6 @@ export async function* media(node: Node, config: Config, stateManager: StateMana
     });
 
     mediaTag.children = [JSON.stringify(mediaContent)];
+
+    yield mediaTag;
 }

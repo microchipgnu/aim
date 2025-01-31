@@ -1,4 +1,4 @@
-import { type Schema, type Node, type Config, Tag } from "@markdoc/markdoc";
+import { type Schema, type Node, type Config, Tag, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { resolveValue } from "markdoc/utils";
 import { StateManager, walk } from "runtime";
 import { GLOBAL_SCOPE } from "index";
@@ -22,7 +22,7 @@ export const loopTag: Schema = {
     }
 }
 
-export async function* loop(node: Node, config: Config, stateManager: StateManager) {
+export async function* loop(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const signal = runtimeState.options.signals.abort;
     
@@ -50,7 +50,6 @@ export async function* loop(node: Node, config: Config, stateManager: StateManag
     }
 
     let loopTag = new Tag("loop");
-    yield loopTag;
 
     const iterables = items || (hasValidCount ? Array.from({ length: numericCount }) : [null]);
     let i = 0;
@@ -108,6 +107,8 @@ export async function* loop(node: Node, config: Config, stateManager: StateManag
             }
         }
     } while (true);
+
+    yield loopTag;
 
     // Clean up loop state
     // stateManager.popStack(GLOBAL_SCOPE);

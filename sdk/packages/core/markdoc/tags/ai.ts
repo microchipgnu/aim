@@ -1,10 +1,9 @@
-import { type Config, type Node, type Schema, Tag } from "@markdoc/markdoc";
+import { type Config, type Node, type Schema, Tag, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { generateObject, generateText } from "ai";
 import { GLOBAL_SCOPE } from "aim";
 import { text } from "markdoc/renderers/text";
 import { getModelProvider } from "runtime/ai/get-model-providers";
 import type { StateManager } from "runtime/state";
-import { z } from "zod";
 
 export const aiTag: Schema = {
     render: 'ai',
@@ -20,7 +19,7 @@ export const aiTag: Schema = {
     }
 }
 
-export async function* ai(node: Node, config: Config, stateManager: StateManager) {
+export async function* ai(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const signal = runtimeState.options.signals.abort;
 
@@ -32,8 +31,6 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
     }
 
     const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join('\n');
-
-    stateManager.runtimeOptions.events?.onLog?.(`Context: ${contextText}`);
 
     const model = attrs.model || "openai/gpt-4o-mini";
     const modelProvider = getModelProvider(model);
@@ -153,7 +150,6 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
     }
 
     let aiTag = new Tag("ai");
-    yield aiTag;
 
     // Check abort signal before finalizing
     if (signal.aborted) {
@@ -174,4 +170,6 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
     stateManager.addToTextRegistry(text(JSON.stringify(structuredOutputs)), GLOBAL_SCOPE);
 
     aiTag.children = [result.text];
+
+    yield aiTag
 }

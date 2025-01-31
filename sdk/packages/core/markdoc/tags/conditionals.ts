@@ -1,4 +1,4 @@
-import { type Config, type Node, Tag, tags } from "@markdoc/markdoc";
+import { type Config, type Node, type RenderableTreeNodes, Tag, tags } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import { nanoid } from "nanoid";
 import type { StateManager } from "runtime/state";
@@ -49,7 +49,7 @@ export const ifTag = {
 };
 export const elseTag = tags.else;
 
-export async function* if_(node: Node, config: Config, stateManager: StateManager) {
+export async function* if_(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const signal = runtimeState.options.signals.abort;
 
@@ -57,7 +57,6 @@ export async function* if_(node: Node, config: Config, stateManager: StateManage
     const conditions = renderConditions(node);
 
     let ifTag = new Tag("if");
-    yield ifTag;
 
     // Check abort signal before processing
     if (signal.aborted) {
@@ -111,4 +110,6 @@ export async function* if_(node: Node, config: Config, stateManager: StateManage
     }
 
     ifTag.children = children.flat();
+
+    yield ifTag;
 }

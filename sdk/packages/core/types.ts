@@ -145,7 +145,7 @@ export interface AIMPlugin {
     };
     configSchema?: unknown; // Schema validation object (e.g., Zod, Joi, etc.)
     init?: (config: AIMConfig, pluginOptions?: unknown) => void;
-    tags?: Record<string, AIMTag & { execute: (params: { node: Node, config: Config, state: RuntimeState }) => AsyncGenerator<any> }>;
+    tags?: Record<string, AIMTag & { execute: (params: { node: Node, config: Config, state: RuntimeState }) => AsyncGenerator<RenderableTreeNodes> }>;
     functions?: Record<string, (...args: any[]) => any>;
     hooks?: {
         beforeExecution?: (context: RuntimeContext) => Promise<void>;

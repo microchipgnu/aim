@@ -1,4 +1,4 @@
-import { type Node, type RenderableTreeNodes } from "@markdoc/markdoc";
+import { Tag, type Node, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import { fence } from "markdoc/nodes/fence";
 import { text } from "markdoc/renderers/text";
@@ -25,25 +25,17 @@ export async function* walk(node: Node, stateManager: StateManager): AsyncGenera
 
     const config = stateManager.getCurrentConfig(runtimeState.options.config);
 
-    // TODO: handle more nodes here
     switch (node.type) {
         case "paragraph":
         case "heading":
-        case "list":
+        case "list": 
         case "item":
         case "inline":
-            for (const child of node.children) {
-                yield* walk(child, stateManager);
-            }
+            yield* handleContainerNode(node, config, stateManager);
             break;
         case "text":
-            const result = await transform?.(node, config);
-
-            runtimeState.context.methods.addToTextRegistry({ text: text(result), scope: GLOBAL_SCOPE });
-
-            yield result;
+            yield* handleTextNode(node, config, runtimeState);
             break;
-
         case "fence":
             yield* fence(node, config, stateManager);
             break;
@@ -55,7 +47,38 @@ export async function* walk(node: Node, stateManager: StateManager): AsyncGenera
     }
 }
 
-async function* handleTag(node: Node, stateManager: StateManager) {
+async function* handleContainerNode(node: Node, config: any, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
+    const transformedNode = transform(node, config);
+    if (transformedNode && typeof transformedNode === 'object') {
+        const children = [];
+        for (const child of node.children) {
+            if (child.type === "text") {
+                for await (const result of handleTextNode(child, config, stateManager.getRuntimeState())) {
+                    children.push(result);
+                }
+            } else {
+                for await (const result of walk(child, stateManager)) {
+                    children.push(result);
+                }
+            }
+        }
+        if ('children' in transformedNode) {
+            transformedNode.children = children;
+        }
+        yield transformedNode;
+    }
+}
+
+async function* handleTextNode(node: Node, config: any, runtimeState: any): AsyncGenerator<RenderableTreeNodes> {
+    const result = await transform?.(node, config);
+    runtimeState.context.methods.addToTextRegistry({
+        text: text(result),
+        scope: GLOBAL_SCOPE
+    });
+    yield result;
+}
+
+async function* handleTag(node: Node, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const config = stateManager.getCurrentConfig(runtimeState.options.config);
 

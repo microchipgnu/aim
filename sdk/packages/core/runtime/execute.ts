@@ -109,6 +109,7 @@ export async function* executeGenerator({ node, stateManager }: AIMRuntime): Asy
             if (result) {
                 stateManager.runtimeOptions.events?.onLog?.(`Processing result: ${JSON.stringify(result)}`);
                 stateManager.runtimeOptions.events?.onData?.(result);
+                
                 if (typeof result === 'string' || typeof result === 'object') {
                     yield result;
                 }

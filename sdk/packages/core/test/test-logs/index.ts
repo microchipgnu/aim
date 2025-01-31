@@ -1,6 +1,6 @@
 import { writeFileSync } from "fs";
 import { transform } from "markdoc/transform";
-import { aim, defaultRuntimeOptions, Tag } from "../../index";
+import { aim, defaultRuntimeOptions, renderers, Tag } from "../../index";
 import { html } from "../../markdoc/renderers/html";
 
 
@@ -382,7 +382,7 @@ structuredOutputs: `
 
 Create a recipe for chocholate cake
 
-{% ai #output1 model="openai/gpt-4o" structuredOutputs={recipe: "string", ingredients: "string[]", instructions: "string[]"} /%}
+{% ai #output1 model="openai/gpt-4o-mini" structuredOutputs={recipe: "string", ingredients: "string[]", instructions: "string[]"} /%}
 
 # {% $output1.structuredOutputs.recipe %}
 
@@ -935,7 +935,8 @@ async function main() {
     //     }
     // });
 
-    // Execute document with generator
+    //TEST ABORTION
+    let shouldAbort = false;
     let resultCount = 0;
     for await (const result of doc.executeWithGenerator({
         input: {
@@ -948,19 +949,14 @@ async function main() {
             question: "What is the capital of France?"
         }
     })) {
-        console.log("🔄 Generator Result:", result);
+        console.log("🔄 Generator Result:", JSON.stringify(result, null, 2));
         resultCount++;
-        if (resultCount >= 2) {
+        if (resultCount >= 2 && shouldAbort) {
             console.log("🚀 Aborting execution...");
             abortController.abort();
             break;
         }
     }
-
-
-    
-
-    console.log("🚀 State Manager:", JSON.stringify(doc.stateManager.getRuntimeState().options.config, null, 2));
 
     // Get state chain logs
     const logs = doc.stateManager.getStateHistory();
@@ -992,8 +988,8 @@ async function main() {
     console.log('📄 Logs have been written to logs.html');
     process.exit(0);
 }
-
-const run = content.parallel
+ 
+const run = content.wikipediaResults
 
 main().catch(console.error);
 

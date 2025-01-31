@@ -1,4 +1,4 @@
-import { Tag, type Config, type Node, type Schema } from "@markdoc/markdoc";
+import { Tag, type Config, type Node, type Schema, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import { resolveValue } from "markdoc/utils";
 import type { StateManager } from "runtime/state";
@@ -14,7 +14,7 @@ export const setTag: Schema = {
     }
 }
 
-export async function* set(node: Node, config: Config, stateManager: StateManager) {
+export async function* set(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const signal = runtimeState.options.signals.abort;
 
@@ -26,7 +26,6 @@ export async function* set(node: Node, config: Config, stateManager: StateManage
     }
 
     let setTag = new Tag("set");
-    yield setTag;
 
     // Check abort signal before processing
     if (signal.aborted) {
@@ -65,4 +64,6 @@ export async function* set(node: Node, config: Config, stateManager: StateManage
     // }
 
     // setTag.children = children.flat();
+
+    yield setTag;
 }

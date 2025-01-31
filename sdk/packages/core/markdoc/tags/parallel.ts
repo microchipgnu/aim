@@ -1,4 +1,4 @@
-import { type Schema, type Node, type Config, Tag } from "@markdoc/markdoc";
+import { type Schema, type Node, type Config, Tag, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { StateManager, walk } from "runtime";
 import { GLOBAL_SCOPE } from "index";
 
@@ -12,7 +12,7 @@ export const parallelTag: Schema = {
     }
 }
 
-export async function* parallel(node: Node, config: Config, stateManager: StateManager) {
+export async function* parallel(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const signal = runtimeState.options.signals.abort;
 
@@ -20,7 +20,7 @@ export async function* parallel(node: Node, config: Config, stateManager: StateM
     const id = attrs?.id || 'parallel';
 
     let parallelTag = new Tag("parallel");
-    yield parallelTag;
+
 
     // Check abort signal before processing
     if (signal.aborted) {
@@ -68,4 +68,6 @@ export async function* parallel(node: Node, config: Config, stateManager: StateM
             results: results.flat()
         }
     });
+
+    yield parallelTag;
 }

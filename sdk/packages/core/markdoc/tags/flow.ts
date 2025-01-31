@@ -1,4 +1,4 @@
-import { Tag, type Config, type Node, type Schema } from "@markdoc/markdoc";
+import { Tag, type Config, type Node, type Schema, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { aim, GLOBAL_SCOPE, StateManager } from "index";
 import { nanoid } from "nanoid";
 
@@ -15,14 +15,13 @@ export const flowTag: Schema = {
     }
 }
 
-export async function* flow(node: Node, config: Config, stateManager: StateManager) {
+export async function* flow(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
     const runtimeState = stateManager.getRuntimeState();
     const signal = runtimeState.options.signals.abort;
 
     const attrs = node.transformAttributes(config);
 
     let flowTag = new Tag("flow");
-    yield flowTag;
 
     // Check abort signal before processing
     if (signal.aborted) {
@@ -108,6 +107,8 @@ export async function* flow(node: Node, config: Config, stateManager: StateManag
             input,
             content: flowContent
         })];
+
+        yield flowTag;
 
     } catch (error) {
         throw new Error(`Failed to execute flow '${path}': ${error}`);

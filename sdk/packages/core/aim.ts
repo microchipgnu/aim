@@ -1,6 +1,7 @@
 import { functions, nodes, tags, type Schema } from "@markdoc/markdoc";
 import * as jsEnvironment from "browser-or-node";
-import { add, divide, greaterThan, greaterThanOrEqual, includes, lessThan, lessThanOrEqual, multiply, subtract } from "markdoc/functions/functions";
+import { greaterThan, greaterThanOrEqual, includes, lessThan, lessThanOrEqual } from "markdoc/functions/compare";
+import { add, divide, multiply, subtract } from "markdoc/functions/arithmetic";
 import { fenceNode } from "markdoc/nodes/fence";
 import { parser } from "markdoc/parser";
 import { aiTag } from "markdoc/tags/ai";

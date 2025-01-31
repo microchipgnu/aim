@@ -1,618 +1,241 @@
-🚀 Initial State: {"variables":{}}
-🚀 Runtime Options: {"variables":{},"nodes":{"blockquote":{"render":"blockquote","children":["heading","paragraph","image","table","tag","fence","blockquote","list","hr"]},"code":{"render":"code","attributes":{"content":{"render":false,"required":true}}},"comment":{"attributes":{"content":{"required":true}}},"document":{"render":"article","children":["heading","paragraph","image","table","tag","fence","blockquote","comment","list","hr"],"attributes":{"frontmatter":{"render":false}}},"em":{"render":"em","children":["strong","s","link","code","text","tag"],"attributes":{"marker":{"render":false}}},"error":{},"fence":{"render":"pre","attributes":{"content":{"render":false,"required":true},"language":{"render":"data-language"},"process":{"render":false,"default":true},"id":{"required":false}}},"hardbreak":{"render":"br"},"heading":{"children":["inline"],"attributes":{"level":{"render":false,"required":true}}},"hr":{"render":"hr"},"image":{"render":"img","attributes":{"src":{"required":true},"alt":{},"title":{}}},"inline":{"children":["strong","em","s","code","text","tag","link","image","hardbreak","softbreak","comment"]},"item":{"render":"li","children":["inline","heading","paragraph","image","table","tag","fence","blockquote","list","hr"]},"link":{"render":"a","children":["strong","em","s","code","text","tag"],"attributes":{"href":{"required":true},"title":{}}},"list":{"children":["item"],"attributes":{"ordered":{"render":false,"required":true},"start":{},"marker":{"render":false}}},"node":{},"paragraph":{"render":"p","children":["inline"]},"s":{"render":"s","children":["strong","em","link","code","text","tag"]},"softbreak":{},"strong":{"render":"strong","children":["em","s","link","code","text","tag"],"attributes":{"marker":{"render":false}}},"table":{"render":"table"},"tbody":{"render":"tbody","children":["tr","tag"]},"td":{"render":"td","children":["inline","heading","paragraph","image","table","tag","fence","blockquote","list","hr"],"attributes":{"align":{},"colspan":{"render":"colSpan"},"rowspan":{"render":"rowSpan"}}},"text":{"attributes":{"content":{"required":true}}},"th":{"render":"th","attributes":{"width":{},"align":{},"colspan":{"render":"colSpan"},"rowspan":{"render":"rowSpan"}}},"thead":{"render":"thead","children":["tr"]},"tr":{"render":"tr","children":["th","td"]}},"tags":{"else":{"selfClosing":true,"attributes":{"primary":{"render":false}}},"if":{"attributes":{"primary":{"render":false}}},"partial":{"inline":false,"selfClosing":true,"attributes":{"file":{"render":false,"required":true},"variables":{"render":false}}},"slot":{"attributes":{"primary":{"required":true}}},"table":{"children":["table"],"inline":false},"ai":{"render":"ai","selfClosing":true,"attributes":{"model":{"required":true,"default":"openai/gpt-4o-mini"},"id":{"required":false},"temperature":{"required":false,"default":0.5}}},"loop":{"render":"loop","attributes":{"count":{"required":false},"id":{"required":false},"items":{"required":false},"primary":{"required":false}}},"set":{"render":"set","selfClosing":true,"attributes":{"id":{"required":true}}},"input":{"render":"input","selfClosing":true,"attributes":{"name":{"required":false,"default":"question"},"description":{"required":false,"default":""},"type":{"required":false,"default":"text/plain"},"src":{"required":false}}},"flow":{"render":"flow","selfClosing":true,"attributes":{"path":{"required":true},"id":{"required":false},"input":{"required":false}}},"sign-eth-transaction":{"render":"sign-eth-transaction"}},"functions":{"and":{},"or":{},"not":{"parameters":{"0":{"required":true}}},"equals":{},"default":{},"debug":{},"greaterThan":{"parameters":{"0":{"required":true},"1":{"required":true}}},"lessThan":{"parameters":{"0":{"required":true},"1":{"required":true}}},"greaterThanOrEqual":{"parameters":{"0":{"required":true},"1":{"required":true}}},"lessThanOrEqual":{"parameters":{"0":{"required":true},"1":{"required":true}}},"includes":{"parameters":{"0":{"required":true},"1":{"required":true}}},"add":{"parameters":{"0":{"required":true},"1":{"required":true}}},"subtract":{"parameters":{"0":{"required":true},"1":{"required":true}}},"multiply":{"parameters":{"0":{"required":true},"1":{"required":true}}},"divide":{"parameters":{"0":{"required":true},"1":{"required":true}}}}}
-🚀 Runtime Options: {"variables":{},"nodes":{"blockquote":{"render":"blockquote","children":["heading","paragraph","image","table","tag","fence","blockquote","list","hr"]},"code":{"render":"code","attributes":{"content":{"render":false,"required":true}}},"comment":{"attributes":{"content":{"required":true}}},"document":{"render":"article","children":["heading","paragraph","image","table","tag","fence","blockquote","comment","list","hr"],"attributes":{"frontmatter":{"render":false}}},"em":{"render":"em","children":["strong","s","link","code","text","tag"],"attributes":{"marker":{"render":false}}},"error":{},"fence":{"render":"pre","attributes":{"content":{"render":false,"required":true},"language":{"render":"data-language"},"process":{"render":false,"default":true},"id":{"required":false}}},"hardbreak":{"render":"br"},"heading":{"children":["inline"],"attributes":{"level":{"render":false,"required":true}}},"hr":{"render":"hr"},"image":{"render":"img","attributes":{"src":{"required":true},"alt":{},"title":{}}},"inline":{"children":["strong","em","s","code","text","tag","link","image","hardbreak","softbreak","comment"]},"item":{"render":"li","children":["inline","heading","paragraph","image","table","tag","fence","blockquote","list","hr"]},"link":{"render":"a","children":["strong","em","s","code","text","tag"],"attributes":{"href":{"required":true},"title":{}}},"list":{"children":["item"],"attributes":{"ordered":{"render":false,"required":true},"start":{},"marker":{"render":false}}},"node":{},"paragraph":{"render":"p","children":["inline"]},"s":{"render":"s","children":["strong","em","link","code","text","tag"]},"softbreak":{},"strong":{"render":"strong","children":["em","s","link","code","text","tag"],"attributes":{"marker":{"render":false}}},"table":{"render":"table"},"tbody":{"render":"tbody","children":["tr","tag"]},"td":{"render":"td","children":["inline","heading","paragraph","image","table","tag","fence","blockquote","list","hr"],"attributes":{"align":{},"colspan":{"render":"colSpan"},"rowspan":{"render":"rowSpan"}}},"text":{"attributes":{"content":{"required":true}}},"th":{"render":"th","attributes":{"width":{},"align":{},"colspan":{"render":"colSpan"},"rowspan":{"render":"rowSpan"}}},"thead":{"render":"thead","children":["tr"]},"tr":{"render":"tr","children":["th","td"]}},"tags":{"else":{"selfClosing":true,"attributes":{"primary":{"render":false}}},"if":{"attributes":{"primary":{"render":false}}},"partial":{"inline":false,"selfClosing":true,"attributes":{"file":{"render":false,"required":true},"variables":{"render":false}}},"slot":{"attributes":{"primary":{"required":true}}},"table":{"children":["table"],"inline":false},"ai":{"render":"ai","selfClosing":true,"attributes":{"model":{"required":true,"default":"openai/gpt-4o-mini"},"id":{"required":false},"temperature":{"required":false,"default":0.5}}},"loop":{"render":"loop","attributes":{"count":{"required":false},"id":{"required":false},"items":{"required":false},"primary":{"required":false}}},"set":{"render":"set","selfClosing":true,"attributes":{"id":{"required":true}}},"input":{"render":"input","selfClosing":true,"attributes":{"name":{"required":false,"default":"question"},"description":{"required":false,"default":""},"type":{"required":false,"default":"text/plain"},"src":{"required":false}}},"flow":{"render":"flow","selfClosing":true,"attributes":{"path":{"required":true},"id":{"required":false},"input":{"required":false}}},"sign-eth-transaction":{"render":"sign-eth-transaction"}},"functions":{"and":{},"or":{},"not":{"parameters":{"0":{"required":true}}},"equals":{},"default":{},"debug":{},"greaterThan":{"parameters":{"0":{"required":true},"1":{"required":true}}},"lessThan":{"parameters":{"0":{"required":true},"1":{"required":true}}},"greaterThanOrEqual":{"parameters":{"0":{"required":true},"1":{"required":true}}},"lessThanOrEqual":{"parameters":{"0":{"required":true},"1":{"required":true}}},"includes":{"parameters":{"0":{"required":true},"1":{"required":true}}},"add":{"parameters":{"0":{"required":true},"1":{"required":true}}},"subtract":{"parameters":{"0":{"required":true},"1":{"required":true}}},"multiply":{"parameters":{"0":{"required":true},"1":{"required":true}}},"divide":{"parameters":{"0":{"required":true},"1":{"required":true}}}}}
 🚀 Started: Execution started!
-📝 Log: Processing result: "Lets sign the transaction. "
-📊 Data: Lets sign the transaction. 
-📝 Log: Processing result: "Here's the signed transaction: 0x1234567890d3fsasd"
-📊 Data: Here's the signed transaction: 0x1234567890d3fsasd
-📝 Log: Processing result: {"$$mdtype":"Tag","name":"div","attributes":{"text":"Here's the signed transaction: 0x1234567890d3fsasd"},"children":[]}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"p","attributes":{},"children":["Retrieval assisted (RAG) question answering using Wikipedia."," ","e.g. Try asking \"When did OceanGate sink?\", \"How tall is the tallest penguin species?\""]}
 📊 Data: Tag {
   [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
-  [0mname[2m:[0m [0m[32m[0m[32m"div"[0m[0m[0m[2m,[0m
-  [0mattributes[2m:[0m {
-    [0mtext[2m:[0m [0m[32m[0m[32m"Here's the signed transaction: 0x1234567890d3fsasd"[0m[0m[0m[2m,[0m
-  }[0m[2m,[0m
-  [0mchildren[2m:[0m [][0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"Retrieval assisted (RAG) question answering using Wikipedia."[0m[0m[0m[2m,[0m
+    [0m[32m" "[0m[0m[0m[2m,[0m [0m[32m"e.g. Try asking \"When did OceanGate sink?\", \"How tall is the tallest penguin species?\""[0m[0m
+  ][0m[2m,[0m
 }
-📝 Log: Processing result: "What is the signed transaction?"
-📊 Data: What is the signed transaction?
-📝 Log: Context: Lets sign the transaction. 
-Here's the signed transaction: 0x1234567890d3fsasd
-What is the signed transaction?
-📝 Log: Processing result: {"$$mdtype":"Tag","name":"ai","attributes":{},"children":[]}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "p",
+  "attributes": {},
+  "children": [
+    "Retrieval assisted (RAG) question answering using Wikipedia.",
+    " ",
+    "e.g. Try asking \"When did OceanGate sink?\", \"How tall is the tallest penguin species?\""
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"p","attributes":{},"children":["Question: ","What is the capital of France?"]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"Question: "[0m[0m[0m[2m,[0m [0m[32m"What is the capital of France?"[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "p",
+  "attributes": {},
+  "children": [
+    "Question: ",
+    "What is the capital of France?"
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"p","attributes":{},"children":["Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term."]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term."[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "p",
+  "attributes": {},
+  "children": [
+    "Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term."
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"ai","attributes":{},"children":["capital of France"]}
 📊 Data: Tag {
   [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
   [0mname[2m:[0m [0m[32m[0m[32m"ai"[0m[0m[0m[2m,[0m
   [0mattributes[2m:[0m {}[0m[2m,[0m
-  [0mchildren[2m:[0m [][0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"capital of France"[0m[0m ][0m[2m,[0m
 }
-📝 Log: Processing result: {"$$mdtype":"Tag","name":"if","attributes":{},"children":[]}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "ai",
+  "attributes": {},
+  "children": [
+    "capital of France"
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"fence","attributes":{},"children":[]}
 📊 Data: Tag {
   [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
-  [0mname[2m:[0m [0m[32m[0m[32m"if"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"fence"[0m[0m[0m[2m,[0m
   [0mattributes[2m:[0m {}[0m[2m,[0m
   [0mchildren[2m:[0m [][0m[2m,[0m
 }
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "fence",
+  "attributes": {},
+  "children": []
+}
+Searching for the term capital of France
+Got some results extracting top [0m[33m3[0m
+Retrieving List of capitals of France
+Retrieving Capital punishment in France
+Retrieving Capital city
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"h2","attributes":{},"children":["Answer:"]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"h2"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"Answer:"[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "h2",
+  "attributes": {},
+  "children": [
+    "Answer:"
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"p","attributes":{},"children":["Based on the information above give the most helpful answer to the question."]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"Based on the information above give the most helpful answer to the question."[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "p",
+  "attributes": {},
+  "children": [
+    "Based on the information above give the most helpful answer to the question."
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"p","attributes":{},"children":["Question: ","What is the capital of France?"]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"Question: "[0m[0m[0m[2m,[0m [0m[32m"What is the capital of France?"[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "p",
+  "attributes": {},
+  "children": [
+    "Question: ",
+    "What is the capital of France?"
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"p","attributes":{},"children":["Results: ","{\n  \"result\": \"{\\\"result\\\":[[\\\"List of capitals of France\\\",\\\"This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.\\\"],[\\\"Capital punishment in France\\\",\\\"Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \\\\\\\"No one can be sentenced to the death penalty\\\\\\\" (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\\\\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.\\\"],[\\\"Capital city\\\",\\\"A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \\\\nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \\\\\\\"relations between London and Washington\\\\\\\" refers to the \\\\\\\"relations between the United Kingdom and the United States\\\\\\\".\\\"]],\\\"error\\\":null}\",\n  \"error\": \"\"\n}"]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"Results: "[0m[0m[0m[2m,[0m [0m[32m"{\n  \"result\": \"{\\\"result\\\":[[\\\"List of capitals of France\\\",\\\"This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.\\\"],[\\\"Capital punishment in France\\\",\\\"Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \\\\\\\"No one can be sentenced to the death penalty\\\\\\\" (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\\\\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.\\\"],[\\\"Capital city\\\",\\\"A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \\\\nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \\\\\\\"relations between London and Washington\\\\\\\" refers to the \\\\\\\"relations between the United Kingdom and the United States\\\\\\\".\\\"]],\\\"error\\\":null}\",\n  \"error\": \"\"\n}"[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "p",
+  "attributes": {},
+  "children": [
+    "Results: ",
+    "{\n  \"result\": \"{\\\"result\\\":[[\\\"List of capitals of France\\\",\\\"This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.\\\"],[\\\"Capital punishment in France\\\",\\\"Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \\\\\\\"No one can be sentenced to the death penalty\\\\\\\" (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\\\\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.\\\"],[\\\"Capital city\\\",\\\"A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \\\\nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \\\\\\\"relations between London and Washington\\\\\\\" refers to the \\\\\\\"relations between the United Kingdom and the United States\\\\\\\".\\\"]],\\\"error\\\":null}\",\n  \"error\": \"\"\n}"
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"ai","attributes":{},"children":["The capital of France is Paris."]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"ai"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"The capital of France is Paris."[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "ai",
+  "attributes": {},
+  "children": [
+    "The capital of France is Paris."
+  ]
+}
+📝 Log: Processing result: {"$$mdtype":"Tag","name":"p","attributes":{},"children":["The capital of France is Paris."]}
+📊 Data: Tag {
+  [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+  [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+  [0mattributes[2m:[0m {}[0m[2m,[0m
+  [0mchildren[2m:[0m [ [0m[32m"The capital of France is Paris."[0m[0m ][0m[2m,[0m
+}
+🔄 Generator Result: {
+  "$$mdtype": "Tag",
+  "name": "p",
+  "attributes": {},
+  "children": [
+    "The capital of France is Paris."
+  ]
+}
 ✅ Finished: Execution finished!
 🎉 Success: Execution completed successfully!
-🚀 State Manager: {
-  "variables": {},
-  "nodes": {
-    "blockquote": {
-      "render": "blockquote",
-      "children": [
-        "heading",
-        "paragraph",
-        "image",
-        "table",
-        "tag",
-        "fence",
-        "blockquote",
-        "list",
-        "hr"
-      ]
-    },
-    "code": {
-      "render": "code",
-      "attributes": {
-        "content": {
-          "render": false,
-          "required": true
-        }
-      }
-    },
-    "comment": {
-      "attributes": {
-        "content": {
-          "required": true
-        }
-      }
-    },
-    "document": {
-      "render": "article",
-      "children": [
-        "heading",
-        "paragraph",
-        "image",
-        "table",
-        "tag",
-        "fence",
-        "blockquote",
-        "comment",
-        "list",
-        "hr"
-      ],
-      "attributes": {
-        "frontmatter": {
-          "render": false
-        }
-      }
-    },
-    "em": {
-      "render": "em",
-      "children": [
-        "strong",
-        "s",
-        "link",
-        "code",
-        "text",
-        "tag"
-      ],
-      "attributes": {
-        "marker": {
-          "render": false
-        }
-      }
-    },
-    "error": {},
-    "fence": {
-      "render": "pre",
-      "attributes": {
-        "content": {
-          "render": false,
-          "required": true
-        },
-        "language": {
-          "render": "data-language"
-        },
-        "process": {
-          "render": false,
-          "default": true
-        },
-        "id": {
-          "required": false
-        }
-      }
-    },
-    "hardbreak": {
-      "render": "br"
-    },
-    "heading": {
-      "children": [
-        "inline"
-      ],
-      "attributes": {
-        "level": {
-          "render": false,
-          "required": true
-        }
-      }
-    },
-    "hr": {
-      "render": "hr"
-    },
-    "image": {
-      "render": "img",
-      "attributes": {
-        "src": {
-          "required": true
-        },
-        "alt": {},
-        "title": {}
-      }
-    },
-    "inline": {
-      "children": [
-        "strong",
-        "em",
-        "s",
-        "code",
-        "text",
-        "tag",
-        "link",
-        "image",
-        "hardbreak",
-        "softbreak",
-        "comment"
-      ]
-    },
-    "item": {
-      "render": "li",
-      "children": [
-        "inline",
-        "heading",
-        "paragraph",
-        "image",
-        "table",
-        "tag",
-        "fence",
-        "blockquote",
-        "list",
-        "hr"
-      ]
-    },
-    "link": {
-      "render": "a",
-      "children": [
-        "strong",
-        "em",
-        "s",
-        "code",
-        "text",
-        "tag"
-      ],
-      "attributes": {
-        "href": {
-          "required": true
-        },
-        "title": {}
-      }
-    },
-    "list": {
-      "children": [
-        "item"
-      ],
-      "attributes": {
-        "ordered": {
-          "render": false,
-          "required": true
-        },
-        "start": {},
-        "marker": {
-          "render": false
-        }
-      }
-    },
-    "node": {},
-    "paragraph": {
-      "render": "p",
-      "children": [
-        "inline"
-      ]
-    },
-    "s": {
-      "render": "s",
-      "children": [
-        "strong",
-        "em",
-        "link",
-        "code",
-        "text",
-        "tag"
-      ]
-    },
-    "softbreak": {},
-    "strong": {
-      "render": "strong",
-      "children": [
-        "em",
-        "s",
-        "link",
-        "code",
-        "text",
-        "tag"
-      ],
-      "attributes": {
-        "marker": {
-          "render": false
-        }
-      }
-    },
-    "table": {
-      "render": "table"
-    },
-    "tbody": {
-      "render": "tbody",
-      "children": [
-        "tr",
-        "tag"
-      ]
-    },
-    "td": {
-      "render": "td",
-      "children": [
-        "inline",
-        "heading",
-        "paragraph",
-        "image",
-        "table",
-        "tag",
-        "fence",
-        "blockquote",
-        "list",
-        "hr"
-      ],
-      "attributes": {
-        "align": {},
-        "colspan": {
-          "render": "colSpan"
-        },
-        "rowspan": {
-          "render": "rowSpan"
-        }
-      }
-    },
-    "text": {
-      "attributes": {
-        "content": {
-          "required": true
-        }
-      }
-    },
-    "th": {
-      "render": "th",
-      "attributes": {
-        "width": {},
-        "align": {},
-        "colspan": {
-          "render": "colSpan"
-        },
-        "rowspan": {
-          "render": "rowSpan"
-        }
-      }
-    },
-    "thead": {
-      "render": "thead",
-      "children": [
-        "tr"
-      ]
-    },
-    "tr": {
-      "render": "tr",
-      "children": [
-        "th",
-        "td"
-      ]
-    }
-  },
-  "tags": {
-    "else": {
-      "selfClosing": true,
-      "attributes": {
-        "primary": {
-          "render": false
-        }
-      }
-    },
-    "if": {
-      "attributes": {
-        "primary": {
-          "render": false
-        }
-      }
-    },
-    "partial": {
-      "inline": false,
-      "selfClosing": true,
-      "attributes": {
-        "file": {
-          "render": false,
-          "required": true
-        },
-        "variables": {
-          "render": false
-        }
-      }
-    },
-    "slot": {
-      "attributes": {
-        "primary": {
-          "required": true
-        }
-      }
-    },
-    "table": {
-      "children": [
-        "table"
-      ],
-      "inline": false
-    },
-    "ai": {
-      "render": "ai",
-      "selfClosing": true,
-      "attributes": {
-        "model": {
-          "required": true,
-          "default": "openai/gpt-4o-mini"
-        },
-        "id": {
-          "required": false
-        },
-        "temperature": {
-          "required": false,
-          "default": 0.5
-        }
-      }
-    },
-    "loop": {
-      "render": "loop",
-      "attributes": {
-        "count": {
-          "required": false
-        },
-        "id": {
-          "required": false
-        },
-        "items": {
-          "required": false
-        },
-        "primary": {
-          "required": false
-        }
-      }
-    },
-    "set": {
-      "render": "set",
-      "selfClosing": true,
-      "attributes": {
-        "id": {
-          "required": true
-        }
-      }
-    },
-    "input": {
-      "render": "input",
-      "selfClosing": true,
-      "attributes": {
-        "name": {
-          "required": false,
-          "default": "question"
-        },
-        "description": {
-          "required": false,
-          "default": ""
-        },
-        "type": {
-          "required": false,
-          "default": "text/plain"
-        },
-        "src": {
-          "required": false
-        }
-      }
-    },
-    "flow": {
-      "render": "flow",
-      "selfClosing": true,
-      "attributes": {
-        "path": {
-          "required": true
-        },
-        "id": {
-          "required": false
-        },
-        "input": {
-          "required": false
-        }
-      }
-    },
-    "sign-eth-transaction": {
-      "render": "sign-eth-transaction"
-    }
-  },
-  "functions": {
-    "and": {},
-    "or": {},
-    "not": {
-      "parameters": {
-        "0": {
-          "required": true
-        }
-      }
-    },
-    "equals": {},
-    "default": {},
-    "debug": {},
-    "greaterThan": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "lessThan": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "greaterThanOrEqual": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "lessThanOrEqual": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "includes": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "add": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "subtract": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "multiply": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    },
-    "divide": {
-      "parameters": {
-        "0": {
-          "required": true
-        },
-        "1": {
-          "required": true
-        }
-      }
-    }
-  }
-}
 📋 Data Events: [
   {
     [0mtype[2m:[0m [0m[32m[0m[32m"start"[0m[0m[0m[2m,[0m
     [0mmessage[2m:[0m [0m[32m[0m[32m"Execution started!"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.773Z"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:01.693Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
-    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: \"Lets sign the transaction. \""[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.774Z"[0m[0m[0m[2m,[0m
-    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
-  }[0m[2m,[0m {
-    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
-    [0mdata[2m:[0m [0m[32m[0m[32m"Lets sign the transaction. "[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.774Z"[0m[0m[0m[2m,[0m
-    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
-    [0mdataType[2m:[0m [0m[32m[0m[32m"string"[0m[0m[0m[2m,[0m
-  }[0m[2m,[0m {
-    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
-    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: \"Here's the signed transaction: 0x1234567890d3fsasd\""[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.775Z"[0m[0m[0m[2m,[0m
-    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
-  }[0m[2m,[0m {
-    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
-    [0mdata[2m:[0m [0m[32m[0m[32m"Here's the signed transaction: 0x1234567890d3fsasd"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.775Z"[0m[0m[0m[2m,[0m
-    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
-    [0mdataType[2m:[0m [0m[32m[0m[32m"string"[0m[0m[0m[2m,[0m
-  }[0m[2m,[0m {
-    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
-    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"div\",\"attributes\":{\"text\":\"Here's the signed transaction: 0x1234567890d3fsasd\"},\"children\":[]}"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.775Z"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"p\",\"attributes\":{},\"children\":[\"Retrieval assisted (RAG) question answering using Wikipedia.\",\" \",\"e.g. Try asking \\\"When did OceanGate sink?\\\", \\\"How tall is the tallest penguin species?\\\"\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:01.695Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
     [0mdata[2m:[0m Tag {
       [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
-      [0mname[2m:[0m [0m[32m[0m[32m"div"[0m[0m[0m[2m,[0m
-      [0mattributes[2m:[0m {
-        [0mtext[2m:[0m [0m[32m[0m[32m"Here's the signed transaction: 0x1234567890d3fsasd"[0m[0m[0m[2m,[0m
-      }[0m[2m,[0m
-      [0mchildren[2m:[0m [][0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"Retrieval assisted (RAG) question answering using Wikipedia."[0m[0m[0m[2m,[0m
+        [0m[32m" "[0m[0m[0m[2m,[0m [0m[32m"e.g. Try asking \"When did OceanGate sink?\", \"How tall is the tallest penguin species?\""[0m[0m
+      ][0m[2m,[0m
     }[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.775Z"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:01.696Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
     [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
-    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: \"What is the signed transaction?\""[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.775Z"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"p\",\"attributes\":{},\"children\":[\"Question: \",\"What is the capital of France?\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:01.696Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
-    [0mdata[2m:[0m [0m[32m[0m[32m"What is the signed transaction?"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.775Z"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"Question: "[0m[0m[0m[2m,[0m [0m[32m"What is the capital of France?"[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:01.696Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
-    [0mdataType[2m:[0m [0m[32m[0m[32m"string"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
-    [0mmessage[2m:[0m [0m[32m[0m[32m"Context: Lets sign the transaction. \nHere's the signed transaction: 0x1234567890d3fsasd\nWhat is the signed transaction?"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:12:59.776Z"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"p\",\"attributes\":{},\"children\":[\"Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term.\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:01.696Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term."[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:01.696Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
-    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"ai\",\"attributes\":{},\"children\":[]}"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:13:01.384Z"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"ai\",\"attributes\":{},\"children\":[\"capital of France\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:02.328Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
@@ -620,47 +243,192 @@ What is the signed transaction?
       [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
       [0mname[2m:[0m [0m[32m[0m[32m"ai"[0m[0m[0m[2m,[0m
       [0mattributes[2m:[0m {}[0m[2m,[0m
-      [0mchildren[2m:[0m [ [0m[32m"The signed transaction you provided is: `0x1234567890d3fsasd`. This string typically represents a transaction in a blockchain context that has been cryptographically signed to ensure its authenticity and integrity. \n\nIf you need more specific information about what a signed transaction entails or how to interpret it, please let me know!"[0m[0m ][0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"capital of France"[0m[0m ][0m[2m,[0m
     }[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:13:01.384Z"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:02.328Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
     [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
-    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"if\",\"attributes\":{},\"children\":[]}"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:13:01.385Z"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"fence\",\"attributes\":{},\"children\":[]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:02.329Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
     [0mdata[2m:[0m Tag {
       [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
-      [0mname[2m:[0m [0m[32m[0m[32m"if"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"fence"[0m[0m[0m[2m,[0m
       [0mattributes[2m:[0m {}[0m[2m,[0m
       [0mchildren[2m:[0m [
         Tag {
           [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
-          [0mname[2m:[0m [0m[32m[0m[32m"loop"[0m[0m[0m[2m,[0m
-          [0mattributes[2m:[0m {}[0m[2m,[0m
-          [0mchildren[2m:[0m [ [0m[32m"This is the loop index: "[0m[0m[0m[2m,[0m [0m[33m0[0m[0m[2m,[0m [0m[32m"This is the loop index: "[0m[0m[0m[2m,[0m [0m[33m1[0m ][0m[2m,[0m
-        }
+          [0mname[2m:[0m [0m[32m[0m[32m"code"[0m[0m[0m[2m,[0m
+          [0mattributes[2m:[0m {
+            [0mlanguage[2m:[0m [0m[32m[0m[32m"js"[0m[0m[0m[2m,[0m
+          }[0m[2m,[0m
+          [0mchildren[2m:[0m [ [0m[32m"\n// Read the term generated by the language model\nlet input;\ntry {\n    input = aimVariables.search_term.result.trim().replace(/^\"+|\"+$/g, '');\n} catch (error) {\n    console.error(\"Error reading search term:\", error);\n    return { result: \"\", error: error.toString() };\n}\n\nconsole.log(\"Searching for the term\", input);\n\ntry {\n    const maxResults = 3;\n    const searchTerm = encodeURIComponent(input.trim());\n    const url = `https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch=${searchTerm}&srlimit=${maxResults}&utf8=&origin=*`;\n    const response = await fetch(url);\n    const data = await response.json();\n\n    const fetchExtract = async (title) => {\n        console.log(\"Retrieving\", title);\n        const extractUrl = `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=${encodeURIComponent(title)}&redirects=1&origin=*`;\n        const extractResponse = await fetch(extractUrl);\n        const extractData = await extractResponse.json();\n        const pageId = Object.keys(extractData.query.pages)[0];\n        const extract = extractData.query.pages[pageId].extract;\n        return [title, extract];\n    }\n\n    try {\n        if (data.query.search.length > 0) {\n            console.log(\"Got some results extracting top\", data.query.search.length);\n            const extracts = await Promise.all(data.query.search.map(result => fetchExtract(result.title)));\n            return { result: extracts, error: null };\n        } else {\n            return { result: \"No results found.\", error: null };\n        }\n    } catch (error) {\n        console.error(\"Error extracting Wikipedia results:\", error);\n        return { result: \"\", error: error.toString() };\n    }\n} catch (error) {\n    console.error(\"Error processing Wikipedia results:\", error);\n    return { result: \"\", error: error.toString() };\n}\n    \n"[0m[0m ][0m[2m,[0m
+        }[0m[2m,[0m [0m[32m"{\"result\":[[\"List of capitals of France\",\"This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.\"],[\"Capital punishment in France\",\"Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \\\"No one can be sentenced to the death penalty\\\" (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.\"],[\"Capital city\",\"A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \\nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \\\"relations between London and Washington\\\" refers to the \\\"relations between the United Kingdom and the United States\\\".\"]],\"error\":null}"[0m[0m
       ][0m[2m,[0m
     }[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:13:01.385Z"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:02.329Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"h2\",\"attributes\":{},\"children\":[\"Answer:\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"h2"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"Answer:"[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"p\",\"attributes\":{},\"children\":[\"Based on the information above give the most helpful answer to the question.\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"Based on the information above give the most helpful answer to the question."[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"p\",\"attributes\":{},\"children\":[\"Question: \",\"What is the capital of France?\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"Question: "[0m[0m[0m[2m,[0m [0m[32m"What is the capital of France?"[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"p\",\"attributes\":{},\"children\":[\"Results: \",\"{\\n  \\\"result\\\": \\\"{\\\\\\\"result\\\\\\\":[[\\\\\\\"List of capitals of France\\\\\\\",\\\\\\\"This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.\\\\\\\"],[\\\\\\\"Capital punishment in France\\\\\\\",\\\\\\\"Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \\\\\\\\\\\\\\\"No one can be sentenced to the death penalty\\\\\\\\\\\\\\\" (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\\\\\\\\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.\\\\\\\"],[\\\\\\\"Capital city\\\\\\\",\\\\\\\"A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \\\\\\\\nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \\\\\\\\\\\\\\\"relations between London and Washington\\\\\\\\\\\\\\\" refers to the \\\\\\\\\\\\\\\"relations between the United Kingdom and the United States\\\\\\\\\\\\\\\".\\\\\\\"]],\\\\\\\"error\\\\\\\":null}\\\",\\n  \\\"error\\\": \\\"\\\"\\n}\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"Results: "[0m[0m[0m[2m,[0m [0m[32m"{\n  \"result\": \"{\\\"result\\\":[[\\\"List of capitals of France\\\",\\\"This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.\\\"],[\\\"Capital punishment in France\\\",\\\"Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \\\\\\\"No one can be sentenced to the death penalty\\\\\\\" (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\\\\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.\\\"],[\\\"Capital city\\\",\\\"A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \\\\nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \\\\\\\"relations between London and Washington\\\\\\\" refers to the \\\\\\\"relations between the United Kingdom and the United States\\\\\\\".\\\"]],\\\"error\\\":null}\",\n  \"error\": \"\"\n}"[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:04.183Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"ai\",\"attributes\":{},\"children\":[\"The capital of France is Paris.\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:05.571Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"ai"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"The capital of France is Paris."[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:05.571Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
+    [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"log"[0m[0m[0m[2m,[0m
+    [0mmessage[2m:[0m [0m[32m[0m[32m"Processing result: {\"$$mdtype\":\"Tag\",\"name\":\"p\",\"attributes\":{},\"children\":[\"The capital of France is Paris.\"]}"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:05.572Z"[0m[0m[0m[2m,[0m
+    [0mlevel[2m:[0m [0m[32m[0m[32m"debug"[0m[0m[0m[2m,[0m
+  }[0m[2m,[0m {
+    [0mtype[2m:[0m [0m[32m[0m[32m"data"[0m[0m[0m[2m,[0m
+    [0mdata[2m:[0m Tag {
+      [0m$$mdtype[2m:[0m [0m[32m[0m[32m"Tag"[0m[0m[0m[2m,[0m
+      [0mname[2m:[0m [0m[32m[0m[32m"p"[0m[0m[0m[2m,[0m
+      [0mattributes[2m:[0m {}[0m[2m,[0m
+      [0mchildren[2m:[0m [ [0m[32m"The capital of France is Paris."[0m[0m ][0m[2m,[0m
+    }[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:05.572Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
     [0mdataType[2m:[0m [0m[32m[0m[32m"object"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"finish"[0m[0m[0m[2m,[0m
     [0mmessage[2m:[0m [0m[32m[0m[32m"Execution finished!"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:13:01.386Z"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:05.572Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"info"[0m[0m[0m[2m,[0m
   }[0m[2m,[0m {
     [0mtype[2m:[0m [0m[32m[0m[32m"success"[0m[0m[0m[2m,[0m
     [0mmessage[2m:[0m [0m[32m[0m[32m"Execution completed successfully!"[0m[0m[0m[2m,[0m
-    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-25T03:13:01.386Z"[0m[0m[0m[2m,[0m
+    [0mtimestamp[2m:[0m [0m[32m[0m[32m"2025-01-31T21:20:05.572Z"[0m[0m[0m[2m,[0m
     [0mlevel[2m:[0m [0m[32m[0m[32m"success"[0m[0m[0m[2m,[0m
   }
 ]
-📋 HTML Output: Lets sign the transaction. Here's the signed transaction: 0x1234567890d3fsasd<div text="Here's the signed transaction: 0x1234567890d3fsasd"></div>What is the signed transaction?<ai>The signed transaction you provided is: `0x1234567890d3fsasd`. This string typically represents a transaction in a blockchain context that has been cryptographically signed to ensure its authenticity and integrity. 
+📋 HTML Output: <p>Retrieval assisted (RAG) question answering using Wikipedia. e.g. Try asking &quot;When did OceanGate sink?&quot;, &quot;How tall is the tallest penguin species?&quot;</p><p>Question: What is the capital of France?</p><p>Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term.</p><ai>capital of France</ai><fence><code language="js">
+// Read the term generated by the language model
+let input;
+try {
+    input = aimVariables.search_term.result.trim().replace(/^&quot;+|&quot;+$/g, '');
+} catch (error) {
+    console.error(&quot;Error reading search term:&quot;, error);
+    return { result: &quot;&quot;, error: error.toString() };
+}
 
-If you need more specific information about what a signed transaction entails or how to interpret it, please let me know!</ai><if><loop>This is the loop index: 0This is the loop index: 1</loop></if>
+console.log(&quot;Searching for the term&quot;, input);
+
+try {
+    const maxResults = 3;
+    const searchTerm = encodeURIComponent(input.trim());
+    const url = `https://en.wikipedia.org/w/api.php?format=json&amp;action=query&amp;list=search&amp;srsearch=${searchTerm}&amp;srlimit=${maxResults}&amp;utf8=&amp;origin=*`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const fetchExtract = async (title) =&gt; {
+        console.log(&quot;Retrieving&quot;, title);
+        const extractUrl = `https://en.wikipedia.org/w/api.php?format=json&amp;action=query&amp;prop=extracts&amp;exintro&amp;explaintext&amp;titles=${encodeURIComponent(title)}&amp;redirects=1&amp;origin=*`;
+        const extractResponse = await fetch(extractUrl);
+        const extractData = await extractResponse.json();
+        const pageId = Object.keys(extractData.query.pages)[0];
+        const extract = extractData.query.pages[pageId].extract;
+        return [title, extract];
+    }
+
+    try {
+        if (data.query.search.length &gt; 0) {
+            console.log(&quot;Got some results extracting top&quot;, data.query.search.length);
+            const extracts = await Promise.all(data.query.search.map(result =&gt; fetchExtract(result.title)));
+            return { result: extracts, error: null };
+        } else {
+            return { result: &quot;No results found.&quot;, error: null };
+        }
+    } catch (error) {
+        console.error(&quot;Error extracting Wikipedia results:&quot;, error);
+        return { result: &quot;&quot;, error: error.toString() };
+    }
+} catch (error) {
+    console.error(&quot;Error processing Wikipedia results:&quot;, error);
+    return { result: &quot;&quot;, error: error.toString() };
+}
+    
+</code>{&quot;result&quot;:[[&quot;List of capitals of France&quot;,&quot;This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.&quot;],[&quot;Capital punishment in France&quot;,&quot;Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \&quot;No one can be sentenced to the death penalty\&quot; (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.&quot;],[&quot;Capital city&quot;,&quot;A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \&quot;relations between London and Washington\&quot; refers to the \&quot;relations between the United Kingdom and the United States\&quot;.&quot;]],&quot;error&quot;:null}</fence><h2>Answer:</h2><p>Based on the information above give the most helpful answer to the question.</p><p>Question: What is the capital of France?</p><p>Results: {
+  &quot;result&quot;: &quot;{\&quot;result\&quot;:[[\&quot;List of capitals of France\&quot;,\&quot;This is a chronological list of capitals of France. The capital of France has been Paris since its liberation in 1944.\&quot;],[\&quot;Capital punishment in France\&quot;,\&quot;Capital punishment in France (French: peine de mort en France) is banned by Article 66-1 of the Constitution of the French Republic, voted as a constitutional amendment by the Congress of the French Parliament on 19 February 2007 and simply stating \\\&quot;No one can be sentenced to the death penalty\\\&quot; (French: Nul ne peut être condamné à la peine de mort). The death penalty was already declared illegal on 9 October 1981 when President François Mitterrand signed a law prohibiting the judicial system from using it and commuting the sentences of the seven people on death row to life imprisonment. The last execution took place by guillotine, being the main legal method since the French Revolution; Hamida Djandoubi, a Tunisian citizen convicted of torture and murder on French soil, was put to death in September 1977 in Marseille.\\nMajor French death penalty abolitionists across time have included philosopher Voltaire; poet Victor Hugo; politicians Léon Gambetta, Jean Jaurès and Aristide Briand; and writers Alphonse de Lamartine and Albert Camus.\&quot;],[\&quot;Capital city\&quot;,\&quot;A capital city or just capital is the municipality holding primary status in a country, state, province, department, or other subnational division, usually as its seat of the government. A capital is typically a city that physically encompasses the government's offices and meeting places; the status as capital is often designated by its law or constitution. In some jurisdictions, including several countries, different branches of government are in different settlements, sometimes meaning multiple official capitals. In some cases, a distinction is made between the official (constitutional) capital and the seat of government, which is in another place. \\nEnglish-language news media often use the name of the capital city as an alternative name for the government of the country of which it is the capital, as a form of metonymy. For example, the \\\&quot;relations between London and Washington\\\&quot; refers to the \\\&quot;relations between the United Kingdom and the United States\\\&quot;.\&quot;]],\&quot;error\&quot;:null}&quot;,
+  &quot;error&quot;: &quot;&quot;
+}</p><ai>The capital of France is Paris.</ai><p>The capital of France is Paris.</p>
 📄 Logs have been written to logs.html
