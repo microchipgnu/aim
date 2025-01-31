@@ -1,9 +1,12 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-interface RouteFile {
-  path: string;      // Route path (e.g., /blog/[id])
-  filePath: string;  // Actual file path on disk
+export interface RouteInfo {
+    path: string;
+    file: string;
+    type: 'dynamic' | 'static';
+    segments: number;
+    extension: string;
 }
 
 /**
@@ -14,8 +17,8 @@ interface RouteFile {
  * - (group) for route groups that don't affect URL path
  * - @parallel/sequential for parallel/sequential route groups
  */
-export async function getAIMRoutes(directory: string, extensions: string[] = ['aim', 'aimd', 'md', 'mdx']): Promise<RouteFile[]> {
-  const routes: RouteFile[] = [];
+export async function getAIMRoutes(directory: string, extensions: string[] = ['aim', 'aimd', 'md', 'mdx']): Promise<RouteInfo[]> {
+  const routes: RouteInfo[] = [];
   
   async function scan(dir: string, routePrefix: string = '') {
     const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -71,9 +74,14 @@ export async function getAIMRoutes(directory: string, extensions: string[] = ['a
           ? ''
           : '/' + entry.name.replace(new RegExp(`\\.(${extensions.join('|')})$`), '');
           
+        const routePath = path.join('api', routePrefix, routePart).replace(/\\/g, '/');
+        
         routes.push({
-          path: path.join('api', routePrefix, routePart).replace(/\\/g, '/'), // Prepend 'api' to the path
-          filePath: fullPath
+          path: routePath,
+          file: fullPath,
+          type: routePath.includes('[') ? 'dynamic' : 'static',
+          segments: routePath.split('/').filter(Boolean).length,
+          extension: path.extname(fullPath).slice(1)
         });
       }
     }

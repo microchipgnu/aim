@@ -9,45 +9,47 @@ import { setupAbortController } from './controllers/abort';
 import { setupAIMRoutes } from './controllers/aim';
 import { setupRouteHandlers } from './controllers/routes';
 import { setupManifests } from './controllers/openapi';
+import { setupMCPController } from './controllers/mcp';
+import cors from 'cors';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function createServer(config: ServerConfig) {
     const app = express();
 
+    // Enable CORS for all routes
+    app.use(cors());
     // Error handling middleware
     app.use(errorHandler);
 
-    // API routes
+    // Setup MCP controller first
+    await setupMCPController(app, config.routesDir);
+    
+    // Then setup other routes and middleware
     app.use('/api', express.json());
-
-    // Setup controllers
     setupAbortController(app);
     setupAIMRoutes(app);
-    setupManifests(app, config.routesDir);
-    
-    try {
-        // Setup route handlers (includes sandbox and dynamic routes)
-        await setupRouteHandlers(app, config.routesDir);
+    await setupManifests(app, config.routesDir);
+    await setupRouteHandlers(app, config.routesDir);
 
-        // Serve UI if enabled
-        if (config.enableUI) {
-            await setupUI(
-                app,
-                process.env.NODE_ENV === 'development',
-                path.join(__dirname, 'ui')
-            );
-        }
-
-    } catch (error) {
-        console.error(chalk.red('Failed to initialize server:'), error);
-        throw error;
+    // UI middleware last
+    if (config.enableUI) {
+        await setupUI(
+            app,
+            process.env.NODE_ENV === 'development',
+            path.join(__dirname, 'ui')
+        );
     }
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
         try {
-            app.listen(config.port, () => {
-                resolve();
+            app.listen(config.port, async () => {
+                try {
+                    resolve();
+                } catch (error) {
+                    console.error(chalk.red('Failed to setup manifests:'), error);
+                    reject(error);
+                }
             });
         } catch (error) {
             console.error(chalk.red('Failed to start server:'), error);

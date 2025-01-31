@@ -16,7 +16,7 @@ Building AIM (a natural markup language for AI) tooling. This includes:
     - 🚧 LICENSE
     - ❌ Syntax highlighting
 
-1. **AIM Server** [IN PROGRESS]
+1. **AIM Server** [IN PROGRESS]+
     - ✅ Create a basic server
     - ✅ Introduce NextJS like routing system
     - ✅ Serve UI to navigate AIM documents
@@ -62,9 +62,11 @@ Building AIM (a natural markup language for AI) tooling. This includes:
 5. **AIM Website** [IN PROGRESS]
     - ✅ Create Docusaurus site
     - ✅ Syntax highlighting
-    - 🚧 Cookbook
-    - 🚧 Examples
-    - 🚧 Tutorials
     - 🚧 Blog
+        - ✅ Prompt-driven Programming
+        - ✅ Syntax Decisions
+    - 🚧 Docs
+        - ✅ Syntax
+        - 🚧 Cookbook
 
-5. **Starter Project** [IN PROGRESS]
+6. **Starter Project** [IN PROGRESS]

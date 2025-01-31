@@ -20,12 +20,13 @@ export default defineConfig({
   },
   noExternal: [
     '@aim-sdk/core',
-    '@aim-sdk/server',
     'commander',
     'inquirer',
     'dotenv',
     'ora',
     'chalk',
+    'openapi-mcp-server',
+    '@modelcontextprotocol/sdk',
   ],
   external: [
     'path',

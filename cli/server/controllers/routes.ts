@@ -1,14 +1,8 @@
 import chalk from 'chalk';
 import type { Express } from 'express';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { getAIMRoutes } from '../resolution';
 import { aimManager, type AIMResponse } from '../services/aim-manager';
-
-interface Route {
-    path: string;
-    filePath: string;
-}
 
 export async function setupRouteHandlers(app: Express, routesDir: string) {
     try {
@@ -24,10 +18,10 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
                 // Map routes and add additional metadata
                 const routeInfo = routes.map(route => ({
                     path: route.path.replace(/^api\//, ''), // Remove the 'api/' prefix for client display
-                    file: route.filePath,
-                    type: route.path.includes('[') ? 'dynamic' : 'static',
-                    segments: route.path.split('/').filter(Boolean).length,
-                    extension: path.extname(route.filePath).slice(1)
+                    file: route.file,
+                    type: route.type,
+                    segments: route.segments,
+                    extension: route.extension
                 }));
 
                 // Sort routes by segments and path for consistent ordering
@@ -56,8 +50,8 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
             app.get(`/${apiPath}`, async (req, res) => {
                 try {
                     console.log(chalk.dim(`GET /${apiPath} - Serving AST`));
-                    const content = await fs.readFile(route.filePath, 'utf-8');
-                    const ast = await aimManager.getDocumentAST(route.filePath);
+                    const content = await fs.readFile(route.file, 'utf-8');
+                    const ast = await aimManager.getDocumentAST(route.file);
 
                     // Include additional info like warnings and frontmatter
                     res.json({
@@ -84,7 +78,7 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
                         'Connection': 'keep-alive'
                     });
 
-                    const content = await fs.readFile(route.filePath, 'utf-8');
+                    const content = await fs.readFile(route.file, 'utf-8');
                     const requestId = req.headers['x-request-id'];
                     if (!requestId || typeof requestId !== 'string') {
                         throw new Error('Missing or invalid X-Request-ID header');

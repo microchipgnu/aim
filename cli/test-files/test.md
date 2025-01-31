@@ -8,11 +8,6 @@ input:
 
 Say hey to {% $frontmatter.input.test %}
 
-{% ai model="openai/gpt-4o-mini" /%}
-{% ai model="openai/gpt-4o-mini" /%}
-{% ai model="openai/gpt-4o-mini" /%}
-{% ai model="openai/gpt-4o-mini" /%}
-{% ai model="openai/gpt-4o-mini" /%}
-{% ai model="openai/gpt-4o-mini" /%}
-{% ai model="openai/gpt-4o-mini" /%}
-{% ai model="openai/gpt-4o-mini" /%}
+{% ai #hey model="openai/gpt-4o-mini" /%}
+
+{% $hey.result %}

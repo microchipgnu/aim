@@ -9,7 +9,7 @@ import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
 import MonacoEditor from '@monaco-editor/react';
 import { FileText, PlayIcon, RotateCcw, SaveIcon, Settings2, StopCircle, Upload } from "lucide-react";
 import React from 'react';
-import { unicodeToBase64 } from "../../../utils/encode-decode";
+import { base64ToUnicode, unicodeToBase64 } from "../../../utils/encode-decode";
 
 export function Sandbox() {
   const [code, setCode] = React.useState<string>('');
@@ -27,7 +27,7 @@ export function Sandbox() {
     const content = params.get('content');
     if (content) {
       try {
-        setCode(atob(content));
+        setCode(base64ToUnicode(content));
       } catch (e) {
         console.error('Failed to decode content from URL:', e);
         setCode('');

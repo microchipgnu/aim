@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.40
+
+### Patch Changes
+
+- feat: Integrate Model Context Protocol (MCP) and enhance server architecture
+
 ## 0.1.39
 
 ### Patch Changes
