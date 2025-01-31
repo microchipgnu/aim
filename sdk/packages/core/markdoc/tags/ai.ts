@@ -171,6 +171,7 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
     });
 
     stateManager.addToTextRegistry(text(result.text), GLOBAL_SCOPE);
+    stateManager.addToTextRegistry(text(JSON.stringify(structuredOutputs)), GLOBAL_SCOPE);
 
     aiTag.children = [result.text];
 }

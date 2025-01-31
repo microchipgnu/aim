@@ -13,6 +13,8 @@ import { StateManager } from "runtime/state";
 import { execute, executeGenerator } from "./runtime/execute";
 import type { RuntimeOptions } from "./types";
 import { mediaTag } from "markdoc/tags/media";
+import { groupTag } from "markdoc/tags/group";
+import { parallelTag } from "markdoc/tags/parallel";
 
 export const GLOBAL_SCOPE = "global";
 
@@ -47,7 +49,9 @@ export const defaultRuntimeOptions: RuntimeOptions = {
             flow: flowTag,
             if: ifTag,
             else: elseTag,
-            media: mediaTag
+            media: mediaTag,
+            group: groupTag,
+            parallel: parallelTag
         },
         functions: {
             ...functions,

@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.13
+
+### Patch Changes
+
+- feat: Add group and parallel tag support for advanced content processing
+
 ## 0.0.12
 
 ### Patch Changes

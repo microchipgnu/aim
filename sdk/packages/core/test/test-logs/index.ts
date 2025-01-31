@@ -345,17 +345,36 @@ parallel: `
 
 {% parallel #parallel %}
 
-    {% loop #loop1 count=2 %}
+    {% group #group %}
 
-        This is the loop index: {% $loop1.index %}
+        {% loop #loop1 count=100 %}
 
-    {% /loop %}
+            This is the loop index: {% $loop1.index %}
 
-    {% loop #loop2 count=2 %}
+        {% /loop %}
 
-        This is the loop index: {% $loop2.index %}
+        {% loop #loop2 count=100 %}
 
-    {% /loop %}
+            This is the loop index: {% $loop2.index %}
+
+        {% /loop %}
+
+    {% /group %}
+    {% group #group %}
+
+        {% loop #loop1 count=100 %}
+
+            This is the loop index: {% $loop1.index %}
+
+        {% /loop %}
+
+        {% loop #loop2 count=100 %}
+
+            This is the loop index: {% $loop2.index %}
+
+        {% /loop %}
+
+    {% /group %}
 
 {% /parallel %}
 `,
@@ -974,7 +993,7 @@ async function main() {
     process.exit(0);
 }
 
-const run = content.structuredOutputs
+const run = content.parallel
 
 main().catch(console.error);
 
