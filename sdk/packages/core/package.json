@@ -9,11 +9,10 @@
     "@types/bun": "latest",
     "@types/js-yaml": "^4.0.9",
     "@types/react": "^19.0.7",
-    "@types/semver": "^7.5.8",
-    "tsup": "^8.3.5"
+    "tsup": "^8.3.6"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.7.3"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.6",
@@ -24,14 +23,11 @@
     "ai": "^4.1.1",
     "browser-or-node": "^3.0.0",
     "chrome-ai": "^1.11.1",
-    "effector": "^23.2.3",
     "js-yaml": "^4.1.0",
     "nanoid": "^5.0.9",
     "ollama-ai-provider": "^1.0.0",
     "react": "^19.0.0",
-    "replicate": "^1.0.1",
     "rxjs": "^7.8.1",
-    "semver": "^7.6.3",
     "zod": "^3.24.1"
   },
   "publishConfig": {
@@ -41,7 +37,8 @@
     "typecheck": "tsc --noEmit",
     "build": "rm -rf dist && tsup --config tsup.config.ts",
     "logs": "bun test/test-logs/index.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "check": "bunx knip || exit 0"
   },
   "exports": {
     ".": {
