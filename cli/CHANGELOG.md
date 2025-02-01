@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.43
+
+### Patch Changes
+
+- up
+
 ## 0.1.42
 
 ### Patch Changes

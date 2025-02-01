@@ -3,7 +3,7 @@ import type { Express } from 'express';
 import { promises as fs } from 'fs';
 import { getAIMRoutes } from '../resolution';
 import { aimManager, type AIMResponse } from '../services/aim-manager';
-import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
+import { requireAuth } from '@clerk/express';
 
 export async function setupRouteHandlers(app: Express, routesDir: string) {
     try {
@@ -70,7 +70,7 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
             });
 
             // POST handler for route execution
-            app.post(`/${apiPath}`, ClerkExpressRequireAuth(), async (req, res) => {
+            app.post(`/${apiPath}`, requireAuth(), async (req, res) => {
                 try {
                     // Set headers for SSE
                     res.writeHead(200, {
