@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.41
+
+### Patch Changes
+
+- clerk auth
+
 ## 0.1.40
 
 ### Patch Changes

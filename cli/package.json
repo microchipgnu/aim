@@ -1,7 +1,7 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.40",
+  "version": "0.1.41",
   "private": false,
   "type": "commonjs",
   "bin": {
