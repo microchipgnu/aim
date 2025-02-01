@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.16
+
+### Patch Changes
+
+- enhance secret management, and ai providers. remove storage and node deps
+
 ## 0.0.15
 
 ### Patch Changes
