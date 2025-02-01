@@ -148,10 +148,16 @@ async function* handleTag(node: Node, stateManager: StateManager): AsyncGenerato
             const context = runtimeState.context;
             const plugins = context.plugins;
 
-            const plugin = node.tag ? plugins.get(node.tag) : undefined;
+            if (!node.tag) {
+                break;
+            }
+
+            const [pluginName, tagName] = node.tag.split("_");
+
+            const plugin = plugins.get(pluginName);
             
-            if (plugin?.tags && node.tag && node.tag in plugin.tags) {
-                const tagConfig = plugin.tags[node.tag];
+            if (plugin?.tags && tagName && tagName in plugin.tags) {
+                const tagConfig = plugin.tags[tagName];
                 if ('execute' in tagConfig) {
                     plugin.hooks?.beforeExecution?.(context);
                     const result = yield* tagConfig.execute({ node, config, state: runtimeState });

@@ -1,5 +1,23 @@
 # @aim-sdk/core
 
+## 0.0.19
+
+### Patch Changes
+
+- up
+
+## 0.0.18
+
+### Patch Changes
+
+- up
+
+## 0.0.17
+
+### Patch Changes
+
+- improve plugin processing
+
 ## 0.0.16
 
 ### Patch Changes

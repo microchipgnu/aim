@@ -92,7 +92,7 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
             const { runtime, ...tagWithoutRuntime } = tag as any;
             return {
                 ...filtered,
-                [key]: tagWithoutRuntime
+                [`${p.plugin.name}_${key}`]: tagWithoutRuntime
             };
         }, {});
         return {
