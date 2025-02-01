@@ -1,4 +1,4 @@
-import { Tag, type Node, type RenderableTreeNodes } from "@markdoc/markdoc";
+import { Tag, type Node, type RenderableTreeNode, type RenderableTreeNodes } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import { fence } from "markdoc/nodes/fence";
 import { text } from "markdoc/renderers/text";
@@ -48,25 +48,49 @@ export async function* walk(node: Node, stateManager: StateManager): AsyncGenera
 }
 
 async function* handleContainerNode(node: Node, config: any, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
-    const transformedNode = transform(node, config);
-    if (transformedNode && typeof transformedNode === 'object') {
-        const children = [];
-        for (const child of node.children) {
-            if (child.type === "text") {
-                for await (const result of handleTextNode(child, config, stateManager.getRuntimeState())) {
-                    children.push(result);
-                }
-            } else {
-                for await (const result of walk(child, stateManager)) {
-                    children.push(result);
-                }
+    const children = [];
+
+    // Process all children first to get renderable tree nodes
+    for (const child of node.children) {
+        if (child.type === "text") {
+            for await (const result of handleTextNode(child, config, stateManager.getRuntimeState())) {
+                children.push(result);
+            }
+        } else {
+            for await (const result of walk(child, stateManager)) {
+                children.push(result);
             }
         }
-        if ('children' in transformedNode) {
-            transformedNode.children = children;
-        }
-        yield transformedNode;
     }
+    // TODO: Need to recreate node because https://github.com/markdoc/markdoc/commit/2e2d2c4f6736300d0973b833b78e7b6a797357ea hasn't been released yet
+    // Clone the node while preserving prototype chain
+    const clonedNode = Object.create(
+      Object.getPrototypeOf(node),
+      Object.getOwnPropertyDescriptors(node)
+    );
+    clonedNode.children = [];
+
+    const transformedNode = clonedNode.transform(config);
+
+    let containerTag: Tag;
+    
+    if (Tag.isTag(transformedNode)) {
+        // If transformedNode is a Tag, use its properties
+        containerTag = new Tag(
+            transformedNode.name,
+            transformedNode.attributes,
+            children.flat() as RenderableTreeNode[]
+        );
+    } else {
+        // Otherwise fall back to node properties
+        containerTag = new Tag(
+            node.type,
+            node.transformAttributes(config),
+            children.flat() as RenderableTreeNode[]
+        );
+    }
+
+    yield containerTag;
 }
 
 async function* handleTextNode(node: Node, config: any, runtimeState: any): AsyncGenerator<RenderableTreeNodes> {

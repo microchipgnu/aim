@@ -386,7 +386,7 @@ Create a recipe for chocholate cake
 
 # {% $output1.structuredOutputs.recipe %}
 
-# Ingredients:
+## Ingredients:
 
 {% loop #loop1 items=$output1.structuredOutputs.ingredients %}
 
@@ -395,6 +395,29 @@ Create a recipe for chocholate cake
 {% /loop %}
 
 `,
+timesTable: `---
+title: Loop
+description: Use loops to repeat a block of code multiple times.
+input:
+    - name: count
+      type: number
+      description: The number of times to repeat the block
+---
+
+Let's do the {% $frontmatter.input.count %} times table. 
+
+Output just the next number.
+
+{% loop #loop count=$frontmatter.input.count %}
+
+  {% add($loop.index, 1) %} x {% $frontmatter.input.count %} = {% ai #result model="openai/gpt-4o-mini" /%}
+
+{% /loop %}
+
+The next number is {% ai #result model="openai/gpt-4o-mini" /%}
+
+Yay, we're done!
+`
 
 
 };
@@ -411,6 +434,7 @@ const htmlTemplate = `
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <style>
+        /* Base styles */
         .fade-in {
             animation: fadeIn 0.3s ease-in;
         }
@@ -418,6 +442,8 @@ const htmlTemplate = `
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Tab styles */
         .tab-btn.active-tab {
             position: relative;
         }
@@ -431,149 +457,166 @@ const htmlTemplate = `
             background-color: rgb(59, 130, 246);
             transition: all 0.3s ease;
         }
+
+        /* Typography */
         h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            font-size: 10rem;
+            font-size: 2rem;
+            font-weight: 700;
             color: rgb(30, 41, 59);
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
-            margin-top: 0.75rem;
-            margin-bottom: 0.75rem;
-            line-height: 1.75;
+            padding: 1rem 0;
+            margin: 1rem 0;
+            line-height: 1.2;
         }
+
         p {
-            display: block;
-            padding: 0.5rem 0;
+            padding: 0.75rem 0;
             margin: 0.5rem 0;
-            color: #475569;
+            color: #1f2937;
             line-height: 1.6;
-            font-size: 1rem;
+            font-size: 1.125rem;
         }
+
+        /* Component styles */
         loop {
             display: block;
-            padding: 1rem;
-            margin: 1rem 0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             border: 2px solid #e5e7eb;
-            border-radius: 0.5rem;
-            background-color: #f9fafb;
+            border-radius: 0.75rem;
+            background-color: #f8fafc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             position: relative;
         }
-        
+
         loop::before {
-            content: '↻';
+            content: 'Loop';
             position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            font-size: 1.25rem;
-            color: #9ca3af;
-            animation: spin 2s linear infinite;
+            top: -12px;
+            left: 16px;
+            background: #fff;
+            padding: 0 8px;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        if {
-            display: block;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border: 2px solid #60a5fa;
-            border-radius: 0.375rem;
-            background-color: #eff6ff;
-            position: relative;
-        }
-
-        if::before {
-            content: '?';
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            width: 1.5rem;
-            height: 1.5rem;
-            border-radius: 50%;
-            background-color: #60a5fa;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        if[data-condition="true"] {
-            border-color: #22c55e;
-            background-color: #f0fdf4;
-        }
-
-        if[data-condition="true"]::before {
-            content: '✓';
-            background-color: #22c55e;
-        }
-
-        if[data-condition="false"] {
-            border-color: #ef4444;
-            background-color: #fef2f2;
-            opacity: 0.75;
-        }
-
-        if[data-condition="false"]::before {
-            content: '✕';
-            background-color: #ef4444;
-        }
-        set {
-            display: block;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border-left: 4px solid #60a5fa;
-            background-color: #eff6ff;
-        }
         ai {
             display: inline-block;
-            padding: 0.75rem 1rem;
-            margin: 0.5rem 0.25rem;
-            border: 1px solid #60a5fa;
+            padding: 0.25rem 0.5rem;
+            margin: 0 0.25rem;
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
             border-radius: 0.375rem;
-            background-color: #f0f7ff;
-            color: #2563eb;
-            font-weight: 500;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s ease;
+            color: #0369a1;
+            font-family: monospace;
         }
-        else {
+
+        inline {
             display: block;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border: 1px solid #60a5fa;
-            border-radius: 0.375rem;
-            background-color: #f0f7ff;
-            color: #2563eb;
+            padding: 0.5rem;
+            line-height: 1.6;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        paragraph {
+            display: block;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Times table specific styles */
+        loop paragraph:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        loop paragraph inline {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        loop ai {
+            font-weight: 600;
+            min-width: 3rem;
+            text-align: right;
+        }
+
+        paragraph:last-of-type inline {
+            color: #059669;
             font-weight: 500;
         }
-        ai:hover {
-            background-color: #e0f2fe;
-            border-color: #3b82f6;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        fence {
-            display: none;
-        }
-        parallel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border: 1px solid #60a5fa;
-            border-radius: 0.375rem;
-            background-color: #f0f7ff;
-            color: #2563eb;
-            font-weight: 500;
-        }
+
+        /* JSON Editor styles */
         .jsoneditor {
-            border: none !important;
+            border: 2px solid #e5e7eb !important;
+            border-radius: 0.75rem !important;
         }
+
         .jsoneditor-menu {
-            display: none;
+            background-color: #f8fafc !important;
+            border-bottom: 2px solid #e5e7eb !important;
+            border-top-left-radius: 0.75rem !important;
+            border-top-right-radius: 0.75rem !important;
+        }
+
+        .jsoneditor-navigation-bar {
+            border-bottom: 2px solid #e5e7eb !important;
+        }
+
+        /* Additional components */
+        code {
+            font-family: 'Courier New', monospace;
+            background-color: #f1f5f9;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+        }
+
+        pre {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        /* Data visualization */
+        .data-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .data-header {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .data-content {
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.875rem;
         }
     </style>
 </head>
@@ -989,7 +1032,7 @@ async function main() {
     process.exit(0);
 }
  
-const run = content.wikipediaResults
+const run = content.structuredOutputs
 
 main().catch(console.error);
 
