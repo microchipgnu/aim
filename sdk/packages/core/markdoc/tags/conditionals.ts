@@ -1,115 +1,143 @@
-import { type Config, type Node, type RenderableTreeNodes, Tag, tags } from "@markdoc/markdoc";
+import {
+	type Config,
+	type Node,
+	type RenderableTreeNodes,
+	Tag,
+	tags,
+} from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
 import { nanoid } from "nanoid";
 import type { StateManager } from "runtime/state";
 import { walk } from "runtime/process";
 
-type Condition = { condition: any; children: any[]; type: 'if' | 'else' };
+type Condition = { condition: any; children: any[]; type: "if" | "else" };
 
 function renderConditions(node: any) {
-    const conditions: Condition[] = [
-        { condition: node.attributes.primary, children: [], type: 'if' },
-    ];
-    for (const child of node.children) {
-        if (child.type === 'tag' && child.tag === 'else')
-            conditions.push({
-                condition:
-                    'primary' in child.attributes ? child.attributes.primary : true,
-                children: [],
-                type: 'else'
-            });
-        else conditions[conditions.length - 1].children.push(child);
-    }
-    return conditions;
+	const conditions: Condition[] = [
+		{ condition: node.attributes.primary, children: [], type: "if" },
+	];
+	for (const child of node.children) {
+		if (child.type === "tag" && child.tag === "else")
+			conditions.push({
+				condition:
+					"primary" in child.attributes ? child.attributes.primary : true,
+				children: [],
+				type: "else",
+			});
+		else conditions[conditions.length - 1].children.push(child);
+	}
+	return conditions;
 }
 
 export const ifTag = {
-    ...tags.if,
-    transform(node: Node, config: Config) {
-        const attrs = node.transformAttributes(config);
-        const conditions = renderConditions(node);
-        const tags = [];
+	...tags.if,
+	transform(node: Node, config: Config) {
+		const attrs = node.transformAttributes(config);
+		const conditions = renderConditions(node);
+		const tags = [];
 
-        for (const { condition, children: conditionChildren, type } of conditions) {
-            if (type === 'if') {
-                tags.push(new Tag("if", {
-                    ...attrs,
-                    "data-condition": condition
-                }, conditionChildren.map(child => child.transform?.(config) || child)));
-            } else {
-                tags.push(new Tag("else", {
-                    ...attrs,
-                    "data-condition": condition
-                }, conditionChildren.map(child => child.transform?.(config) || child)));
-            }
-        }
+		for (const { condition, children: conditionChildren, type } of conditions) {
+			if (type === "if") {
+				tags.push(
+					new Tag(
+						"if",
+						{
+							...attrs,
+							"data-condition": condition,
+						},
+						conditionChildren.map(
+							(child) => child.transform?.(config) || child,
+						),
+					),
+				);
+			} else {
+				tags.push(
+					new Tag(
+						"else",
+						{
+							...attrs,
+							"data-condition": condition,
+						},
+						conditionChildren.map(
+							(child) => child.transform?.(config) || child,
+						),
+					),
+				);
+			}
+		}
 
-        return tags;
-    }
+		return tags;
+	},
 };
 export const elseTag = tags.else;
 
-export async function* if_(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
-    const runtimeState = stateManager.getRuntimeState();
-    const signal = runtimeState.options.signals.abort;
+export async function* if_(
+	node: Node,
+	config: Config,
+	stateManager: StateManager,
+): AsyncGenerator<RenderableTreeNodes> {
+	const runtimeState = stateManager.getRuntimeState();
+	const signal = runtimeState.options.signals.abort;
 
-    const attrs = node.transformAttributes(config);
-    const conditions = renderConditions(node);
+	const attrs = node.transformAttributes(config);
+	const conditions = renderConditions(node);
 
-    let ifTag = new Tag("if");
+	const ifTag = new Tag("if");
 
-    // Check abort signal before processing
-    if (signal.aborted) {
-        throw new Error('If execution aborted');
-    }
+	// Check abort signal before processing
+	if (signal.aborted) {
+		throw new Error("If execution aborted");
+	}
 
-    const children = [];
-    const id = attrs.id || nanoid();
+	const children = [];
+	const id = attrs.id || nanoid();
 
-    for (const { condition, children: conditionChildren, type } of conditions) {
-        // Check abort signal before evaluating each condition
-        if (signal.aborted) {
-            throw new Error('If execution aborted');
-        }
+	for (const { condition, children: conditionChildren, type } of conditions) {
+		// Check abort signal before evaluating each condition
+		if (signal.aborted) {
+			throw new Error("If execution aborted");
+		}
 
-        const resolvedCondition = condition?.resolve ? condition.resolve(config) : condition;
-        
-        if (resolvedCondition) {
-            stateManager.pushStack({
-                id,
-                scope: GLOBAL_SCOPE,
-                variables: {
-                    condition: resolvedCondition,
-                    isTrue: true,
-                    branch: type
-                }
-            });
+		const resolvedCondition = condition?.resolve
+			? condition.resolve(config)
+			: condition;
 
-            // Check abort signal before processing children
-            if (signal.aborted) {
-                throw new Error('If execution aborted');
-            }
+		if (resolvedCondition) {
+			stateManager.pushStack({
+				id,
+				scope: GLOBAL_SCOPE,
+				variables: {
+					condition: resolvedCondition,
+					isTrue: true,
+					branch: type,
+				},
+			});
 
-            for (const child of conditionChildren) {
-                for await (const result of walk(child, stateManager)) {
-                    // Check abort signal during child processing
-                    if (signal.aborted) {
-                        throw new Error('If execution aborted');
-                    }
-                    children.push(result);
-                }
-            }
+			// Check abort signal before processing children
+			if (signal.aborted) {
+				throw new Error("If execution aborted");
+			}
 
-            break;
-        }
-    }
+			for (const child of conditionChildren) {
+				for await (const result of walk(child, stateManager)) {
+					// Check abort signal during child processing
+					if (signal.aborted) {
+						throw new Error("If execution aborted");
+					}
+					children.push(result);
+				}
+			}
 
-    // Check abort signal before finalizing
-    if (signal.aborted) {
-        throw new Error('If execution aborted');
-    }
+			break;
+		}
+	}
 
-    ifTag.children = children.flat();
+	// Check abort signal before finalizing
+	if (signal.aborted) {
+		throw new Error("If execution aborted");
+	}
 
-    yield ifTag;
+	ifTag.children = children.flat();
+
+	yield ifTag;
 }

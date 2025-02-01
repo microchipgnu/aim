@@ -1,116 +1,131 @@
-import { Tag, type Config, type Node, type Schema, type RenderableTreeNodes } from "@markdoc/markdoc";
-import { aim, GLOBAL_SCOPE, StateManager } from "index";
+import {
+	Tag,
+	type Config,
+	type Node,
+	type Schema,
+	type RenderableTreeNodes,
+} from "@markdoc/markdoc";
+import { aim, GLOBAL_SCOPE, type StateManager } from "index";
 import { nanoid } from "nanoid";
 
 export const flowTag: Schema = {
-    render: 'flow',
-    selfClosing: true,
-    attributes: {
-        path: { type: String, required: true },
-        id: { type: String, required: false },
-        input: { type: Object, required: false }
-    },
-    transform(node, config) {
-        return new Tag("flow", node.transformAttributes(config), node.transformChildren(config));
-    }
-}
+	render: "flow",
+	selfClosing: true,
+	attributes: {
+		path: { type: String, required: true },
+		id: { type: String, required: false },
+		input: { type: Object, required: false },
+	},
+	transform(node, config) {
+		return new Tag(
+			"flow",
+			node.transformAttributes(config),
+			node.transformChildren(config),
+		);
+	},
+};
 
-export async function* flow(node: Node, config: Config, stateManager: StateManager): AsyncGenerator<RenderableTreeNodes> {
-    const runtimeState = stateManager.getRuntimeState();
-    const signal = runtimeState.options.signals.abort;
+export async function* flow(
+	node: Node,
+	config: Config,
+	stateManager: StateManager,
+): AsyncGenerator<RenderableTreeNodes> {
+	const runtimeState = stateManager.getRuntimeState();
+	const signal = runtimeState.options.signals.abort;
 
-    const attrs = node.transformAttributes(config);
+	const attrs = node.transformAttributes(config);
 
-    let flowTag = new Tag("flow");
+	const flowTag = new Tag("flow");
 
-    // Check abort signal before processing
-    if (signal.aborted) {
-        throw new Error('Flow execution aborted');
-    }
+	// Check abort signal before processing
+	if (signal.aborted) {
+		throw new Error("Flow execution aborted");
+	}
 
-    const path = attrs.path;
-    const id = attrs.id || nanoid();
-    const input = attrs.input || {};
+	const path = attrs.path;
+	const id = attrs.id || nanoid();
+	const input = attrs.input || {};
 
-    if (!path) {
-        throw new Error('Flow tag must have a path attribute');
-    }
+	if (!path) {
+		throw new Error("Flow tag must have a path attribute");
+	}
 
-    try {
-        // Check abort signal before loading content
-        if (signal.aborted) {
-            throw new Error('Flow execution aborted');
-        }
+	try {
+		// Check abort signal before loading content
+		if (signal.aborted) {
+			throw new Error("Flow execution aborted");
+		}
 
-        // Determine environment and load flow content
-        const isNode = typeof window === 'undefined';
-        let flowContent: string;
+		// Determine environment and load flow content
+		const isNode = typeof window === "undefined";
+		let flowContent: string;
 
-        if (isNode) {
-            const fs = await import('fs/promises');
-            flowContent = await fs.readFile(path, 'utf-8');
-        } else {
-            const response = await fetch(path);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch flow from '${path}'`);
-            }
-            flowContent = await response.text();
-        }
+		if (isNode) {
+			const fs = await import("fs/promises");
+			flowContent = await fs.readFile(path, "utf-8");
+		} else {
+			const response = await fetch(path);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch flow from '${path}'`);
+			}
+			flowContent = await response.text();
+		}
 
-        // Check abort signal before compilation
-        if (signal.aborted) {
-            throw new Error('Flow execution aborted');
-        }
+		// Check abort signal before compilation
+		if (signal.aborted) {
+			throw new Error("Flow execution aborted");
+		}
 
-        const { ast, errors, execute } = aim({
-            content: flowContent,
-            options: {
-                settings: {
-                    useScoping: true
-                },
-                config,
-                signals: {
-                    abort: signal
-                }
-            }
-        });
+		const { ast, errors, execute } = aim({
+			content: flowContent,
+			options: {
+				settings: {
+					useScoping: true,
+				},
+				config,
+				signals: {
+					abort: signal,
+				},
+			},
+		});
 
-        if (errors && errors.length > 0) {
-            throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
-        }
+		if (errors && errors.length > 0) {
+			throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
+		}
 
-        // Check abort signal before execution
-        if (signal.aborted) {
-            throw new Error('Flow execution aborted');
-        }
+		// Check abort signal before execution
+		if (signal.aborted) {
+			throw new Error("Flow execution aborted");
+		}
 
-        await execute();
+		await execute();
 
-        // Check abort signal before finalizing
-        if (signal.aborted) {
-            throw new Error('Flow execution aborted');
-        }
+		// Check abort signal before finalizing
+		if (signal.aborted) {
+			throw new Error("Flow execution aborted");
+		}
 
-        // Push flow variables to stack
-        stateManager.pushStack({
-            id,
-            scope: GLOBAL_SCOPE,
-            variables: {
-                ...input,
-                path,
-                content: flowContent
-            }
-        });
+		// Push flow variables to stack
+		stateManager.pushStack({
+			id,
+			scope: GLOBAL_SCOPE,
+			variables: {
+				...input,
+				path,
+				content: flowContent,
+			},
+		});
 
-        flowTag.children = [JSON.stringify({
-            path,
-            input,
-            content: flowContent
-        })];
+		flowTag.children = [
+			JSON.stringify({
+				path,
+				input,
+				content: flowContent,
+			}),
+		];
 
-        yield flowTag;
-
-    } catch (error) {
-        throw new Error(`Failed to execute flow '${path}': ${error}`);
-    }
+		yield flowTag;
+	} catch (error) {
+		throw new Error(`Failed to execute flow '${path}': ${error}`);
+	}
 }
