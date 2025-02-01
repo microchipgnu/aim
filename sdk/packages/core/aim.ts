@@ -35,6 +35,7 @@ export const defaultRuntimeOptions: RuntimeOptions = {
     settings: {
         useScoping: false
     },
+    env: {},
     config: {
         variables: {},
         nodes: {
@@ -77,6 +78,8 @@ export function aim({ content, options = defaultRuntimeOptions }: { content: str
             ...options.config.variables
         }
     }, options);
+
+    stateManager.setSecrets(options.env || {});
 
     // Register plugins in state
     options.plugins?.forEach(p => {

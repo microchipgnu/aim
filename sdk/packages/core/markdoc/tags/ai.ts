@@ -2,8 +2,12 @@ import { type Config, type Node, type Schema, Tag, type RenderableTreeNodes } fr
 import { generateObject, generateText } from "ai";
 import { GLOBAL_SCOPE } from "aim";
 import { text } from "markdoc/renderers/text";
-import { getModelProvider } from "runtime/ai/get-model-providers";
 import type { StateManager } from "runtime/state";
+import { createOpenAI } from "@ai-sdk/openai"
+import { createAnthropic } from "@ai-sdk/anthropic"
+import { createOllama } from "ollama-ai-provider"
+import { chromeai as chromeAI } from "chrome-ai"
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 
 export const aiTag: Schema = {
     render: 'ai',
@@ -33,9 +37,9 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
     const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join('\n');
 
     const model = attrs.model || "openai/gpt-4o-mini";
-    const modelProvider = getModelProvider(model);
+    const aiProvider = getModelProvider(model, stateManager);
 
-    if (!modelProvider) {
+    if (!aiProvider) {
         throw new Error(`Invalid model provider for model: ${model}`);
     }
 
@@ -45,7 +49,7 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
     }
 
     const result = await generateText({
-        model: modelProvider,
+        model: aiProvider.modelProvider(aiProvider.modelName),
         prompt: contextText,
         temperature: attrs.temperature || 0.5,
         abortSignal: signal
@@ -139,7 +143,7 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
         // })
         
         const structuredOutputsRequest = await generateObject({
-            model: modelProvider,
+            model: aiProvider.modelProvider(aiProvider.modelName),
             prompt: `Create an object that matches the following schema: ${JSON.stringify(attrs.structuredOutputs)}\n Here is the context: ${contextText}`,
             temperature: attrs.temperature || 0.5,
             output: "no-schema",
@@ -173,3 +177,96 @@ export async function* ai(node: Node, config: Config, stateManager: StateManager
 
     yield aiTag
 }
+
+// Implements CAIMPS (https://github.com/microchipgnu/caimps) and maps to providers used by Vercel AI SDK
+
+export const getModelProvider = (model: string, stateManager: StateManager): {
+    model: string,
+    provider: string,
+    modelName: string,
+    hosting: string,
+    modelProvider: any
+} => {
+    const [provider, modelName] = model.split('/');
+    const hosting = getModelHosting(model);
+
+    const createProviderConfig = (modelProvider: any) => ({
+        model,
+        provider,
+        modelName,
+        hosting,
+        modelProvider
+    });
+
+    if (hosting === 'openrouter') {
+        const openRouterProvider = createOpenRouter({
+            apiKey: stateManager.getSecret("OPENROUTER_API_KEY"),
+        })(`${provider}/${modelName}`);
+        return createProviderConfig(openRouterProvider);
+    }
+
+    switch (provider) {
+        case 'openai': {
+            const openAIProvider = createOpenAI({
+                apiKey: stateManager.getSecret("OPENAI_API_KEY"),
+            });
+            return createProviderConfig(openAIProvider);
+        }
+
+        case 'anthropic': {
+            const anthropicProvider = createAnthropic({
+                apiKey: stateManager.getSecret("ANTHROPIC_API_KEY"),
+            });
+            return createProviderConfig(anthropicProvider);
+        }
+                
+        case 'ollama': {
+            const ollamaProvider = createOllama({
+                baseURL: stateManager.getSecret("OLLAMA_BASE_URL"),
+            });
+            return createProviderConfig(ollamaProvider);
+        }
+
+        case 'google': {
+            if (modelName === 'chrome-ai@chrome') {
+                const chromeProvider = chromeAI("text", { temperature: 0.5, topK: 5 });
+                return createProviderConfig(chromeProvider);
+            }
+            throw new Error(`Unknown Google model: ${modelName}`);
+        }
+
+        default:
+            throw new Error(`Unknown model provider: ${provider}`);
+    }
+};
+
+export const modelProviders = [
+    { provider: 'openai', models: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4-32k', 'gpt-4-1106-preview', 'gpt-4-vision-preview', 'gpt-3.5-turbo-16k', 'gpt-3.5-turbo-instruct'] },
+    { provider: 'google', models: ['gemini-pro', 'gemini-pro-vision', 'text-bison', 'chat-bison', 'code-bison', 'codechat-bison'] },
+    { provider: 'anthropic', models: ['claude-2', 'claude-2.1', 'claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku', 'claude-instant-1', 'claude-instant-1.2'] },
+];
+
+export const allModels = modelProviders.flatMap(provider => 
+    provider.models.map(model => `${provider.provider}/${model}`)
+);
+
+export const getModelName = (fullModelName: string): string => {
+    const [, modelName] = fullModelName.split('/');
+    return modelName || fullModelName;
+};
+
+export const getProviderName = (fullModelName: string): string => {
+    const [providerName] = fullModelName.split('/');
+    return providerName || 'unknown';
+};
+
+export const getModelHosting = (fullModelName: string): string => {
+    const [provider, modelName] = fullModelName.split('/');
+    if (provider === 'ollama') return 'local';
+    if (modelName?.includes('@')) {
+        const [, host] = modelName.split('@');
+        return host;
+    }
+    if (modelName?.includes('openrouter')) return 'openrouter';
+    return 'cloud';
+};

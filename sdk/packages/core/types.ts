@@ -103,6 +103,7 @@ export interface RuntimeOptions {
     settings: {
         useScoping: boolean;
     };
+    env?: Record<string, string>;
     timeout?: number;
     maxRetries?: number;
     variables?: Record<string, unknown>;

@@ -2,6 +2,7 @@ import { type Config, type ConfigFunction } from "@markdoc/markdoc";
 import { BehaviorSubject, Subject } from 'rxjs';
 import { scan, shareReplay } from 'rxjs/operators';
 import type { AIMAdapter, AIMConfig, AIMPlugin, RuntimeContext, RuntimeMethods, RuntimeOptions, RuntimeState, StackFrame, StateBlock } from "types";
+import { getAllEnvVars } from "./envs";
 
 // Create a StateManager class to handle isolated state
 export class StateManager {
@@ -9,6 +10,7 @@ export class StateManager {
     private runtimeContext$ = new BehaviorSubject<RuntimeContext>(null!);
     private runtimeState$ = new BehaviorSubject<RuntimeState>(null!);
     private stateUpdates$ = new Subject<{action: string, state: RuntimeContext}>();
+    private secrets$ = new BehaviorSubject<Record<string, string>>({});
 
     // Add public accessor for runtimeState$
     public get $runtimeState() {
@@ -55,6 +57,14 @@ export class StateManager {
             }, []),
             shareReplay(1)
         ).subscribe(this.stateChain$);
+
+        // Initialize secrets from environment variables
+        const envVars = getAllEnvVars();
+        const secrets: Record<string, string> = {};
+        for (const [key, value] of Object.entries(envVars)) {
+            secrets[key] = value;
+        }
+        this.secrets$.next(secrets);
     }
 
     private createRuntimeMethods(): RuntimeMethods {
@@ -68,6 +78,40 @@ export class StateManager {
             getCurrentConfig: async (config: Config) => this.getCurrentConfig(config),
             getRuntimeContext: async () => this.getRuntimeContext()
         };
+    }
+
+    // Secret management methods
+    setSecret(key: string, value: string) {
+        const currentSecrets = this.secrets$.value;
+        this.secrets$.next({
+            ...currentSecrets,
+            [key]: value
+        });
+    }
+
+    getSecret(key: string): string | undefined {
+        return this.secrets$.value[key];
+    }
+
+    setSecrets(secrets: Record<string, string>) {
+        this.secrets$.next({
+            ...this.secrets$.value,
+            ...secrets
+        });
+    }
+
+    getAllSecrets(): Record<string, string> {
+        return { ...this.secrets$.value };
+    }
+
+    deleteSecret(key: string) {
+        const currentSecrets = this.secrets$.value;
+        const { [key]: _, ...remainingSecrets } = currentSecrets;
+        this.secrets$.next(remainingSecrets);
+    }
+
+    clearSecrets() {
+        this.secrets$.next({});
     }
 
     pushStack(frame: StackFrame) {

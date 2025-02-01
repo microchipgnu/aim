@@ -1,4 +1,3 @@
-import * as readline from "node:readline";
 import * as jsEnvironment from "browser-or-node";
 import { process as runtimeProcess } from "./process";
 import type { AIMRuntime } from "../types";
@@ -13,15 +12,6 @@ export const execute = async ({ node, stateManager }: AIMRuntime): Promise<void>
     // Check abort signal before setup
     if (signal.aborted) {
         throw new Error('Execution aborted');
-    }
-
-    // Handle Node.js specific setup
-    if (jsEnvironment.isNode) {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        rl.close();
     }
 
     stateManager.runtimeOptions?.events?.onStart?.("Execution started!");
@@ -80,15 +70,6 @@ export async function* executeGenerator({ node, stateManager }: AIMRuntime): Asy
     // Check abort signal before setup
     if (signal.aborted) {
         throw new Error('Execution aborted');
-    }
-
-    // Handle Node.js specific setup
-    if (jsEnvironment.isNode) {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        rl.close();
     }
 
     stateManager.runtimeOptions?.events?.onStart?.("Execution started!");

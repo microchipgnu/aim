@@ -1005,6 +1005,8 @@ async function main() {
     const logs = doc.stateManager.getStateHistory();
     const AST = doc.ast;
 
+    console.log("📋 Secrets:", doc.stateManager.getAllSecrets());
+
     console.log("📋 Data Events:", dataEvents);
 
     // Generate HTML with logs
