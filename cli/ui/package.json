@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.22.10",
     "@hookform/resolvers": "^3.10.0",
     "@markdoc/markdoc": "^0.4.0",
     "@monaco-editor/react": "^4.6.0",

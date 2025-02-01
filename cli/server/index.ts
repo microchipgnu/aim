@@ -1,16 +1,16 @@
-import express from 'express';
-import { fileURLToPath } from 'url';
-import path from 'path';
 import chalk from 'chalk';
+import cors from 'cors';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import type { ServerConfig } from './config/types';
-import { errorHandler } from './middleware/error';
-import { setupUI } from './middleware/ui';
 import { setupAbortController } from './controllers/abort';
 import { setupAIMRoutes } from './controllers/aim';
-import { setupRouteHandlers } from './controllers/routes';
-import { setupManifests } from './controllers/openapi';
 import { setupMCPController } from './controllers/mcp';
-import cors from 'cors';
+import { setupManifests } from './controllers/openapi';
+import { setupRouteHandlers } from './controllers/routes';
+import { errorHandler } from './middleware/error';
+import { setupUI } from './middleware/ui';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -24,7 +24,7 @@ export async function createServer(config: ServerConfig) {
 
     // Setup MCP controller first
     await setupMCPController(app, config.routesDir);
-    
+
     // Then setup other routes and middleware
     app.use('/api', express.json());
     setupAbortController(app);

@@ -23,7 +23,7 @@ Building AIM (a natural markup language for AI) tooling. This includes:
     - ✅ Serve API to execute AIM documents
     - ✅ Serve OpenAPI spec for each route (AIM document)
     - 🚧 Serve MCP to manage AIM documents
-    - ❌ Authentication
+    - ✅ Authentication
     - ❌ Payments
     - ❌ Chat mode
 
@@ -38,6 +38,7 @@ Building AIM (a natural markup language for AI) tooling. This includes:
     - ✅ Add loading spinners with ora
     - ❌ Project compiler
     - ❌ Natural language to project
+    - ❌ Compiling a project
     - ❌ Compiling shows the projected cost of running a document
     - ❌ Testing 
     - ❌ Generate diagram flow of how things connect
@@ -50,9 +51,12 @@ Building AIM (a natural markup language for AI) tooling. This includes:
     - 🚧 Sandbox: Syntax highlighting
     - 🚧 Add UI for MCP
     - ❌ Add UI for LLMs
+    - ❌ Add chat mode
 
 4. **AIM SDK Core** [IN PROGRESS]
     - ✅ Use Markdoc for parsing
+    - ✅ Create custom Markdoc nodes for AI, Loop, etc.
+    - ✅ Runtime for executing AIM documents
     - ✅ Add plugin system
     - 🚧 Introduce adapters
     - ❌ Testing 

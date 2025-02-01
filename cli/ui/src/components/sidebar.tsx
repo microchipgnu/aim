@@ -1,25 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem
 } from "@/components/ui/sidebar";
-import { ChevronDown, ChevronRight, FileCode, Folder, FolderOpen, Home, User } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import { ChevronDown, ChevronRight, FileCode, Folder, FolderOpen, Home } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Link, useLocation } from 'react-router-dom';
 
 interface Route {
   path: string;
@@ -97,13 +90,13 @@ export function AppSidebar({ routes }: SidebarProps) {
         <div key={folderName}>
           {folderName !== '/' && (
             <SidebarMenuItem>
-              <div 
+              <div
                 className="flex items-center px-2 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
                 onClick={() => hasSubContent && toggleFolder(fullPath)}
               >
                 {hasSubContent && (
-                  isExpanded ? 
-                    <ChevronDown className="w-4 h-4 mr-1" /> : 
+                  isExpanded ?
+                    <ChevronDown className="w-4 h-4 mr-1" /> :
                     <ChevronRight className="w-4 h-4 mr-1" />
                 )}
                 {content.folders && Object.keys(content.folders).length > 0 ? (
@@ -127,7 +120,7 @@ export function AppSidebar({ routes }: SidebarProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              {Object.entries(content.folders).map(([subFolder, subContent]) => 
+              {Object.entries(content.folders).map(([subFolder, subContent]) =>
                 renderFolder({ [subFolder]: subContent }, fullPath)
               )}
             </div>
@@ -171,7 +164,13 @@ export function AppSidebar({ routes }: SidebarProps) {
               Documentation
             </a>
           </Button>
-          <DropdownMenu>
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full">
                 <User className="h-4 w-4 mr-2" />
@@ -181,13 +180,8 @@ export function AppSidebar({ routes }: SidebarProps) {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>API Keys</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Sign out</DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
       </SidebarFooter>
     </Sidebar>

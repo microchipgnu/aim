@@ -101,17 +101,17 @@ export class AIMManager {
                         }
                         abortManager.delete(requestId);
                     },
-                    onSuccess: this.createEventHandler('success', res, requestId),
-                    onFinish: this.createEventHandler('finish', res, requestId),
-                    onStart: this.createEventHandler('start', res, requestId),
-                    onStep: this.createEventHandler('step', res, requestId),
+                    // onSuccess: this.createEventHandler('success', res, requestId),
+                    // onFinish: this.createEventHandler('finish', res, requestId),
+                    // onStart: this.createEventHandler('start', res, requestId),
+                    // onStep: this.createEventHandler('step', res, requestId),
                     onData: this.createEventHandler('data', res, requestId),
-                    onOutput: async (output) => {
-                        console.log(output);
-                        if (!res.writableEnded) {
-                            res.write(`event: output\ndata: ${JSON.stringify({ output, requestId })}\n\n`);
-                        }
-                    },
+                    // onOutput: async (output) => {
+                    //     console.log(output);
+                    //     if (!res.writableEnded) {
+                    //         res.write(`event: output\ndata: ${JSON.stringify({ output, requestId })}\n\n`);
+                    //     }
+                    // },
                     onUserInput: async (prompt) => {
                         console.log(prompt);
                         return "";

@@ -10,4 +10,4 @@ Say hey to {% $frontmatter.input.test %}
 
 {% ai #hey model="openai/gpt-4o-mini" /%}
 
-{% $hey.result %}
+# {% $hey.result %}

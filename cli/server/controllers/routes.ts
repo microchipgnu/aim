@@ -3,6 +3,7 @@ import type { Express } from 'express';
 import { promises as fs } from 'fs';
 import { getAIMRoutes } from '../resolution';
 import { aimManager, type AIMResponse } from '../services/aim-manager';
+import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
 
 export async function setupRouteHandlers(app: Express, routesDir: string) {
     try {
@@ -69,7 +70,7 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
             });
 
             // POST handler for route execution
-            app.post(`/${apiPath}`, async (req, res) => {
+            app.post(`/${apiPath}`, ClerkExpressRequireAuth(), async (req, res) => {
                 try {
                     // Set headers for SSE
                     res.writeHead(200, {
@@ -98,9 +99,9 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
                     req.on('close', () => {
                         if (!aimResponse.writableEnded) {
                             console.log(chalk.dim(`Client disconnected for request ${requestId}`));
-                            aimResponse.write(`event: abort\ndata: ${JSON.stringify({ 
+                            aimResponse.write(`event: abort\ndata: ${JSON.stringify({
                                 reason: 'Client disconnected',
-                                requestId 
+                                requestId
                             })}\n\n`);
                             aimResponse.end();
                         }

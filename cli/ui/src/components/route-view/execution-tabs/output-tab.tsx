@@ -1,58 +1,131 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlayCircle } from 'lucide-react';
 import React from 'react';
-import Markdoc from '@markdoc/markdoc';
-import { Terminal, PlayCircle } from 'lucide-react';
+import {
+    renderers
+} from '@markdoc/markdoc';
 
-const components = {
-    P: (props: any) => <p className="text-foreground">{props.children}</p>,
-    Ai: (props: any) => (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 text-blue-700 my-2">
-            <Terminal className="h-5 w-5" />
-            <span className="font-medium">{JSON.stringify(props?.children)}</span>
-        </div>
-    ),
-    If: (props: any) => (
-        <div className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50 my-2">
-            <div className="flex items-center gap-2">
-                <span className="font-mono text-sm bg-gray-200 px-2 py-1 rounded">if {props.condition}</span>
-            </div>
-            <div className="pl-4 border-l-2 border-gray-200">
-                {props.children}
-            </div>
-        </div>
-    ),
-    Else: (props: any) => (
-        <div className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50 my-2">
-            <div className="flex items-center gap-2">
-                <span className="font-mono text-sm bg-gray-200 px-2 py-1 rounded">else</span>
-            </div>
-            <div className="pl-4 border-l-2 border-gray-200">
-                {props.children}
-            </div>
-        </div>
-    ),
-    Loop: (props: any) => (
-        <div className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50 my-2">
-            <div className="flex items-center gap-2">
-                <span className="font-mono text-sm bg-gray-200 px-2 py-1 rounded">loop {props.count} times</span>
-            </div>
-            <div className="pl-4 border-l-2 border-gray-200">
-                {props.children}
-            </div>
-        </div>
-    ),
-    Loading: () => (
-        <div className="flex items-center justify-center h-6 w-6">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-        </div>
-    ),
-    Empty: () => (
-        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-            <PlayCircle className="h-12 w-12 mb-4" />
-            <p>Click the Run button to see execution results</p>
-        </div>
-    )
+const styles = `
+.output-preview h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgb(30, 41, 59);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.75;
 }
+
+.output-preview p {
+    display: block;
+    padding: 0.5rem 0;
+    margin: 0.5rem 0;
+    color: #475569;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.output-preview ai {
+    display: inline-block;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0.25rem;
+    border: 1px solid #60a5fa;
+    border-radius: 0.375rem;
+    background-color: #f0f7ff;
+    color: #2563eb;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.output-preview ai:hover {
+    background-color: #e0f2fe;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.output-preview if {
+    display: block;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border: 2px solid #60a5fa;
+    border-radius: 0.375rem;
+    background-color: #eff6ff;
+    position: relative;
+}
+
+.output-preview else {
+    display: block;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border: 1px solid #60a5fa;
+    border-radius: 0.375rem;
+    background-color: #f0f7ff;
+    color: #2563eb;
+    font-weight: 500;
+}
+
+.output-preview loop {
+    display: block;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+    position: relative;
+}
+
+.output-preview .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.output-preview .loading div {
+    animation: spin 1s linear infinite;
+    height: 1rem;
+    width: 1rem;
+    border-radius: 9999px;
+    border-bottom: 2px solid rgb(59 130 246);
+}
+
+.output-preview .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted-foreground);
+}
+
+.output-preview .empty-state svg {
+    height: 3rem;
+    width: 3rem;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+`;
 
 interface OutputTabProps {
     result: any[];
@@ -60,24 +133,6 @@ interface OutputTabProps {
 }
 
 export function OutputTab({ result, isLoading = false }: OutputTabProps) {
-    const processMarkdocTag = (tag: any): any => {
-        if (tag?.$$mdtype === 'Tag') {
-            try {
-                if (tag.name && components[tag.name.charAt(0).toUpperCase() + tag.name.slice(1) as keyof typeof components]) {
-                    tag.name = tag.name.charAt(0).toUpperCase() + tag.name.slice(1);
-                }
-                if (tag.children) {
-                    tag.children = tag.children.map((child: any) => processMarkdocTag(child));
-                }
-                return Markdoc.renderers.react(tag, React, { components });
-            } catch (err) {
-                console.error('Error rendering Markdoc:', err);
-                return null;
-            }
-        }
-        return tag;
-    };
-
     // Create a ref to scroll to bottom
     const resultsEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -96,42 +151,38 @@ export function OutputTab({ result, isLoading = false }: OutputTabProps) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0 h-[calc(100%-5rem)] overflow-auto">
-                {result.length === 0 && !isLoading ? (
-                    <components.Empty />
-                ) : (
-                    <div className="p-6">
-                        {result.map((item, index) => {
-                            if (Array.isArray(item) && item.length === 0) return null;
-                            
-                            let content = item;
-                            if (item?.$$mdtype === 'Tag') {
-                                content = processMarkdocTag(item);
-                            }
-                            if (!content) return null;
+                <style>{styles}</style>
+                <div className="output-preview">
+                    {result.length === 0 && !isLoading ? (
+                        <div className="empty-state">
+                            <PlayCircle />
+                            <p>Click the Run button to see execution results</p>
+                        </div>
+                    ) : (
+                        <div className="p-6">
+                            {result.map((item, index) => {
+                                if (Array.isArray(item) && item.length === 0) return null;
+                                if (!item) return null;
 
-                            if (Array.isArray(content)) {
-                                content = content.map(item => 
-                                    item?.$$mdtype === 'Tag' ? processMarkdocTag(item) : item
+                                return (
+                                    <div
+                                        key={index}
+                                        className="animate-fadeIn"
+                                        dangerouslySetInnerHTML={{ __html: renderers.html(item) }}
+                                    />
                                 );
-                            }
-
-                            return (
-                                <div 
-                                    key={index} 
-                                    className="mb-5 last:mb-0 animate-fadeIn"
-                                >
-                                    {typeof content === 'string' ? content : React.createElement(React.Fragment, null, content)}
+                            })}
+                            {isLoading && (
+                                <div className="flex justify-center mt-4">
+                                    <div className="loading">
+                                        <div />
+                                    </div>
                                 </div>
-                            );
-                        })}
-                        {isLoading && (
-                            <div className="flex justify-center mt-4">
-                                <components.Loading />
-                            </div>
-                        )}
-                        <div ref={resultsEndRef} />
-                    </div>
-                )}
+                            )}
+                            <div ref={resultsEndRef} />
+                        </div>
+                    )}
+                </div>
             </CardContent>
         </Card>
     );

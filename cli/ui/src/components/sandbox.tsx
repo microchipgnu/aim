@@ -6,8 +6,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
+import { SignInButton, UserButton, useUser } from '@clerk/clerk-react';
 import MonacoEditor from '@monaco-editor/react';
-import { FileText, PlayIcon, RotateCcw, SaveIcon, Settings2, StopCircle, Upload } from "lucide-react";
+import { Loader2, PlayIcon, SaveIcon, StopCircle, Upload } from "lucide-react";
 import React from 'react';
 import { base64ToUnicode, unicodeToBase64 } from "../../../utils/encode-decode";
 
@@ -21,6 +22,8 @@ export function Sandbox() {
   const abortControllerRef = React.useRef<AbortController | null>(null);
   const requestIdRef = React.useRef<string>('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const { isSignedIn, isLoaded } = useUser();
 
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -39,12 +42,6 @@ export function Sandbox() {
     if (value) {
       setCode(value);
     }
-  };
-
-  const handleReset = () => {
-    setCode('');
-    setLogs([]);
-    setResult([]);
   };
 
   const handleUpload = () => {
@@ -135,7 +132,7 @@ export function Sandbox() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           content: unicodeToBase64(code),
           input: variables
         }),
@@ -157,7 +154,7 @@ export function Sandbox() {
 
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) break;
 
         const chunk = decoder.decode(value);
@@ -167,7 +164,7 @@ export function Sandbox() {
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6));
-              
+
               if (data.message) {
                 setLogs(prev => [...prev, `Log: ${data.message}`]);
               }
@@ -226,20 +223,37 @@ export function Sandbox() {
     };
   }, []);
 
+  if (!isLoaded) {
+    return (
+      <div className="h-screen w-full flex flex-col bg-[#1e1e1e] text-white overflow-hidden">
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-4 w-4 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+  if (isLoaded && !isSignedIn) {
+    return (
+      <div className="h-screen w-full flex flex-col bg-[#1e1e1e] text-white overflow-hidden">
+        <div className="flex flex-col items-center justify-center h-full space-y-6">
+          <div className="flex flex-col items-center gap-4 max-w-md text-center">
+            <h2 className="text-2xl font-bold">Welcome to AIM Sandbox</h2>
+            <p className="text-gray-400">
+              This is an interactive environment where you can write, test and experiment with AIM code. Sign in to get started.
+            </p>
+          </div>
+          <SignInButton mode="modal" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-full flex flex-col bg-[#1e1e1e] text-white overflow-hidden">
       {/* Top Bar */}
       <div className="h-12 flex items-center justify-between px-4 bg-[#252526] border-b border-[#3c3c3c]">
         <div className="flex items-center gap-4">
-          <h2 className="text-sm font-medium">AIM Sandbox</h2>
-          <div className="flex items-center gap-2 text-[#858585]">
-            <Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-[#3c3c3c]">
-              <FileText className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-[#3c3c3c]">
-              <Settings2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <a href="/" className="text-sm font-medium hover:text-[#007acc]">AIM Sandbox</a>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -249,8 +263,8 @@ export function Sandbox() {
             accept=".aim,.md"
             className="hidden"
           />
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={handleUpload}
             disabled={isRunning}
@@ -258,16 +272,7 @@ export function Sandbox() {
           >
             <Upload className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleReset}
-            disabled={isRunning}
-            className="h-7 px-2 hover:bg-[#3c3c3c]"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             onClick={handleSave}
@@ -277,7 +282,7 @@ export function Sandbox() {
             <SaveIcon className="h-4 w-4" />
           </Button>
           {isRunning ? (
-            <Button 
+            <Button
               variant="ghost"
               size="sm"
               onClick={handleAbort}
@@ -287,7 +292,7 @@ export function Sandbox() {
               Stop
             </Button>
           ) : (
-            <Button 
+            <Button
               variant="ghost"
               size="sm"
               onClick={handleRun}
@@ -297,6 +302,7 @@ export function Sandbox() {
               Run
             </Button>
           )}
+          <UserButton />
         </div>
       </div>
 
@@ -334,14 +340,14 @@ export function Sandbox() {
           <div className="h-full border-l border-border bg-background">
             <Tabs defaultValue="output" className="h-[calc(100%-2.25rem)]">
               <TabsList className="h-9 bg-background border-b border-border">
-                <TabsTrigger 
-                  value="output" 
+                <TabsTrigger
+                  value="output"
                   className="data-[state=active]:bg-muted transition-colors"
                 >
                   Output
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="events" 
+                <TabsTrigger
+                  value="events"
                   className="data-[state=active]:bg-muted relative transition-colors"
                 >
                   Events
