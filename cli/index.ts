@@ -22,6 +22,104 @@ program
   .version(pkg.version);
 
 program
+  .command("init")
+  .description("Initialize a new AIM project")
+  .argument('[name]', 'Project name')
+  .action(async (name?: string) => {
+    console.log(chalk.cyan('AIM Project Initializer'));
+
+    // If no name provided, prompt for one
+    if (!name) {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      name = await new Promise<string>(resolve => {
+        rl.question('Project name: ', answer => {
+          rl.close();
+          resolve(answer);
+        });
+      });
+    }
+
+    if (!name) {
+      console.log(chalk.red('Project name is required'));
+      process.exit(1);
+    }
+
+    console.log(chalk.dim(`\nInitializing project "${name}"...\n`));
+
+    const spinner = ora({
+      text: 'Creating project files...',
+      color: 'cyan'
+    }).start();
+
+    try {
+      // Create project directory
+      await fs.mkdir(name, { recursive: true });
+
+      // Create necessary directories
+      await fs.mkdir(`${name}/files`, { recursive: true });
+
+      // Create README.md
+      const readmeContent = `# ${name}
+
+This is an AIM (AI Markup) project that allows you to create interactive AI-powered content.
+
+## Getting Started
+
+1. Add your AI provider API keys in the .env file
+2. Create your content files in the /files directory
+3. Run \`aim start -d . --ui\` to start the development server
+
+## Documentation
+
+For full documentation, visit [docs.aimarkup.org](https://docs.aimarkup.org)
+`;
+      await fs.writeFile(`${name}/README.md`, readmeContent);
+
+      // Create example file
+      const exampleContent = `# Hello World`;
+      await fs.writeFile(`${name}/files/example.md`, exampleContent);
+
+      // Create .env file
+      const envContent = `# Add your API keys here
+# AI Providers
+OPENAI_API_KEY=""
+REPLICATE_API_KEY=""
+OPENROUTER_API_KEY=""
+
+# Authentication
+CLERK_SECRET_KEY=""
+CLERK_PUBLISHABLE_KEY=""
+VITE_CLERK_PUBLISHABLE_KEY=""
+`;
+      await fs.writeFile(`${name}/.env`, envContent);
+
+      // Create .gitignore
+      const gitignoreContent = `node_modules/
+.env
+.DS_Store
+dist/
+*.log`;
+      await fs.writeFile(`${name}/.gitignore`, gitignoreContent);
+
+      spinner.succeed('Project initialized successfully!');
+      console.log(chalk.green(`\nCreated new AIM project in ./${name}`));
+      console.log(chalk.dim('\nNext steps:'));
+      console.log(chalk.dim('1. cd ' + name));
+      console.log(chalk.dim('2. Add your API keys to .env'));
+      console.log(chalk.dim('3. aim start -d . --ui\n'));
+
+    } catch (error) {
+      spinner.fail('Failed to initialize project');
+      console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+program
   .command("start")
   .description("Start the AIM server")
   .option('-d, --dir <path>', 'Routes directory path', './routes')
@@ -87,19 +185,21 @@ program
       }).start();
 
       const content = await fs.readFile(filepath, 'utf-8');
-      const aimDocument = aim({ content, options: {
-        variables: {},
-        signals: {
-          abort: new AbortController().signal
-        },
-        config: {},
-        events: {
-          onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
-        },
-        settings: {
-          useScoping: false
+      const aimDocument = aim({
+        content, options: {
+          variables: {},
+          signals: {
+            abort: new AbortController().signal
+          },
+          config: {},
+          events: {
+            onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
+          },
+          settings: {
+            useScoping: false
+          }
         }
-      } });
+      });
 
       spinner.stop();
 
@@ -151,19 +251,21 @@ program
       console.log(chalk.dim('Executing AIM file...\n'));
 
       const aimContent = await fs.readFile(filepath, 'utf-8');
-      const aimDocument = aim({ content: aimContent, options: {
-        variables: {},
-        signals: {
-          abort: new AbortController().signal
-        },
-        config: {},
-        events: {
-          onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
-        },
-        settings: {
-          useScoping: false
+      const aimDocument = aim({
+        content: aimContent, options: {
+          variables: {},
+          signals: {
+            abort: new AbortController().signal
+          },
+          config: {},
+          events: {
+            onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
+          },
+          settings: {
+            useScoping: false
+          }
         }
-      } });
+      });
 
       const createUserInputHandler = () => {
         return async (prompt: string): Promise<string> => {

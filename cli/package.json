@@ -1,9 +1,9 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "private": false,
-  "type": "commonjs",
+  "type": "module",
   "bin": {
     "aimx": "dist/index.cjs"
   },
