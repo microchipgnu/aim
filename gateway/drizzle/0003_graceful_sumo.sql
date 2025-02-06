@@ -1,0 +1,1 @@
+ALTER TABLE "projects" ALTER COLUMN "content_hash" DROP NOT NULL;
