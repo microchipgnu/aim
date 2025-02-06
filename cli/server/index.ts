@@ -2,9 +2,6 @@ import chalk from 'chalk';
 import cors from 'cors';
 import express from 'express';
 import type { ServerConfig } from './config/types';
-import { setupAIMRoutes } from './controllers/aim';
-import { setupMCPController } from './controllers/mcp';
-import { setupManifests } from './controllers/openapi';
 import { setupRouteHandlers } from './controllers/routes';
 import { errorHandler } from './middleware/error';
 import { getAIMRoutes } from './resolution';
@@ -27,9 +24,6 @@ export async function createServer(config: ServerConfig) {
     app.use(cors());
     // Error handling middleware
     app.use(errorHandler);
-
-    // Setup MCP controller first
-    await setupMCPController(app, config.routesDir);
 
     app.get('/', (req, res) => {
         res.send(`
@@ -98,7 +92,7 @@ export async function createServer(config: ServerConfig) {
                     <div class="routes">
                         ${routes.map(route => `
                             <div class="route-card">
-                                <div class="route-path">/${route.path}</div>
+                                <a class="route-path" href="/${route.path}">/${route.path}</a>
                                 <div class="route-file">${route.file}</div>
                                 <div class="endpoint-details">
                                     <div>
@@ -145,8 +139,6 @@ export async function createServer(config: ServerConfig) {
 
     // Then setup other routes and middleware
     app.use(express.json());
-    setupAIMRoutes(app);
-    await setupManifests(app, config.routesDir);
     await setupRouteHandlers(app, routes);
 
     return new Promise<void>(async (resolve, reject) => {

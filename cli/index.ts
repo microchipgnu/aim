@@ -3,11 +3,13 @@ import type { ValidateError } from "@markdoc/markdoc";
 import chalk from 'chalk';
 import { Command } from "commander";
 import "dotenv/config";
+import { nanoid } from "nanoid";
 import { promises as fs } from 'node:fs';
 import * as readline from 'node:readline';
 import ora from 'ora';
 import pkg from "./package.json" assert { type: "json" };
 import { createServer } from "./server";
+import { AIMManager } from "./server/services/aim-manager";
 
 // Initialize Commander
 const program = new Command();
@@ -85,15 +87,16 @@ For full documentation, visit [docs.aimarkup.org](https://docs.aimarkup.org)
 
       // Create .env file
       const envContent = `# Add your API keys here
-# AI Providers
-OPENAI_API_KEY=""
-REPLICATE_API_KEY=""
-OPENROUTER_API_KEY=""
+# For running locally
+OPENAI_API_KEY= # openai api key
+REPLICATE_API_KEY= # replicate api key
+OPENROUTER_API_KEY= # openrouter api key
 
-# Authentication
-CLERK_SECRET_KEY=""
-CLERK_PUBLISHABLE_KEY=""
-VITE_CLERK_PUBLISHABLE_KEY=""
+
+# AIM's hosted inference service url
+AIM_INFERENCE_SERVER_URL= # AIM's hosted inference service url
+AIM_API_KEY= # AIM's api key
+
 `;
       await fs.writeFile(`${name}/.env`, envContent);
 
@@ -104,6 +107,10 @@ VITE_CLERK_PUBLISHABLE_KEY=""
 dist/
 *.log`;
       await fs.writeFile(`${name}/.gitignore`, gitignoreContent);
+
+      await fs.writeFile(`${name}/aim.config.json`, JSON.stringify({
+        inferenceServerUrl: process.env.AIM_INFERENCE_SERVER_URL,
+      }));
 
       spinner.succeed('Project initialized successfully!');
       console.log(chalk.green(`\nCreated new AIM project in ./${name}`));
@@ -124,7 +131,6 @@ program
   .description("Start the AIM server")
   .option('-d, --dir <path>', 'Routes directory path', './routes')
   .option('-p, --port <number>', 'Port number', '3000')
-  .option('--ui', 'Enable web UI', false)
   .action(async (options) => {
     console.clear();
 
@@ -184,6 +190,7 @@ program
       }).start();
 
       const content = await fs.readFile(filepath, 'utf-8');
+
       const aimDocument = aim({
         content, options: {
           variables: {},
@@ -191,9 +198,6 @@ program
             abort: new AbortController().signal
           },
           config: {},
-          events: {
-            onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
-          },
           settings: {
             useScoping: false
           }
@@ -250,37 +254,8 @@ program
       console.log(chalk.dim('Executing AIM file...\n'));
 
       const aimContent = await fs.readFile(filepath, 'utf-8');
-      const aimDocument = aim({
-        content: aimContent, options: {
-          variables: {},
-          signals: {
-            abort: new AbortController().signal
-          },
-          config: {},
-          events: {
-            onLog: (message) => console.log(chalk.dim(`Log: ${message}`))
-          },
-          settings: {
-            useScoping: false
-          }
-        }
-      });
 
-      const createUserInputHandler = () => {
-        return async (prompt: string): Promise<string> => {
-          const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-          });
-
-          const answer = await new Promise<string>(resolve => {
-            rl.question(prompt + ' ', resolve);
-            rl.close();
-          });
-
-          return answer;
-        };
-      };
+      const aimManager = new AIMManager();
 
       let variables = {};
       if (options.variables) {
@@ -292,14 +267,40 @@ program
         }
       }
 
-      await aimDocument.execute(variables);
+      await aimManager.executeDocument(aimContent, variables, nanoid(), {
+        writableEnded: false,
+        write: (data: string) => {
+          // Parse SSE data to extract messages and results
+          const lines = data.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const eventData = JSON.parse(line.slice(6));
+                if (eventData.message) {
+                  console.log(chalk.dim(`📋 ${eventData.message}`));
+                } else if (eventData.data) {
+                  console.log(chalk.green(`✨ Result:`));
+                  console.log(chalk.white(JSON.stringify(eventData.data, null, 2)));
+                } else if (eventData.error) {
+                  console.log(chalk.red(`❌ Error: ${eventData.error}`));
+                }
+              } catch (e) {
+                // Skip invalid JSON
+              }
+            }
+          }
+        },
+        end: () => {
+          console.log(chalk.green('\n✅ Execution completed\n'));
+        }
+      });
+
 
     } catch (error) {
       console.error('Execution failed:', error);
       process.exit(1);
     }
   });
-
 
 program
   .command("deploy")

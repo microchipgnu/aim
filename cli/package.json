@@ -25,8 +25,8 @@
     "dist/ui"
   ],
   "scripts": {
-    "build": "rm -rf dist && cd ui && bun run build && cd .. && tsup --config tsup.config.ts",
-    "dev": "bun run --watch ./index.ts serve -d ./test",
+    "build": "rm -rf dist && tsup --config tsup.config.ts",
+    "dev": "bun run --watch ./index.ts serve -d ./test -p 3001",
     "dev:test": "concurrently \"bun run dev\" \"wait-on dist/index.mjs && bun --watch run ./dist/index.mjs start -d ../start-here/examples/ --ui\"",
     "build-binary": "bun run typecheck && bun build ./index.ts --compile --outfile aimx",
     "typecheck": "tsc --noEmit",

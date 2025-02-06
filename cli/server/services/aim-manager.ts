@@ -10,7 +10,7 @@ export interface AIMResponse {
 }
 
 export class AIMManager {
-    constructor() {}
+    constructor() { }
 
     async getDocumentInfo(content: string) {
         const aimDocument = aim({
@@ -34,7 +34,7 @@ export class AIMManager {
 
     async getDocumentAST(filePath: string) {
         const content = await fs.readFile(filePath, 'utf-8');
-        
+
         const aimDocument = aim({
             content,
             options: {
@@ -69,96 +69,100 @@ export class AIMManager {
     }
 
     async executeDocument(content: string, input: any, requestId: string, res: AIMResponse) {
+        console.log(chalk.cyan(`🚀 Starting execution [${requestId}]`));
         const abortController = abortManager.create(requestId);
 
-        const aimDocument = aim({
-            content,
-            options: {
-                signals: {
-                    abort: abortController.signal
-                },
-                events: {
-                    onLog: (message) => {
-                        if (!res.writableEnded) {
-                            console.log(chalk.dim(`Log: ${message}`));
-                            res.write(`event: log\ndata: ${JSON.stringify({ message, requestId })}\n\n`);
-                        }
-                    },
-                    onError: (error) => {
-                        if (!res.writableEnded) {
-                            console.error(error);
-                            res.write(`event: error\ndata: ${JSON.stringify({ error, requestId })}\n\n`);
-                        }
-                    },
-                    onAbort: (reason) => {
-                        console.warn('Execution aborted:', reason);
-                        if (!res.writableEnded) {
-                            res.write(`event: abort\ndata: ${JSON.stringify({ 
-                                reason: reason || 'Execution aborted by user',
-                                requestId
-                            })}\n\n`);
-                            res.end();
-                        }
-                        abortManager.delete(requestId);
-                    },
-                    // onSuccess: this.createEventHandler('success', res, requestId),
-                    // onFinish: this.createEventHandler('finish', res, requestId),
-                    // onStart: this.createEventHandler('start', res, requestId),
-                    // onStep: this.createEventHandler('step', res, requestId),
-                    onData: this.createEventHandler('data', res, requestId),
-                    // onOutput: async (output) => {
-                    //     console.log(output);
-                    //     if (!res.writableEnded) {
-                    //         res.write(`event: output\ndata: ${JSON.stringify({ output, requestId })}\n\n`);
-                    //     }
-                    // },
-                    onUserInput: async (prompt) => {
-                        console.log(prompt);
-                        return "";
-                    }
-                },
-                config: defaultRuntimeOptions.config,
-                settings: {
-                    useScoping: false
-                }
-            }
-        });
-
         try {
-            for await (const result of aimDocument.executeWithGenerator({ input })) {
-                if (abortController.signal.aborted) {
-                    break;
+            // Set up SSE headers
+            res.write('event: start\n');
+            res.write(`data: ${JSON.stringify({ requestId })}\n\n`);
+
+            const response = await fetch(`${process.env.INFERENCE_SERVER_URL}/aim/v1/process`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.INFERENCE_SERVER_API_KEY}`
+                },
+                body: JSON.stringify({
+                    content,
+                    input,
+                    requestId
+                }),
+                signal: abortController.signal
+            });
+
+            if (!response.ok) {
+                const errorMessage = `Inference server error: ${response.status} ${response.statusText}`;
+                console.error(chalk.red(`❌ ${errorMessage}`));
+
+                if (!res.writableEnded) {
+                    res.write(`event: error\ndata: ${JSON.stringify({
+                        error: errorMessage,
+                        requestId
+                    })}\n\n`);
+                    res.end();
                 }
-                // if (result && typeof result === 'object') {
-                //     res.write(`event: data\ndata: ${JSON.stringify({ data: result, requestId })}\n\n`);
-                // }
+                return;
+            }
+
+            // Stream the response
+            const reader = response.body?.getReader();
+            if (!reader) {
+                throw new Error('No response body from inference server');
+            }
+
+            console.log(chalk.yellow('\n📥 Receiving chunks...\n'));
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = new TextDecoder().decode(value);
+
+                // Parse and display chunk data nicely
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.message) {
+                                console.log(chalk.dim(`📋 ${data.message}`));
+                            } else if (data.data) {
+                                console.log(chalk.green(`✨ Result received:`));
+                                console.log(chalk.white(JSON.stringify(data.data, null, 2)));
+                            }
+                        } catch (e) {
+                            // Skip invalid JSON
+                        }
+                    }
+                }
+
+                // Forward the chunks to the client
+                if (!res.writableEnded) {
+                    res.write(`event: chunk\ndata: ${chunk}\n\n`);
+                }
             }
 
             if (!res.writableEnded) {
                 res.write(`event: complete\ndata: ${JSON.stringify({ requestId })}\n\n`);
                 res.end();
             }
+
+            console.log(chalk.green(`\n✅ Execution completed [${requestId}]\n`));
+
         } catch (error) {
+            console.error(chalk.red('❌ Error executing document:'), error);
             if (!res.writableEnded) {
-                console.error(chalk.red(`Error executing document:`), error);
                 res.write(`event: error\ndata: ${JSON.stringify({
-                    error: error instanceof Error ? error.message : 'Failed to execute document',
+                    error: error instanceof Error ? error.message : String(error),
                     requestId
                 })}\n\n`);
                 res.end();
             }
         } finally {
+            console.log(chalk.dim(`🧹 Cleaning up abort controller [${requestId}]`));
             abortManager.delete(requestId);
         }
-    }
-
-    private createEventHandler(eventName: string, res: AIMResponse, requestId: string) {
-        return (data: any) => {
-            console.log(data);
-            if (!res.writableEnded) {
-                res.write(`event: ${eventName}\ndata: ${JSON.stringify({ data, requestId })}\n\n`);
-            }
-        };
     }
 }
 
