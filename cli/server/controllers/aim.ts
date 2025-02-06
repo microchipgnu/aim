@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid';
 import { base64ToUnicode } from '../../utils/encode-decode';
 
 export function setupAIMRoutes(app: Express) {
-    app.post('/api/aim/process', async (req: Request, res: Response) => {
+    app.post('/api/process', async (req: Request, res: Response) => {
         const requestId = nanoid();
         const { content, input } = req.body;
 
@@ -47,7 +47,7 @@ export function setupAIMRoutes(app: Express) {
         }
     });
 
-    app.get('/api/aim/info', async (req: Request, res: Response) => {
+    app.get('/api/info', async (req: Request, res: Response) => {
         try {
             const content = req.query.content;
             if (!content || typeof content !== 'string') {
@@ -61,14 +61,14 @@ export function setupAIMRoutes(app: Express) {
             res.json(info);
         } catch (error) {
             console.error(chalk.red('Error getting document info:'), error);
-            res.status(500).json({ 
+            res.status(500).json({
                 error: 'Failed to get document info',
                 message: process.env.NODE_ENV === 'development' ? error : undefined
             });
         }
     });
 
-    app.get('/api/aim/ast/:filePath', async (req: Request, res: Response) => {
+    app.get('/api/ast/:filePath', async (req: Request, res: Response) => {
         const { filePath } = req.params;
 
         if (!filePath) {
@@ -85,9 +85,9 @@ export function setupAIMRoutes(app: Express) {
         }
     });
 
-    app.get('/api/aim/status/:requestId', (req: Request, res: Response) => {
+    app.get('/api/status/:requestId', (req: Request, res: Response) => {
         const { requestId } = req.params;
-        
+
         if (!requestId) {
             res.status(400).json({ error: 'Request ID is required' });
             return;
@@ -101,9 +101,9 @@ export function setupAIMRoutes(app: Express) {
             return;
         }
 
-        res.json({ 
+        res.json({
             status: 'processing',
-            requestId 
+            requestId
         });
     });
 }

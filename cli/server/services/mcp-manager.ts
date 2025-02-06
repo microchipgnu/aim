@@ -14,10 +14,9 @@ export class MCPManager {
     private openApiLookup: Record<string, any> = {};
 
     constructor() {
-        console.log('[MCP] Initializing MCP manager...');
         this.server = new Server(
             { name: 'aim-server', version: '1.0.0' },
-            { 
+            {
                 capabilities: {
                     resources: {}, // Enable resources capability
                     tools: {} // Enable tools capability
@@ -26,7 +25,6 @@ export class MCPManager {
         );
 
         this.setupRequestHandlers();
-        console.log('[MCP] MCP manager initialized');
     }
 
     private setupRequestHandlers() {
@@ -48,7 +46,7 @@ export class MCPManager {
         this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
             const uri = request.params.uri;
             const toolMatch = uri.match(/^mcp:\/\/tools\/(.+)$/);
-            
+
             if (!toolMatch) {
                 throw new Error(`Invalid resource URI: ${uri}`);
             }
@@ -72,48 +70,35 @@ export class MCPManager {
 
     async initialize(routesDir: string) {
         try {
-            // Get routes and generate OpenAPI spec
-            console.log('[MCP] Loading and generating OpenAPI spec...');
             const routes = await getAIMRoutes(routesDir);
             await openAPIManager.initialize(routes);
             const spec = openAPIManager.generateOpenAPISpec();
             const converter = new OpenAPIToMCPConverter(spec);
-            console.log('[MCP] OpenAPI spec generated and parsed');
 
-            // Get base URL from spec
             const baseUrl = spec.servers?.[0]?.url;
             if (!baseUrl) {
                 throw new Error('No base URL found in OpenAPI spec');
             }
 
-            // Initialize HTTP client
             this.httpClient = new HttpClient({ baseUrl }, spec);
 
-            // Convert spec to MCP tools
             const { tools, openApiLookup } = converter.convertToMCPTools();
             this.tools = tools;
             this.openApiLookup = openApiLookup;
-            console.log('[MCP] Generated', Object.keys(tools).length, 'tools');
         } catch (error) {
-            console.error('[MCP] Error initializing MCP manager:', error);
             throw error;
         }
     }
 
     handleSSEConnection(res: Response) {
-        console.log('[MCP] New SSE connection established');
-
-        // Set headers for SSE
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        // Create new transport and connect server
         const transport = new SSEServerTransport('/messages', res);
         this.server.connect(transport);
         this.sseTransport = transport;
 
-        // Send initial message to confirm connection
         res.write('data: {"type":"connection","status":"established"}\n\n');
     }
 

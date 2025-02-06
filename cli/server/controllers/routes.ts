@@ -1,48 +1,11 @@
 import chalk from 'chalk';
 import type { Express } from 'express';
 import { promises as fs } from 'fs';
-import { getAIMRoutes } from '../resolution';
+import { getAIMRoutes, type RouteInfo } from '../resolution';
 import { aimManager, type AIMResponse } from '../services/aim-manager';
-import { requireAuth } from '@clerk/express';
 
-export async function setupRouteHandlers(app: Express, routesDir: string) {
+export async function setupRouteHandlers(app: Express, routes: RouteInfo[]) {
     try {
-        // Get all AIM routes using the resolution helper
-        const routes = await getAIMRoutes(routesDir);
-        console.log(chalk.dim(`Found ${routes.length} routes`));
-
-        // Add index route that lists all routes
-        app.get('/api', (req, res) => {
-            try {
-                console.log(chalk.dim(`GET /api - Listing ${routes.length} routes`));
-
-                // Map routes and add additional metadata
-                const routeInfo = routes.map(route => ({
-                    path: route.path.replace(/^api\//, ''), // Remove the 'api/' prefix for client display
-                    file: route.file,
-                    type: route.type,
-                    segments: route.segments,
-                    extension: route.extension
-                }));
-
-                // Sort routes by segments and path for consistent ordering
-                routeInfo.sort((a, b) => {
-                    if (a.segments === b.segments) {
-                        return a.path.localeCompare(b.path);
-                    }
-                    return a.segments - b.segments;
-                });
-
-                res.json({
-                    count: routes.length,
-                    routes: routeInfo
-                });
-            } catch (error) {
-                console.error(chalk.red('Error serving route list:'), error);
-                res.status(500).json({ error: 'Failed to list routes' });
-            }
-        });
-
         // Add individual routes
         for (const route of routes) {
             const apiPath = route.path; // Path already includes 'api/' prefix from resolution.ts
@@ -70,7 +33,7 @@ export async function setupRouteHandlers(app: Express, routesDir: string) {
             });
 
             // POST handler for route execution
-            app.post(`/${apiPath}`, requireAuth(), async (req, res) => {
+            app.post(`/${apiPath}`, async (req, res) => {
                 try {
                     // Set headers for SSE
                     res.writeHead(200, {

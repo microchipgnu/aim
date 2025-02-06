@@ -1,13 +1,13 @@
 import { aim } from "@aim-sdk/core";
+import type { ValidateError } from "@markdoc/markdoc";
+import chalk from 'chalk';
 import { Command } from "commander";
 import "dotenv/config";
 import { promises as fs } from 'node:fs';
 import * as readline from 'node:readline';
+import ora from 'ora';
 import pkg from "./package.json" assert { type: "json" };
 import { createServer } from "./server";
-import chalk from 'chalk';
-import type { ValidateError, ValidationError } from "@markdoc/markdoc";
-import ora from 'ora';
 
 // Initialize Commander
 const program = new Command();
@@ -120,7 +120,7 @@ dist/
   });
 
 program
-  .command("start")
+  .command("serve")
   .description("Start the AIM server")
   .option('-d, --dir <path>', 'Routes directory path', './routes')
   .option('-p, --port <number>', 'Port number', '3000')
@@ -130,12 +130,11 @@ program
 
     console.log(chalk.cyan('AIM Server'));
     console.log(chalk.dim(`Starting server with configuration:`));
-    console.log(chalk.dim(`• Routes directory: ./${options.dir}`));
+    console.log(chalk.dim(`• Routes directory: ${options.dir}`));
     console.log(chalk.dim(`• Port: ${options.port}`));
     if (options.ui) {
       console.log(chalk.dim(`• Web UI: enabled`));
     }
-    console.log();
 
     const spinner = ora({
       text: 'Starting development server...',
@@ -301,58 +300,10 @@ program
     }
   });
 
-// program
-//   .command("ask")
-//   .description("Ask a question")
-//   .action(async () => {
-//     console.clear();
 
-//     console.log(chalk.blue("Question Time!"));
-//     const answers = await inquirer.prompt([
-//       {
-//         type: "input",
-//         name: "username",
-//         message: "What is your name?",
-//       },
-//       {
-//         type: "list",
-//         name: "favoriteColor",
-//         message: "Choose your favorite color:",
-//         choices: ["Red", "Green", "Blue", "Yellow"],
-//       },
-//     ]);
-
-//     console.log(
-//       chalk.green(`Hello, ${answers.username}! Your favorite color is ${answers.favoriteColor}.`)
-//     );
-//   });
-
-// program
-//   .command("ui")
-//   .description("Display a simple console menu")
-//   .action(async () => {
-//     console.clear();
-
-//     console.log(chalk.cyan("Console Menu"));
-//     console.log("\nSelect an option:");
-
-//     const { choice } = await inquirer.prompt([
-//       {
-//         type: "list",
-//         name: "choice",
-//         message: "Choose an option:",
-//         choices: ["Option 1", "Option 2", "Option 3", "Exit"]
-//       }
-//     ]);
-
-//     if (choice === "Exit") {
-//       console.log("Goodbye!");
-//       process.exit(0);
-//     } else {
-//       console.log(chalk.green(`You selected: ${choice}`));
-//       console.log("Performing some action...");
-//     }
-//   });
+program
+  .command("deploy")
+  .description("Deploy project");
 
 // Parse CLI arguments
 program.parse(process.argv);
