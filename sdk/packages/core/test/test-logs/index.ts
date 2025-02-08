@@ -2,10 +2,11 @@ import { writeFileSync } from "fs";
 import { transform } from "markdoc/transform";
 import { aim, defaultRuntimeOptions, renderers, Tag } from "../../index";
 import { html } from "../../markdoc/renderers/html";
+import { z } from "zod";
 
 // Sample test content
 const content = {
-	main: `
+    main: `
 {% loop #loop count=2 %}
     {% if equals($loop.index, 1) %}
         What is the number the first time? {% $loop.index %}
@@ -14,13 +15,13 @@ const content = {
     {% /if %}
 {% /loop %}
 `,
-	secondary: `
+    secondary: `
 # Hey
 
 hey
 
 `,
-	calculator: `---
+    calculator: `---
 title: Loop
 description: Use loops to repeat a block of code multiple times.
 input:
@@ -37,7 +38,7 @@ Let's do the {% $frontmatter.input.count %} times table. Output just the next nu
 
 {% /loop %}
 `,
-	test: `---
+    test: `---
 title: Loop
 description: Use loops to repeat a block of code multiple times.
 input:
@@ -57,7 +58,7 @@ Output just the next number.
 {% /loop %}
 
 Yay, we're done!`,
-	signEthTransaction: `
+    signEthTransaction: `
 
 Lets sign the transaction. {% sign-eth-transaction /%}
 
@@ -81,7 +82,7 @@ This is the loop index: {% $loop.index %}
 
 `,
 
-	headsTails: `---
+    headsTails: `---
 title: "Heads or Tails 🪙"
 description: "A coin flip game with conditional responses"
 ---
@@ -138,7 +139,7 @@ Output 'heads' or 'tails' only. Output heads
 
 {% $flip.result %}
 `,
-	ifElse: `---
+    ifElse: `---
 title: "If else"
 description: "An example of how to use AIM to create a document."
 input:
@@ -177,7 +178,7 @@ It should have the following tone: {% $frontmatter.input.tone %}
 
 {% ai #output model="openai/gpt-4o-mini" /%}
 `,
-	loopUntil: `
+    loopUntil: `
 
 Output a random number between 1 and 100. Output just the number.
 
@@ -189,7 +190,7 @@ Output a random number between 1 and 100. Output just the number.
 
 Yay, we're done! The number is {% $value.result %} and it took {% $loop.index %} tries.
 `,
-	greeting: `
+    greeting: `
 
 
 \`\`\`js {% #example %} 
@@ -216,7 +217,7 @@ export default greeting;
 The code returned: {% $example.result %}
 
 `,
-	mathsQuestion: `---
+    mathsQuestion: `---
 title: "Calculator 🧮"
 description: "Using code blocks to solve math problems"
 input:
@@ -244,7 +245,7 @@ return eval(code);
 
 The answer is: {% $eval.result %}
 `,
-	wikipediaResults: `---
+    wikipediaResults: `---
 title: "Q&A with Wikipedia 📚"
 description: "Using code blocks to query Wikipedia"
 input:
@@ -331,7 +332,7 @@ Results: {% debug($wikipedia_results) %}
 
 {% $answer.result %}
 `,
-	loop: `
+    loop: `
 
 {% loop #loop count=2 %}
 
@@ -339,7 +340,7 @@ This is the loop index: {% $loop.index %}
 
 {% /loop %}
 `,
-	parallel: `
+    parallel: `
 
 {% parallel #parallel %}
 
@@ -376,7 +377,7 @@ This is the loop index: {% $loop.index %}
 
 {% /parallel %}
 `,
-	structuredOutputs: `
+    structuredOutputs: `
 
 Create a recipe for chocholate cake
 
@@ -393,7 +394,7 @@ Create a recipe for chocholate cake
 {% /loop %}
 
 `,
-	timesTable: `---
+    timesTable: `---
 title: Loop
 description: Use loops to repeat a block of code multiple times.
 input:
@@ -416,6 +417,40 @@ The next number is {% ai #result model="openai/gpt-4o-mini" /%}
 
 Yay, we're done!
 `,
+    openrouter: `
+    How is the weather today in lisbon?
+
+
+    {% ai  
+    model="openai/gpt-4o-mini:online@openrouter" 
+    structuredOutputs={
+        "weather": {
+            "type": "object",
+            "properties": {
+                "temperature": { "type": "number" },
+                "description": { "type": "string" }
+            }
+        }
+} /%}
+`,
+    useTool: `
+
+    Use tool hello and translate to portuguese
+
+    {% ai #hello model="openai/gpt-4o-mini" structuredOutputs="{greeting: string}"/%}
+
+    {% $hello.structuredOutputs.greeting %}
+    `,
+    flow: `
+
+    I would like to talk about flowers in amazonia
+    
+    {% flow #flow path="/test-flow.md" /%}
+
+    I would like to talk about cars in the future
+
+    {% flow #flow path="/test-flow.md" /%}
+    `
 };
 
 // Create HTML template
@@ -866,179 +901,207 @@ const htmlTemplate = `
 `;
 
 async function main() {
-	const dataEvents: any[] = [];
-	const abortController = new AbortController();
+    const dataEvents: any[] = [];
+    const abortController = new AbortController();
 
-	// Initialize AIM document
-	const doc = aim({
-		content: run,
-		options: {
-			signals: {
-				abort: abortController.signal,
-			},
-			events: {
-				onStart: (msg: string) => {
-					console.log("🚀 Started:", msg);
-					dataEvents.push({
-						type: "start",
-						message: msg,
-						timestamp: new Date().toISOString(),
-						level: "info",
-					});
-				},
-				onFinish: (msg: string) => {
-					console.log("✅ Finished:", msg);
-					dataEvents.push({
-						type: "finish",
-						message: msg,
-						timestamp: new Date().toISOString(),
-						level: "info",
-					});
-				},
-				onSuccess: (msg: string) => {
-					console.log("🎉 Success:", msg);
-					dataEvents.push({
-						type: "success",
-						message: msg,
-						timestamp: new Date().toISOString(),
-						level: "success",
-					});
-				},
-				onError: (msg: string) => {
-					console.error("❌ Error:", msg);
-					dataEvents.push({
-						type: "error",
-						message: msg,
-						timestamp: new Date().toISOString(),
-						level: "error",
-						stack: new Error().stack,
-					});
-				},
-				onLog: (msg: string) => {
-					console.log("📝 Log:", msg);
-					dataEvents.push({
-						type: "log",
-						message: msg,
-						timestamp: new Date().toISOString(),
-						level: "debug",
-					});
-				},
-				onData: (data: any) => {
-					console.log("📊 Data:", data);
-					dataEvents.push({
-						type: "data",
-						data,
-						timestamp: new Date().toISOString(),
-						level: "info",
-						dataType: typeof data,
-					});
-				},
-			},
-			settings: {
-				useScoping: false,
-			},
-			config: {},
-			plugins: [
-				{
-					plugin: {
-						name: "sign-eth-transaction",
-						version: "0.0.1",
-						tags: {
-							"sign-eth-transaction": {
-								render: "sign-eth-transaction",
-								execute: async function* ({ node, config, state }) {
-									const result =
-										"Here's the signed transaction: 0x1234567890d3fsasd";
-									state.context.methods.addToTextRegistry({
-										text: result,
-										scope: "global",
-									});
-									yield result;
-									yield new Tag("div", { text: result });
-								},
-							},
-						},
-					},
-				},
-			],
-		},
-	});
+    // Initialize AIM document
+    const doc = aim({
+        content: run,
+        options: {
+            signals: {
+                abort: abortController.signal,
+            },
+            experimental_files: {
+                "/test-flow.md": {
+                    content: `---
+                    input:
+                      - name: topic
+                        type: string
+                        description: The topic of the flow
+                    ---
+                    Generate a sentence about the topic: {% $frontmatter.input.topic %}
+                {% ai /%}
+                make it crazier
+                {% ai /%}
+                make it funnier
+                {% ai /%}
+                    `,
+                }
+            },
+            tools: {
+                "hello": {
+                    description: "This is a test tool",
+                    parameters: z.object({
+                        name: z.string(),
+                    }),
+                    execute: async (args: { name: string }) => {
+                        return `Hello, ${args.name}!`;
+                    },
+                }
+            },
+            events: {
+                onStart: (msg: string) => {
+                    console.log("🚀 Started:", msg);
+                    dataEvents.push({
+                        type: "start",
+                        message: msg,
+                        timestamp: new Date().toISOString(),
+                        level: "info",
+                    });
+                },
+                onFinish: (msg: string) => {
+                    console.log("✅ Finished:", msg);
+                    dataEvents.push({
+                        type: "finish",
+                        message: msg,
+                        timestamp: new Date().toISOString(),
+                        level: "info",
+                    });
+                },
+                onSuccess: (msg: string) => {
+                    console.log("🎉 Success:", msg);
+                    dataEvents.push({
+                        type: "success",
+                        message: msg,
+                        timestamp: new Date().toISOString(),
+                        level: "success",
+                    });
+                },
+                onError: (msg: string) => {
+                    console.error("❌ Error:", msg);
+                    dataEvents.push({
+                        type: "error",
+                        message: msg,
+                        timestamp: new Date().toISOString(),
+                        level: "error",
+                        stack: new Error().stack,
+                    });
+                },
+                onLog: (msg: string) => {
+                    console.log("📝 Log:", msg);
+                    dataEvents.push({
+                        type: "log",
+                        message: msg,
+                        timestamp: new Date().toISOString(),
+                        level: "debug",
+                    });
+                },
+                onData: (data: any) => {
+                    console.log("📊 Data:", data);
+                    dataEvents.push({
+                        type: "data",
+                        data,
+                        timestamp: new Date().toISOString(),
+                        level: "info",
+                        dataType: typeof data,
+                    });
+                },
+            },
+            settings: {
+                useScoping: false,
+            },
+            config: {},
+            plugins: [
+                {
+                    plugin: {
+                        name: "sign-eth-transaction",
+                        version: "0.0.1",
+                        tags: {
+                            "sign-eth-transaction": {
+                                render: "sign-eth-transaction",
+                                execute: async function* ({ node, config, state }) {
+                                    const result =
+                                        "Here's the signed transaction: 0x1234567890d3fsasd";
+                                    state.context.methods.addToTextRegistry({
+                                        text: result,
+                                        scope: "global",
+                                    });
+                                    yield result;
+                                    yield new Tag("div", { text: result });
+                                },
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+    });
 
-	// Execute document
-	// await doc.execute({
-	//     input: {
-	//         topic: "The future of AI",
-	//         type: "sentence",
-	//         tone: "sad",
-	//         count: 10,
-	//         name: "Micro",
-	//         maths_question: "What is 1 + 1?",
-	//         question: "What is the capital of France?"
-	//     }
-	// });
+    // Execute document
+    // await doc.execute({
+    //     input: {
+    //         topic: "The future of AI",
+    //         type: "sentence",
+    //         tone: "sad",
+    //         count: 10,
+    //         name: "Micro",
+    //         maths_question: "What is 1 + 1?",
+    //         question: "What is the capital of France?"
+    //     }
+    // });
 
-	//TEST ABORTION
-	const shouldAbort = false;
-	let resultCount = 0;
-	for await (const result of doc.executeWithGenerator({
-		input: {
-			topic: "The future of AI",
-			type: "sentence",
-			tone: "sad",
-			count: 10,
-			name: "Micro",
-			maths_question: "What is 1 + 1?",
-			question: "What is the capital of France?",
-		},
-	})) {
-		console.log("🔄 Generator Result:", JSON.stringify(result, null, 2));
-		resultCount++;
-		if (resultCount >= 2 && shouldAbort) {
-			console.log("🚀 Aborting execution...");
-			abortController.abort();
-			break;
-		}
-	}
+    //TEST ABORTION
+    const shouldAbort = false;
+    let resultCount = 0;
+    for await (const result of doc.executeWithGenerator({
+        input: {
+            topic: "The future of AI",
+            type: "sentence",
+            tone: "sad",
+            count: 10,
+            name: "Micro",
+            maths_question: "What is 1 + 1?",
+            question: "What is the capital of France?",
+        },
+    })) {
+        console.log("🔄 Generator Result:", JSON.stringify(result, null, 2));
+        resultCount++;
+        if (resultCount >= 2 && shouldAbort) {
+            console.log("🚀 Aborting execution...");
+            abortController.abort();
+            break;
+        }
+    }
 
-	// Get state chain logs
-	const logs = doc.stateManager.getStateHistory();
-	const AST = doc.ast;
+    // Get state chain logs
+    const logs = doc.stateManager.getStateHistory();
+    const AST = doc.ast;
 
-	console.log("📋 Secrets:", doc.stateManager.getAllSecrets());
+    console.log("📋 Secrets:", doc.stateManager.getAllSecrets());
 
-	console.log("📋 Data Events:", dataEvents);
+    console.log("📋 Data Events:", dataEvents);
 
-	// Generate HTML with logs
-	const htmlOutput = dataEvents
-		.filter((event) => event.type === "data")
-		.map((event) => html(event.data))
-		.join("");
+    // Generate HTML with logs
+    const htmlOutput = dataEvents
+        .filter((event) => event.type === "data")
+        .map((event) => html(event.data))
+        .join("");
 
-	console.log("📋 HTML Output:", htmlOutput);
+    console.log("📋 HTML Output:", htmlOutput);
 
-	const renderableContent = await transform(
-		doc.ast,
-		defaultRuntimeOptions.config,
-	);
+    const renderableContent = await transform(
+        doc.ast,
+        defaultRuntimeOptions.config,
+    );
 
-	const finalHtml = htmlTemplate
-		.replace("LOGS_PLACEHOLDER", JSON.stringify(logs, null, 2))
-		.replace("DATA_EVENTS_PLACEHOLDER", JSON.stringify(dataEvents, null, 2))
-		.replace("OUTPUT_PLACEHOLDER", JSON.stringify(htmlOutput, null, 2))
-		.replace("AST_PLACEHOLDER", JSON.stringify(AST, null, 2))
-		.replace("CONTENT_PLACEHOLDER", JSON.stringify(run, null, 2))
-		.replace(
-			"HTML_CONTENT_PLACEHOLDER",
-			JSON.stringify(html([renderableContent])),
-		);
+    const finalHtml = htmlTemplate
+        .replace("LOGS_PLACEHOLDER", JSON.stringify(logs, null, 2))
+        .replace("DATA_EVENTS_PLACEHOLDER", JSON.stringify(dataEvents, null, 2))
+        .replace("OUTPUT_PLACEHOLDER", JSON.stringify(htmlOutput, null, 2))
+        .replace("AST_PLACEHOLDER", JSON.stringify(AST, null, 2))
+        .replace("CONTENT_PLACEHOLDER", JSON.stringify(run, null, 2))
+        .replace(
+            "HTML_CONTENT_PLACEHOLDER",
+            JSON.stringify(html([renderableContent])),
+        );
 
-	// Write to file
-	writeFileSync("logs.html", finalHtml);
+    // Write to file
+    writeFileSync("logs.html", finalHtml);
 
-	console.log("📄 Logs have been written to logs.html");
-	process.exit(0);
+    console.log("📄 Logs have been written to logs.html");
+    process.exit(0);
 }
 
-const run = content.structuredOutputs;
+const run = content.flow;
 
 main().catch(console.error);

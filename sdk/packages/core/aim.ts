@@ -31,6 +31,7 @@ export const defaultRuntimeOptions: RuntimeOptions = {
 	variables: {},
 	input: {},
 	events: {},
+	tools: {},
 	signals: {
 		abort: new AbortController().signal,
 	},
@@ -79,8 +80,10 @@ export const defaultRuntimeOptions: RuntimeOptions = {
 export function aim({
 	content,
 	options = defaultRuntimeOptions,
-}: { content: string; options: RuntimeOptions }) {
-	const stateManager = new StateManager(
+	manager,
+}: { content: string; options: RuntimeOptions; manager?: StateManager }) {
+
+	const stateManager = manager || new StateManager(
 		{
 			...options.config,
 			variables: {

@@ -1,5 +1,23 @@
 # @aim-sdk/core
 
+## 0.0.22
+
+### Patch Changes
+
+- Enhance AIM SDK core with improved AI and tool integration
+
+## 0.0.21
+
+### Patch Changes
+
+- fix ai
+
+## 0.0.20
+
+### Patch Changes
+
+- ai
+
 ## 0.0.19
 
 ### Patch Changes

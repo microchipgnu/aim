@@ -10,7 +10,7 @@ import type {
 	RuntimeOptions,
 	RuntimeState,
 	StackFrame,
-	StateBlock,
+	StateBlock
 } from "types";
 import { getAllEnvVars } from "./envs";
 
