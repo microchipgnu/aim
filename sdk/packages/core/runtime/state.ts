@@ -275,7 +275,7 @@ export class StateManager {
 	private validatePlugin(plugin: AIMPlugin) {
 		const currentContext = this.runtimeContext$.value;
 		if (currentContext.plugins.has(plugin.name)) {
-			throw new Error(`Plugin ${plugin.name} is already registered`);
+			return; // Already registered, do nothing
 		}
 
 		if (plugin.dependencies?.plugins) {
