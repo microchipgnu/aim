@@ -24,6 +24,7 @@ export const aiTag: Schema = {
 		id: { type: String, required: false },
 		temperature: { type: Number, required: false, default: 0.5 },
 		structuredOutputs: { type: Object, required: false, default: undefined },
+		tools: { type: String, required: false, default: undefined }, // array of tool names
 	},
 	transform(node, config) {
 		return new Tag(
@@ -51,6 +52,7 @@ export async function* ai(
 	const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join("\n");
 	const modelConfig = parseModelString(attrs.model || "openai/gpt-4");
 	const model = await getAIModel(modelConfig, stateManager);
+	const requestedTools = attrs.tools ? attrs.tools.split(",").map((t: string) => t.trim()) : undefined;
 
 	if (!model) {
 		throw new Error(`Invalid model configuration: ${attrs.model}`);
@@ -60,9 +62,14 @@ export async function* ai(
 		throw new Error("AI execution aborted");
 	}
 
-	const tools = Object.fromEntries(
+	const allTools = Object.fromEntries(
 		Object.entries(stateManager.getRuntimeState().options.tools || {}).map(([name, tool]) => [name, convertToAISDKTool(tool)]),
 	);
+
+	const tools = attrs.tools === "*" ? allTools :
+		requestedTools ? Object.fromEntries(
+			Object.entries(allTools).filter(([name]) => requestedTools.includes(name))
+		) : {};
 
 	for (const [name, tool] of Object.entries(tools || {})) {
 		if (tool?.execute) {
@@ -99,7 +106,7 @@ export async function* ai(
 
 		const structuredOutputsRequest = await generateObject({
 			model,
-			prompt: `Create an object that matches the following schema: ${JSON.stringify(attrs.structuredOutputs)}\n Here is the context: ${contextText}`,
+			prompt: `Create an object that matches the following schema: ${JSON.stringify(attrs.structuredOutputs)}\n Here is the context: ${stateManager.getScopedText(GLOBAL_SCOPE).join("\n")}`,
 			temperature: attrs.temperature || 0.5,
 			output: "no-schema",
 			abortSignal: signal,

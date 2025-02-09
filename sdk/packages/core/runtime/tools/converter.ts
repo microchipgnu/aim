@@ -3,6 +3,8 @@ import { StructuredTool } from 'langchain/tools';
 import type { AIMTool } from 'types';
 import { z } from 'zod';
 
+// TODO: need to improve support for LangChain tools. And remove CoreTool to support all existing tool types.
+
 /**
  * Converts any supported tool type to Vercel AI SDK format
  * @param inputTool The tool to convert (LangChain, AIM, or Vercel AI SDK tool)
