@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.24
+
+### Patch Changes
+
+- Streamline flow tag execution and generator handling
+
 ## 0.0.23
 
 ### Patch Changes

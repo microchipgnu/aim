@@ -36,10 +36,8 @@ export async function* flow(
 	const signal = runtimeState.options.signals.abort;
 
 	const attrs = node.transformAttributes(config);
-
 	const flowTag = new Tag("flow");
 
-	// Check abort signal before processing
 	if (signal.aborted) {
 		throw new Error("Flow execution aborted");
 	}
@@ -52,7 +50,6 @@ export async function* flow(
 	}
 
 	try {
-		// Check abort signal before loading content
 		if (signal.aborted) {
 			throw new Error("Flow execution aborted");
 		}
@@ -61,10 +58,8 @@ export async function* flow(
 
 		// TODO: get flow content from external resources (files, urls, etc)
 		// for now we get the content from the runtime options
-
 		flowContent = runtimeState.options.experimental_files?.[path]?.content || "";
 
-		// Check abort signal before compilation
 		if (signal.aborted) {
 			throw new Error("Flow execution aborted");
 		}
@@ -74,6 +69,7 @@ export async function* flow(
 			options: {
 				...runtimeState.options,
 			},
+			manager: stateManager,
 		});
 
 		// if (errors && errors.length > 0) {
@@ -85,7 +81,6 @@ export async function* flow(
 			input = attrs.input;
 		} else if (frontmatter?.input) {
 			const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join("\n");
-			console.log("contextText", contextText);
 
 			const generatedInput = await generateObject({
 				model: openai("gpt-4o-mini"),
@@ -105,15 +100,13 @@ export async function* flow(
 		for await (const result of executeWithGenerator({
 			input: { ...input },
 		})) {
-			stateManager.addToTextRegistry(JSON.stringify(result), GLOBAL_SCOPE);
+			yield result as RenderableTreeNodes;
 		}
 
-		// Check abort signal before finalizing
 		if (signal.aborted) {
 			throw new Error("Flow execution aborted");
 		}
 
-		// Push flow variables to stack
 		stateManager.pushStack({
 			id,
 			scope: GLOBAL_SCOPE,
