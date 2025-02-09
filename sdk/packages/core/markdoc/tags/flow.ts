@@ -83,13 +83,13 @@ export async function* flow(
 		let input = {};
 		if (attrs.input) {
 			input = attrs.input;
-		} else {
+		} else if (frontmatter?.input) {
 			const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join("\n");
 			console.log("contextText", contextText);
 
 			const generatedInput = await generateObject({
 				model: openai("gpt-4o-mini"),
-				prompt: `Create an object that matches the following schema: ${JSON.stringify(frontmatter?.input)}\n Here is the context: ${contextText}`,
+				prompt: `Create an object that matches the following schema: ${JSON.stringify(frontmatter.input)}\n Here is the context: ${contextText}`,
 				temperature: attrs.temperature || 0.5,
 				output: "no-schema",
 				abortSignal: signal,

@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.23
+
+### Patch Changes
+
+- Improve input generation in flow tag with fallback to frontmatter input
+
 ## 0.0.22
 
 ### Patch Changes
