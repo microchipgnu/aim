@@ -1,11 +1,11 @@
 import { build } from 'esbuild'
-import { readFile } from 'fs/promises'
-import { createRequire } from 'module'
-import { dirname } from 'path'
+import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
+import { dirname } from 'node:path'
 
 interface LoadConfigOptions {
     configPath: string
-    defaultConfig?: Record<string, any>
+    defaultConfig?: Record<string, unknown>
 }
 
 async function loadConfig({ configPath, defaultConfig = {} }: LoadConfigOptions) {
@@ -47,15 +47,15 @@ async function loadConfig({ configPath, defaultConfig = {} }: LoadConfigOptions)
         }
 
         // Import required modules
-        const { TransformStream, ReadableStream, WritableStream, TextEncoderStream, TextDecoderStream } = await import('stream/web')
-        const { TextEncoder, TextDecoder } = await import('util')
-        const { URL, URLSearchParams } = await import('url')
-        const { performance } = await import('perf_hooks')
-        const crypto = await import('crypto')
+        const { TransformStream, ReadableStream, WritableStream, TextEncoderStream, TextDecoderStream } = await import('node:stream/web')
+        const { TextEncoder, TextDecoder } = await import('node:util')
+        const { URL, URLSearchParams } = await import('node:url')
+        const { performance } = await import('node:perf_hooks')
+        const crypto = await import('node:crypto')
         const { AbortController, AbortSignal } = await import('abort-controller')
 
         // Execute in VM with enhanced context
-        const vm = await import('vm')
+        const vm = await import('node:vm')
         const script = new vm.Script(transpiledCode)
         const context = vm.createContext({
             ...moduleContext,
@@ -146,7 +146,7 @@ async function loadConfig({ configPath, defaultConfig = {} }: LoadConfigOptions)
 
             // Promise
             Promise,
-            AsyncFunction: Object.getPrototypeOf(async function () { }).constructor,
+            AsyncFunction: Object.getPrototypeOf((() => async () => {})()).constructor,
 
             // Intl
             Intl,
@@ -154,7 +154,7 @@ async function loadConfig({ configPath, defaultConfig = {} }: LoadConfigOptions)
         script.runInContext(context)
 
         // Handle async config
-        const loadedConfig = (moduleContext.exports as any).default || moduleContext.exports
+        const loadedConfig = (moduleContext.exports as { default?: unknown }).default || moduleContext.exports
         const config = typeof loadedConfig === 'function'
             ? await loadedConfig()
             : loadedConfig
@@ -163,8 +163,7 @@ async function loadConfig({ configPath, defaultConfig = {} }: LoadConfigOptions)
         return { ...defaultConfig, ...config }
 
     } catch (error) {
-        console.error('Error loading config:', error)
-        throw error
+        return defaultConfig
     }
 }
 

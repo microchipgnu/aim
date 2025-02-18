@@ -19,9 +19,6 @@ export default defineConfig({
     'dotenv',
     'ora',
     'chalk',
-    'openapi-mcp-server',
-    '@modelcontextprotocol/sdk',
-    'nanoid',
   ],
   external: [
     'path',
