@@ -22,7 +22,6 @@ import type { RuntimeOptions } from "./types";
 import { mediaTag } from "markdoc/tags/media";
 import { groupTag } from "markdoc/tags/group";
 import { parallelTag } from "markdoc/tags/parallel";
-
 export const GLOBAL_SCOPE = "global";
 
 export const defaultRuntimeOptions: RuntimeOptions = {
@@ -96,9 +95,17 @@ export function aim({
 	stateManager.setSecrets(options.env || {});
 
 	// Register plugins in state
-	options.plugins?.forEach((p) => {
-		stateManager.registerPlugin(p.plugin, p.options);
-	});
+	if (options.plugins) {
+		for (const p of options.plugins) {
+			stateManager.registerPlugin(p.plugin, p.options);
+		}
+	}
+
+	if (options.adapters) {
+		for (const adapter of options.adapters) {
+			stateManager.registerAdapter(adapter);
+		}
+	}
 
 	// Convert plugins to Markdoc tags
 	const pluginsConvertedToMarkdocTags: Record<string, Schema> =

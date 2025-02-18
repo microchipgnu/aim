@@ -8,6 +8,10 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 
+interface FileWithPath extends File {
+    webkitRelativePath: string;
+}
+
 export function CreateProjectWithFilesModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [files, setFiles] = useState<FileList | null>(null);
@@ -20,7 +24,7 @@ export function CreateProjectWithFilesModal() {
             setFiles(e.target.files);
             console.log("Files selected:", Array.from(e.target.files).map(f => ({
                 name: f.name,
-                path: (f as any).webkitRelativePath,
+                path: (f as FileWithPath).webkitRelativePath,
                 size: f.size
             })));
         }
@@ -38,12 +42,12 @@ export function CreateProjectWithFilesModal() {
             Array.from(files).forEach((file) => {
                 console.log("Processing file:", {
                     name: file.name,
-                    path: (file as any).webkitRelativePath,
+                    path: (file as FileWithPath).webkitRelativePath,
                     size: file.size
                 });
 
                 formData.append("files", file);
-                formData.append("relativePath", (file as any).webkitRelativePath || file.name);
+                formData.append("relativePath", (file as FileWithPath).webkitRelativePath || file.name);
             });
 
             console.log("Sending request to:", `${process.env.NEXT_PUBLIC_INFERENCE_URL}/storage/upload`);

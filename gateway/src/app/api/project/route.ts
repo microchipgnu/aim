@@ -1,9 +1,7 @@
 import { db } from '@/db';
 import { apiKeys, projects } from '@/db/schema';
-import { auth } from '@/lib/auth';
 import { createProject } from '@/lib/projects';
 import { eq, sql } from 'drizzle-orm';
-import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

@@ -1,7 +1,7 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.44",
+  "version": "0.1.56",
   "private": false,
   "type": "commonjs",
   "bin": {
@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsup --config tsup.config.ts",
-    "dev": "bun run --watch ./index.ts serve -d ./test -p 3001",
+    "dev": "bun run --watch ./index.ts serve ./testing -p 3001",
     "dev:test": "concurrently \"bun run dev\" \"wait-on dist/index.mjs && bun --watch run ./dist/index.mjs start -d ../start-here/examples/ --ui\"",
     "build-binary": "bun run typecheck && bun build ./index.ts --compile --outfile aimx",
     "typecheck": "tsc --noEmit",
@@ -51,7 +51,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@aim-sdk/core": "0.0.19",
+    "@aim-sdk/core": "0.0.25",
     "@markdoc/markdoc": "^0.4.0",
     "@modelcontextprotocol/sdk": "^1.4.1",
     "@types/cors": "^2.8.17",
@@ -60,14 +60,17 @@
     "commander": "^12.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "esbuild": "^0.25.0",
     "express": "^4.21.2",
     "inquirer": "^12.3.0",
     "js-yaml": "^4.1.0",
+    "marked": "^15.0.6",
     "nanoid": "^5.0.9",
     "openapi-mcp-server": "^1.2.0-beta04",
     "openapi-types": "^12.1.3",
     "ora": "^8.1.1",
     "vite": "^6.0.7",
-    "wait-on": "^8.0.2"
+    "wait-on": "^8.0.2",
+    "zod": "^3.24.1"
   }
 }

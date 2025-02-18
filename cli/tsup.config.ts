@@ -1,10 +1,4 @@
-import { existsSync } from 'node:fs'
-import { cp } from 'node:fs/promises'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'tsup'
-
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
   entry: ['index.ts'],
@@ -27,14 +21,14 @@ export default defineConfig({
     'chalk',
     'openapi-mcp-server',
     '@modelcontextprotocol/sdk',
-    '@clerk/express',
-    'nanoid'
+    'nanoid',
   ],
   external: [
     'path',
     'fs',
     'readline',
-    'process'
+    'process',
+    'esbuild'
   ],
   target: 'node18',
   outExtension({ format }) {

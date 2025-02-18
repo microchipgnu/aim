@@ -85,6 +85,11 @@ export async function* ai(
 				return result;
 			};
 		}
+		else {
+			tool.execute = async (args: unknown) => {
+				stateManager.runtimeOptions.events?.onToolCall?.(name, args);
+			};
+		}
 	}
 
 	const result = await generateText({

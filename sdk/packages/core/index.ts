@@ -1,5 +1,6 @@
 export * from "./aim";
 export * from "./runtime";
+export * from "./types";
 export * from "@markdoc/markdoc";
 
 import { html } from "./markdoc/renderers/html";

@@ -72,3 +72,7 @@ To get started with AIM, please refer to the [Getting Started](./start-here/READ
    - Hot reload support
    - Build optimization
    - Deployment utilities
+
+---
+
+For VS Code (and other editors based on VS Code), you can install the [AIM Syntax](https://marketplace.cursorapi.com/items?itemName=stripe.markdoc-language-support) extension.

@@ -101,6 +101,7 @@ export interface RuntimeOptions {
 		onStart?: (startMessage: string) => void;
 		onStep?: (stepDescription: string) => void;
 		onData?: (data: unknown) => void;
+		onToolCall?: (name: string, args: unknown) => void;
 		onOutput?: (output: {
 			success: boolean;
 			data?: unknown;
@@ -145,7 +146,6 @@ export interface AIMOutput {
 
 export interface AIMAdapter {
 	type: string;
-	name: string;
 	init?: () => void;
 	handlers: Record<string, (...args: any[]) => Promise<any>>;
 }

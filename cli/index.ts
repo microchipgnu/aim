@@ -10,6 +10,9 @@ import ora from 'ora';
 import pkg from "./package.json" assert { type: "json" };
 import { createServer } from "./server";
 import { AIMManager } from "./server/services/aim-manager";
+import { getAIMRoutes } from "./server/resolution";
+import path from "node:path";
+import loadConfig from "./utils/load-config";
 
 // Initialize Commander
 const program = new Command();
@@ -94,30 +97,66 @@ OPENROUTER_API_KEY= # openrouter api key
 
 
 # AIM's hosted inference service url
-AIM_INFERENCE_SERVER_URL= # AIM's hosted inference service url
-AIM_API_KEY= # AIM's api key
+# AIM_INFERENCE_SERVER_URL= # AIM's hosted inference service url
+# AIM_API_KEY= # AIM's api key
 
 `;
       await fs.writeFile(`${name}/.env`, envContent);
 
       // Create .gitignore
-      const gitignoreContent = `node_modules/
+      const gitignoreContent = `node_modules
 .env
 .DS_Store
 dist/
-*.log`;
+*.log
+output/
+node_modules`;
       await fs.writeFile(`${name}/.gitignore`, gitignoreContent);
 
       await fs.writeFile(`${name}/aim.config.json`, JSON.stringify({
         inferenceServerUrl: process.env.AIM_INFERENCE_SERVER_URL,
       }));
 
+      await fs.writeFile(`${name}/aim.config.ts`, `import { z } from "zod";
+
+export default {
+    tools: [
+        {
+            name: "test-tool",
+            description: "This is a test tool",
+            parameters: z.object({
+                name: z.string(),
+            }),
+            execute: async (args: { name: string }) => {
+                return \`Hello, \${args.name}!\`;
+            },
+        }
+    ]
+}`);
+
+      // Create package.json
+      const packageJson = {
+        "name": name,
+        "version": "0.1.0",
+        "private": true,
+        "dependencies": {
+          "@aim-sdk/core": "latest",
+          "zod": "latest",
+          "aimx": "latest"
+        },
+        "scripts": {
+          "start": "aimx serve files"
+        }
+      };
+      await fs.writeFile(`${name}/package.json`, JSON.stringify(packageJson, null, 2));
+
+
       spinner.succeed('Project initialized successfully!');
       console.log(chalk.green(`\nCreated new AIM project in ./${name}`));
       console.log(chalk.dim('\nNext steps:'));
       console.log(chalk.dim('1. cd ' + name));
       console.log(chalk.dim('2. Add your API keys to .env'));
-      console.log(chalk.dim('3. aim start -d . --ui\n'));
+      console.log(chalk.dim('3. aimx serve files\n'));
 
     } catch (error) {
       spinner.fail('Failed to initialize project');
@@ -127,16 +166,15 @@ dist/
   });
 
 program
-  .command("serve")
+  .command("serve <dir>")
   .description("Start the AIM server")
-  .option('-d, --dir <path>', 'Routes directory path', './routes')
   .option('-p, --port <number>', 'Port number', '3000')
-  .action(async (options) => {
+  .action(async (dir, options) => {
     console.clear();
 
     console.log(chalk.cyan('AIM Server'));
     console.log(chalk.dim(`Starting server with configuration:`));
-    console.log(chalk.dim(`• Routes directory: ${options.dir}`));
+    console.log(chalk.dim(`• Routes directory: ${dir}`));
     console.log(chalk.dim(`• Port: ${options.port}`));
     if (options.ui) {
       console.log(chalk.dim(`• Web UI: enabled`));
@@ -150,14 +188,11 @@ program
     try {
       await createServer({
         port: parseInt(options.port),
-        routesDir: options.dir,
+        routesDir: dir,
         enableUI: options.ui
       });
 
       spinner.succeed(chalk.green(`Server is running at ${chalk.bold(`http://localhost:${options.port}`)}`));
-      if (options.ui) {
-        console.log(chalk.green(`Web UI available at ${chalk.bold(`http://localhost:${options.port}/ui`)}`));
-      }
 
       console.log(chalk.dim('\nPress Ctrl+C to stop the server\n'));
     } catch (error) {
@@ -184,6 +219,15 @@ program
       console.clear();
       console.log(chalk.cyan('AIM Compiler'));
 
+      const config = await loadConfig({
+        configPath: path.join(process.cwd(), 'aim.config.ts'),
+        defaultConfig: {
+          tools: [],
+          env: {},
+          plugins: []
+        }
+      });
+
       const spinner = ora({
         text: 'Validating syntax...',
         color: 'cyan'
@@ -194,6 +238,9 @@ program
       const aimDocument = aim({
         content, options: {
           variables: {},
+          tools: config.tools,
+          env: config.env,
+          plugins: config.plugins,
           signals: {
             abort: new AbortController().signal
           },
@@ -244,58 +291,117 @@ program
   });
 
 program
-  .command("run <filepath>")
+  .command("run <dir>")
   .description("Execute a single AIM file")
-  .option('-v, --variables <json>', 'Input variables as JSON string')
-  .action(async (filepath: string, options: { variables?: string }) => {
+  .action(async (dir: string) => {
     try {
       console.clear();
       console.log(chalk.cyan('AIM Runner'));
       console.log(chalk.dim('Executing AIM file...\n'));
 
-      const aimContent = await fs.readFile(filepath, 'utf-8');
+      const config = await loadConfig({
+        configPath: path.join(process.cwd(), 'aim.config.ts'),
+        defaultConfig: {
+          tools: [],
+          env: {},
+          plugins: []
+        }
+      });
 
-      const aimManager = new AIMManager();
+      const routes = await getAIMRoutes(dir);
+      // Check if dir is a directory or file
+      const stats = await fs.stat(dir);
+      if (stats.isDirectory()) {
+        const findMdFiles = async (dirPath: string): Promise<string[]> => {
+          const files = await fs.readdir(dirPath);
+          const results: string[] = [];
 
-      let variables = {};
-      if (options.variables) {
+          for (const file of files) {
+            const fullPath = path.join(dirPath, file);
+            const stat = await fs.stat(fullPath);
+
+            if (stat.isDirectory()) {
+              const nestedFiles = await findMdFiles(fullPath);
+              results.push(...nestedFiles);
+            } else if (file.endsWith('.md')) {
+              results.push(fullPath);
+            }
+          }
+
+          return results;
+        };
+
+        const aimFiles = await findMdFiles(dir);
+
+        if (aimFiles.length === 0) {
+          console.log(chalk.yellow('No .aim files found in directory'));
+          process.exit(0);
+        }
+
+        console.log(chalk.cyan('\nAvailable .aim files:'));
+        aimFiles.forEach((file, i) => {
+          // Get relative path from input directory
+          const relativePath = path.relative(dir, file);
+          console.log(`${chalk.cyan(i + 1)}. ${relativePath}`);
+        });
+
+        const readline = require('readline').createInterface({
+          input: process.stdin,
+          output: process.stdout
+        });
+
+        const answer = await new Promise<string>(resolve => {
+          readline.question('\nEnter the number of the file to run: ', resolve);
+        });
+        readline.close();
+
+        const fileIndex = parseInt(answer) - 1;
+        if (isNaN(fileIndex) || fileIndex < 0 || fileIndex >= aimFiles.length) {
+          console.log(chalk.red('Invalid selection'));
+          process.exit(1);
+        }
+
+        dir = aimFiles[fileIndex];
+      }
+
+      // If dir is a file, verify it's an .aim file
+      if (!dir.endsWith('.md')) {
+        console.log(chalk.red('File must have .md extension'));
+        process.exit(1);
+      }
+
+      const aimContent = await fs.readFile(dir, 'utf-8');
+      const aimManager = new AIMManager(routes, config.tools, config.env, config.plugins);
+      const inputSchema = await aimManager.getInputSchema(aimContent);
+      let variables: Record<string, string> = {};
+
+      if (inputSchema) {
+        const readline = require('readline').createInterface({
+          input: process.stdin,
+          output: process.stdout
+        });
+
+        const question = (prompt: string) => new Promise<string>(resolve => {
+          readline.question(prompt, resolve);
+        });
+
         try {
-          variables = JSON.parse(options.variables);
+          // Since we know schema is an array of objects with name property
+          for (const schema of inputSchema as Array<{ name: string }>) {
+            const value = await question(chalk.cyan(`Enter value for ${schema.name}: `));
+            variables[schema.name] = value;
+          }
+
+          readline.close();
         } catch (e) {
-          console.error('Failed to parse variables JSON:', e);
+          readline.close();
+          console.error(chalk.red('Error processing inputs:'), e);
           process.exit(1);
         }
       }
 
-      await aimManager.executeDocument(aimContent, variables, nanoid(), {
-        writableEnded: false,
-        write: (data: string) => {
-          // Parse SSE data to extract messages and results
-          const lines = data.split('\n');
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const eventData = JSON.parse(line.slice(6));
-                if (eventData.message) {
-                  console.log(chalk.dim(`📋 ${eventData.message}`));
-                } else if (eventData.data) {
-                  console.log(chalk.green(`✨ Result:`));
-                  console.log(chalk.white(JSON.stringify(eventData.data, null, 2)));
-                } else if (eventData.error) {
-                  console.log(chalk.red(`❌ Error: ${eventData.error}`));
-                }
-              } catch (e) {
-                // Skip invalid JSON
-              }
-            }
-          }
-        },
-        end: () => {
-          console.log(chalk.green('\n✅ Execution completed\n'));
-        }
-      });
-
-
+      await aimManager.executeDocument(aimContent, variables, nanoid(), undefined, true);
+      process.exit(0);
     } catch (error) {
       console.error('Execution failed:', error);
       process.exit(1);

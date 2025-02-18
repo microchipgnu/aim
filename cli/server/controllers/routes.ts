@@ -1,10 +1,34 @@
 import chalk from 'chalk';
 import type { Express } from 'express';
 import { promises as fs } from 'fs';
-import { getAIMRoutes, type RouteInfo } from '../resolution';
-import { aimManager, type AIMResponse } from '../services/aim-manager';
+import { getFilePage } from '../pages/file';
+import { type RouteInfo } from '../resolution';
+import { AIMManager } from '../services/aim-manager';
+import loadConfig from '../../utils/load-config';
+import path from 'node:path';
 
 export async function setupRouteHandlers(app: Express, routes: RouteInfo[]) {
+
+    let config;
+    try {
+        config = await loadConfig({
+            configPath: path.join(process.cwd(), 'aim.config.ts'),
+            defaultConfig: {
+                tools: [],
+                env: {},
+                plugins: []
+            }
+        });
+    } catch (error) {
+        console.error(chalk.red('Failed to load config:'), error);
+        config = {
+            tools: [],
+            env: {},
+            plugins: []
+        };
+    }
+
+    const aimManager = new AIMManager(routes, config.tools, config.env, config.plugins);
     try {
         // Add individual routes
         for (const route of routes) {
@@ -13,11 +37,57 @@ export async function setupRouteHandlers(app: Express, routes: RouteInfo[]) {
             // GET handler for route AST/info
             app.get(`/${apiPath}`, async (req, res) => {
                 try {
-                    console.log(chalk.dim(`GET /${apiPath} - Serving AST`));
+                    console.log(chalk.dim(`GET /${apiPath} - Serving content`));
                     const content = await fs.readFile(route.file, 'utf-8');
                     const ast = await aimManager.getDocumentAST(route.file);
 
-                    // Include additional info like warnings and frontmatter
+                    // Check Accept header to determine response format
+                    const acceptHeader = req.headers.accept;
+                    if (acceptHeader && acceptHeader.includes('application/json')) {
+                        // Return JSON if specifically requested
+                        res.json({
+                            document: ast.document,
+                            rawContent: content,
+                            rawHtml: ast.rawHtml,
+                            errors: ast.errors,
+                            warnings: ast.warnings,
+                            frontmatter: ast.frontmatter
+                        });
+                    } else {
+                        // Return styled HTML page
+                        res.send(getFilePage(apiPath, ast.rawHtml, content, ast.frontmatter));
+                    }
+                } catch (error) {
+                    console.error(chalk.red(`Error serving content for ${apiPath}:`), error);
+                    res.status(500).send(`
+                        <!DOCTYPE html>
+                        <html>
+                            <head>
+                                <title>Error</title>
+                                <style>
+                                    body {
+                                        font-family: system-ui, -apple-system, sans-serif;
+                                        max-width: 800px;
+                                        margin: 0 auto;
+                                        padding: 2rem;
+                                    }
+                                    h1 { color: #dc2626; }
+                                </style>
+                            </head>
+                            <body>
+                                <h1>Error</h1>
+                                <p>Failed to serve content</p>
+                            </body>
+                        </html>
+                    `);
+                }
+            });
+            app.get(`/${apiPath}.json`, async (req, res) => {
+                try {
+                    console.log(chalk.dim(`GET /${apiPath} - Serving content`));
+                    const content = await fs.readFile(route.file, 'utf-8');
+                    const ast = await aimManager.getDocumentAST(route.file);
+
                     res.json({
                         document: ast.document,
                         rawContent: content,
@@ -27,60 +97,52 @@ export async function setupRouteHandlers(app: Express, routes: RouteInfo[]) {
                         frontmatter: ast.frontmatter
                     });
                 } catch (error) {
-                    console.error(chalk.red(`Error serving AST for ${apiPath}:`), error);
-                    res.status(500).json({ error: 'Failed to serve AST' });
+                    console.error(chalk.red(`Error serving content for ${apiPath}:`), error);
+                    res.status(500).send(`
+                        <!DOCTYPE html>
+                        <html>
+                            <head>
+                                <title>Error</title>
+                                <style>
+                                    body {
+                                        font-family: system-ui, -apple-system, sans-serif;
+                                        max-width: 800px;
+                                        margin: 0 auto;
+                                        padding: 2rem;
+                                    }
+                                    h1 { color: #dc2626; }
+                                </style>
+                            </head>
+                            <body>
+                                <h1>Error</h1>
+                                <p>Failed to serve content</p>
+                            </body>
+                        </html>
+                    `);
                 }
             });
 
             // POST handler for route execution
             app.post(`/${apiPath}`, async (req, res) => {
                 try {
-                    // Set headers for SSE
-                    res.writeHead(200, {
-                        'Content-Type': 'text/event-stream',
-                        'Cache-Control': 'no-cache',
-                        'Connection': 'keep-alive'
-                    });
-
                     const content = await fs.readFile(route.file, 'utf-8');
                     const requestId = req.headers['x-request-id'];
                     if (!requestId || typeof requestId !== 'string') {
                         throw new Error('Missing or invalid X-Request-ID header');
                     }
 
-                    // Create response wrapper for SSE
-                    const aimResponse: AIMResponse = {
-                        writableEnded: false,
-                        write: (data: string) => res.write(data),
-                        end: () => {
-                            res.end();
-                            aimResponse.writableEnded = true;
-                        }
-                    };
+                    // Execute document without SSE
+                    await aimManager.executeDocumentLocally(content, req.body || {}, requestId);
 
-                    // Handle client disconnect
-                    req.on('close', () => {
-                        if (!aimResponse.writableEnded) {
-                            console.log(chalk.dim(`Client disconnected for request ${requestId}`));
-                            aimResponse.write(`event: abort\ndata: ${JSON.stringify({
-                                reason: 'Client disconnected',
-                                requestId
-                            })}\n\n`);
-                            aimResponse.end();
-                        }
-                    });
-
-                    await aimManager.executeDocument(content, req.body || {}, requestId, aimResponse);
+                    // Redirect to run page
+                    res.redirect(`/run/${requestId}`);
 
                 } catch (error) {
-                    if (!res.writableEnded) {
-                        console.error(chalk.red(`Error in route handler for ${apiPath}:`), error);
-                        res.write(`event: error\ndata: ${JSON.stringify({
-                            error: error instanceof Error ? error.message : 'Internal server error',
-                            requestId: req.headers['x-request-id']
-                        })}\n\n`);
-                        res.end();
-                    }
+                    console.error(chalk.red(`Error in route handler for ${apiPath}:`), error);
+                    res.status(500).json({
+                        error: error instanceof Error ? error.message : 'Internal server error',
+                        requestId: req.headers['x-request-id']
+                    });
                 }
             });
         }

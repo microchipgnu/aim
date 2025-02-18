@@ -5,6 +5,10 @@ import type { ServerConfig } from './config/types';
 import { setupRouteHandlers } from './controllers/routes';
 import { errorHandler } from './middleware/error';
 import { getAIMRoutes } from './resolution';
+import { getHomePage } from './pages/home';
+import { getHtmlOutput } from './pages/output';
+import path from 'node:path';
+import { promises as fs } from 'node:fs';
 
 export async function createServer(config: ServerConfig) {
     const app = express();
@@ -26,115 +30,46 @@ export async function createServer(config: ServerConfig) {
     app.use(errorHandler);
 
     app.get('/', (req, res) => {
-        res.send(`
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>AIM Local Server</title>
-                    <style>
-                        body {
-                            font-family: system-ui, -apple-system, sans-serif;
-                            max-width: 800px;
-                            margin: 0 auto;
-                            padding: 2rem;
-                            line-height: 1.6;
-                        }
-                        h1 {
-                            color: #2563eb;
-                            border-bottom: 2px solid #e5e7eb;
-                            padding-bottom: 0.5rem;
-                        }
-                        .route-card {
-                            background: #f8fafc;
-                            border: 1px solid #e5e7eb;
-                            border-radius: 8px;
-                            padding: 1rem;
-                            margin: 1rem 0;
-                        }
-                        .route-path {
-                            font-family: monospace;
-                            font-size: 1.1em;
-                            color: #0f172a;
-                        }
-                        .route-file {
-                            color: #64748b;
-                            font-size: 0.9em;
-                        }
-                        .http-method {
-                            display: inline-block;
-                            padding: 0.25rem 0.5rem;
-                            border-radius: 4px;
-                            font-size: 0.8em;
-                            font-weight: 600;
-                            margin-right: 0.5rem;
-                        }
-                        .get {
-                            background: #dbeafe;
-                            color: #1e40af;
-                        }
-                        .post {
-                            background: #dcfce7;
-                            color: #166534;
-                        }
-                        .endpoint-details {
-                            margin-top: 0.5rem;
-                            padding-left: 1rem;
-                            border-left: 2px solid #e5e7eb;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1>AIM Local Server</h1>
-                    <p>Welcome to the AIM Local Server.</p>
-                    <p>For more information, please visit <a href="https://aim.microchipgnu.pt">https://aim.microchipgnu.pt</a></p>
-                    
-                    <h2>Available Routes</h2>
-                    <div class="routes">
-                        ${routes.map(route => `
-                            <div class="route-card">
-                                <a class="route-path" href="/${route.path}">/${route.path}</a>
-                                <div class="route-file">${route.file}</div>
-                                <div class="endpoint-details">
-                                    <div>
-                                        <span class="http-method get">GET</span>
-                                        Returns the AST and metadata for this route
-                                    </div>
-                                    <div>
-                                        <span class="http-method post">POST</span>
-                                        Executes the AIM document with provided input
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
+        res.send(getHomePage(routes));
+    });
 
-                    <h2>API Information</h2>
-                    <div class="route-card">
-                        <div class="route-path">/api/process</div>
-                        <div class="endpoint-details">
-                            <div>
-                                <span class="http-method post">POST</span>
-                                Process an AIM document
-                                <br>
-                                <small>Requires: { content: string, input?: object }</small>
-                            </div>
-                        </div>
-                    </div>
+    app.get('/runs', async (req, res) => {
+        const outputDir = path.join(process.cwd(), 'output');
+        try {
+            const files = await fs.readdir(outputDir);
+            const runs = files
+                .filter(file => file.endsWith('.html'))
+                .map(file => ({
+                    id: file.replace('.html', ''),
+                    path: `/run/${file.replace('.html', '')}`
+                }));
 
-                    <div class="route-card">
-                        <div class="route-path">/api/info</div>
-                        <div class="endpoint-details">
-                            <div>
-                                <span class="http-method get">GET</span>
-                                Get information about an AIM document
-                                <br>
-                                <small>Query params: content (required)</small>
-                            </div>
-                        </div>
-                    </div>
-                </body>
-            </html>
-        `);
+            const content = `
+                <h1>All Runs</h1>
+                <ul>
+                    ${runs.map(run => `
+                        <li><a href="${run.path}">Run ${run.id}</a></li>
+                    `).join('')}
+                </ul>
+            `;
+            res.send(content);
+        } catch (error) {
+            console.error(chalk.red('Error reading runs directory:'), error);
+            res.status(500).send(getHtmlOutput('Error', '<p>Failed to list runs</p>'));
+        }
+    });
+
+    app.get('/run/:id', async (req, res) => {
+        const requestId = req.params.id;
+        const outputPath = path.join(process.cwd(), 'output', `${requestId}.html`);
+
+        try {
+            const content = await fs.readFile(outputPath, 'utf-8');
+            res.send(content);
+        } catch (error) {
+            console.error(chalk.red('Error reading output file:'), error);
+            res.status(404).send(getHtmlOutput('Not Found', '<p>Run output not found</p>'));
+        }
     });
 
     // Then setup other routes and middleware

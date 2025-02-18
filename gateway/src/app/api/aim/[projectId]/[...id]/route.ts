@@ -1,13 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getProject } from "@/lib/projects";
+import { NextRequest, NextResponse } from "next/server";
+
+type Params = {
+    projectId: string;
+    id: string[];
+}
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { projectId: string; id: string[] } }
+    { params }: { params: Promise<Params> }
 ) {
     try {
-        const project = await getProject(params.projectId);
-        const filePath = params.id.join("/");
+        const project = await getProject((await params).projectId);
+        const filePath = (await params).id.join("/");
 
         const file = project.files.find((f) => f.path === filePath);
 
@@ -18,7 +23,7 @@ export async function GET(
         return NextResponse.json(file);
     } catch (error) {
         return NextResponse.json(
-            { error: "Failed to fetch file" },
+            { error: error },
             { status: 500 }
         );
     }
@@ -26,12 +31,13 @@ export async function GET(
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { projectId: string; id: string[] } }
+    { params }: { params: Promise<Params> }
 ) {
+    const body = await request.json();
+    console.log(body);
     try {
-        const project = await getProject(params.projectId);
-        const filePath = params.id.join("/");
-        const body = await request.json();
+        const project = await getProject((await params).projectId);
+        const filePath = (await params).id.join("/");
 
         const fileIndex = project.files.findIndex((f) => f.path === filePath);
 
@@ -42,7 +48,7 @@ export async function POST(
         return NextResponse.json(project.files[fileIndex]);
     } catch (error) {
         return NextResponse.json(
-            { error: "Failed to update file" },
+            { error: error },
             { status: 500 }
         );
     }

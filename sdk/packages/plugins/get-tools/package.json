@@ -1,0 +1,44 @@
+{
+  "name": "@aim-sdk/plugins-get-tools",
+  "version": "0.0.2",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "tsup": "^8.3.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@aim-sdk/core": "^0.0.31",
+    "zod": "^3.24.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "rm -rf dist && tsup --config tsup.config.ts",
+    "check-deps": "bunx knip || exit 0",
+    "format": "bunx biome format --write",
+    "lint": "bunx biome lint --write"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.mjs",
+      "require": "./dist/types.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}

@@ -9,18 +9,13 @@ import { useState } from "react"
 import { Button } from "../ui/button"
 
 interface SandboxModalProps {
-    projectId: string
     content: string
-    routes: {
-        path: string
-        file: string
-    }[]
 }
 
-export function SandboxModal({ projectId, content, routes }: SandboxModalProps) {
+export function SandboxModal({ content }: SandboxModalProps) {
     const [code, setCode] = useState<string>(content)
-    const [logs, setLogs] = useState<string[]>([])
-    const [result, setResult] = useState<any[]>([])
+    const [logs] = useState<string[]>([])
+    const [result] = useState<string[]>([])
     const [isOpen, setIsOpen] = useState(false)
 
     const handleEditorChange = (value: string | undefined) => {

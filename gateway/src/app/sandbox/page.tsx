@@ -8,14 +8,13 @@ import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
 import MonacoEditor from '@monaco-editor/react';
 import { Loader2, PlayIcon, SaveIcon, Upload } from "lucide-react";
 import React from 'react';
+import Link from 'next/link';
 
 export default function SandboxPage() {
     const [code, setCode] = React.useState<string>('');
     const [isRunning, setIsRunning] = React.useState(false);
     const [logs, setLogs] = React.useState<string[]>([]);
-    const [result, setResult] = React.useState<any[]>([]);
-    const [showInputDialog, setShowInputDialog] = React.useState(false);
-    const [frontmatter, setFrontmatter] = React.useState<any>(null);
+    const [result, setResult] = React.useState<string[]>([]);
     const abortControllerRef = React.useRef<AbortController | null>(null);
     const requestIdRef = React.useRef<string>('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -186,7 +185,7 @@ export default function SandboxPage() {
             {/* Top Bar */}
             <div className="h-12 flex items-center justify-between px-4 border-b">
                 <div className="flex items-center gap-4">
-                    <a href="/" className="text-sm font-medium hover:text-primary">Sandbox</a>
+                    <Link href="/" className="text-sm font-medium hover:text-primary">Sandbox</Link>
                 </div>
                 <div className="flex items-center gap-2">
                     <input

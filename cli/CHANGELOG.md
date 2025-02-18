@@ -1,5 +1,77 @@
 # aimx
 
+## 0.1.56
+
+### Patch Changes
+
+- yo
+
+## 0.1.55
+
+### Patch Changes
+
+- fiux
+
+## 0.1.54
+
+### Patch Changes
+
+- fix
+
+## 0.1.53
+
+### Patch Changes
+
+- esbuidl
+
+## 0.1.52
+
+### Patch Changes
+
+- esbuild
+
+## 0.1.51
+
+### Patch Changes
+
+- path esbuild
+
+## 0.1.50
+
+### Patch Changes
+
+- es
+
+## 0.1.49
+
+### Patch Changes
+
+- es
+
+## 0.1.48
+
+### Patch Changes
+
+- esbuild
+
+## 0.1.47
+
+### Patch Changes
+
+- messing with esbuild
+
+## 0.1.46
+
+### Patch Changes
+
+- up
+
+## 0.1.45
+
+### Patch Changes
+
+- testing
+
 ## 0.1.44
 
 ### Patch Changes

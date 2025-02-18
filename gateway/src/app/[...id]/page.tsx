@@ -1,11 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ProjectsSidebar } from "@/components/projects-sidebar";
-import { getProject, updateDocumentPath } from "@/lib/projects";
 import { SandboxModal } from "@/components/modals/sandbox-modal";
-import { updateProjectNameAction } from "@/actions/project";
+import { ProjectsSidebar } from "@/components/projects-sidebar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getProject } from "@/lib/projects";
 
 export default async function ProjectsPage({
     params
@@ -21,8 +20,6 @@ export default async function ProjectsPage({
 
     // Check if we're on the root project path
     const isProjectRoot = route === ''
-
-    console.log(project)
 
     const routes = project.files.map((file) => ({
         path: `/${projectId}/${file.path}`,
@@ -46,8 +43,6 @@ export default async function ProjectsPage({
                                 <div className="flex items-center gap-4">
                                     {!isProjectRoot && (
                                         <SandboxModal
-                                            projectId={projectId}
-                                            routes={routes}
                                             content={project.files.find((file) => file.path === route)?.content || ''}
                                         />
                                     )}

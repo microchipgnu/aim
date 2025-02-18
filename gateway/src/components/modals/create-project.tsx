@@ -1,19 +1,17 @@
 "use client";
 
+import { createProjectAction } from "@/actions/project";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "../ui/input";
-import { useAuth } from "@/providers/auth-provider";
+import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createProjectAction } from "@/actions/project";
-import { authClient } from "@/lib/auth-client";
+import { Input } from "../ui/input";
 
 export function CreateProjectModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState("");
-    const { apiKeys } = useAuth();
 
     const handleSubmit = async () => {
         if (!name) {
