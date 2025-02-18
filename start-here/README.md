@@ -1,7 +1,13 @@
-# **AI Markup Language (AIM)**
+# start-here-2
 
-AI Markup Language (AIM) is a markup language designed to create interactive, intelligent, and multimodal documents. 
+This is an AIM (AI Markup) project that allows you to create interactive AI-powered content.
 
-By merging the simplicity of Markdown with advanced programming constructs and multimedia capabilities, AIM enables users to build dynamic workflows, integrate AI tasks, and deliver rich, interactive content. 
+## Getting Started
 
-AIM documents have the file extension `.aim`, `.aimd` or `.md`.
+1. Add your AI provider API keys in the .env file
+2. Create your content files in the /files directory
+3. Run `aim start -d . --ui` to start the development server
+
+## Documentation
+
+For full documentation, visit [docs.aimarkup.org](https://docs.aimarkup.org)

@@ -1,0 +1,13 @@
+{
+  "name": "start-here-2",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@aim-sdk/core": "latest",
+    "zod": "latest",
+    "aimx": "latest"
+  },
+  "scripts": {
+    "start": "aimx run ./files"
+  }
+}
