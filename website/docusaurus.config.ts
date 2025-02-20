@@ -213,7 +213,7 @@ const config: Config = {
         },
       } satisfies Preset.Options,
     ],
-  ], 
+  ],
   headTags: [
     // Declare a <link> preconnect tag
     {
@@ -234,7 +234,7 @@ const config: Config = {
         '@type': 'Organization',
         name: 'AIM',
         url: 'https://aim.microchipgnu.pt',
-        logo: 'https://aim.microchipgnu.pt/img/logo.jpeg',
+        logo: 'https://aim.microchipgnu.pt/img/aim-social-card.jpg',
       }),
     },
   ],
@@ -245,7 +245,7 @@ const config: Config = {
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/aim-social-card.jpg',
     mermaid: {
       theme: { light: 'neutral', dark: 'forest' },
     },

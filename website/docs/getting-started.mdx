@@ -1,0 +1,106 @@
+---
+sidebar_position: 2
+title: Getting Started
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+
+The easiest way to get started with AIM is to run the following command:
+
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bunx aimx init
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npx aimx init
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpx aimx init
+    ```
+  </TabItem>
+</Tabs>
+
+
+This will ask a name for your project and create a new AIM project in the current directory. 
+
+Then install the dependencies:
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bun i
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npm i
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpm i
+    ```
+  </TabItem>
+</Tabs>
+
+Once the project is initialized, you can start writing your Markdown AIM documents in the `./files` directory.
+
+You can run the following command to execute your AIM documents:
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bunx aimx run ./files
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npx aimx run ./files
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpx aimx run ./files
+    ```
+  </TabItem>
+</Tabs>
+
+This will prompt you with the existing files in the `./files` directory and ask you to select one to execute.
+
+You can also run individual files by running:
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bunx aimx run ./files/example.md
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npx aimx run ./files/example.md
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpx aimx run ./files/example.md
+    ```
+  </TabItem>
+</Tabs>
+
+And that's it! You can now start writing your AIM documents and execute them.
+
+Now you can set your `.env` file and add things to `aim.config.ts` to customize your project.
+
+
+
+
+
