@@ -1,5 +1,5 @@
 ---
-title: "🤔 Just Answer"
+title: "Just Answer"
 sidebar_position: 1
 ---
 

@@ -90,12 +90,18 @@ For full documentation, visit [docs.aimarkup.org](https://docs.aimarkup.org)
 OPENAI_API_KEY= # openai api key
 REPLICATE_API_KEY= # replicate api key
 OPENROUTER_API_KEY= # openrouter api key
+`;
+
+      const _envContent = `# Add your API keys here
+# For running locally
+OPENAI_API_KEY= # openai api key
+REPLICATE_API_KEY= # replicate api key
+OPENROUTER_API_KEY= # openrouter api key
 
 
 # AIM's hosted inference service url
 # AIM_INFERENCE_SERVER_URL= # AIM's hosted inference service url
 # AIM_API_KEY= # AIM's api key
-
 `;
       await fs.writeFile(`${projectName}/.env`, envContent);
 
@@ -170,8 +176,6 @@ program
       console.log(chalk.cyan('AIM Runner'));
       console.log(chalk.dim('Executing AIM file...\n'));
 
-
-
       const config = await loadConfig({
         configPath: path.join(process.cwd(), 'aim.config.ts'),
         defaultConfig: {
@@ -184,7 +188,7 @@ program
       // Get path to markdown file to execute
       const getMarkdownFilePath = async (dirPath: string): Promise<string> => {
         const stats = await fs.stat(dirPath);
-        
+
         if (!stats.isDirectory()) {
           if (!dirPath.endsWith('.md')) {
             throw new Error('File must have .md extension');
@@ -241,7 +245,7 @@ program
       };
 
       // Get user input based on schema
-      const getUserInput = async (schema: Array<{name: string}>) => {
+      const getUserInput = async (schema: Array<{ name: string }>) => {
         const readline = require('node:readline').createInterface({
           input: process.stdin,
           output: process.stdout
@@ -254,7 +258,7 @@ program
         });
 
         try {
-          for (const {name} of schema) {
+          for (const { name } of schema) {
             variables[name] = await question(chalk.cyan(`Enter value for ${name}: `));
           }
         } finally {
@@ -267,7 +271,7 @@ program
       // Execute the document
       const executeDocument = async (filePath: string, variables: Record<string, string>) => {
         const content = await fs.readFile(filePath, 'utf-8');
-        
+
         const document = aim({
           content,
           options: {
@@ -295,9 +299,9 @@ program
       // Main execution flow
       const filePath = await getMarkdownFilePath(originalPath);
       const inputSchema = undefined
-      
-      const variables = inputSchema ? 
-        await getUserInput(inputSchema as unknown as Array<{name: string}>) :
+
+      const variables = inputSchema ?
+        await getUserInput(inputSchema as unknown as Array<{ name: string }>) :
         {};
 
       await executeDocument(filePath, variables);
