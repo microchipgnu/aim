@@ -40,17 +40,17 @@ function HomepageHeader() {
             </Link>
           </div>
           <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <div className={styles.buttons} style={{ marginBottom: '2rem' }}>
-            <Link
-              to="https://t.me/writeAIM"
-              style={{
-                padding: '0.75rem 1.5rem',
-                fontWeight: 500,
-                transition: 'all 0.2s ease',
-              }}>
-              Join our Telegram Group
-            </Link>
-          </div>
+            <div className={styles.buttons} style={{ marginBottom: '2rem' }}>
+              <Link
+                to="https://t.me/writeAIM"
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                }}>
+                Join our Telegram Group
+              </Link>
+            </div>
             <CodePreview example='dreamer' title='dreamer.aim' outputs={["You may say I'm a dreamer", "But I'm not the only one", "I hope you'll join us", "And the world will live as one."]} />
           </div>
         </div>
@@ -64,7 +64,7 @@ export default function Home(): JSX.Element {
   return (
     <Layout
       title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      description="Write reusable and composable agentic workflows with Markdown">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
