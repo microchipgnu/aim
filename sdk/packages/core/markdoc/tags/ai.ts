@@ -5,7 +5,7 @@ import {
 	Tag,
 	type RenderableTreeNodes,
 } from "@markdoc/markdoc";
-import { generateObject, generateText } from "ai";
+import { generateObject, generateText, type ToolExecutionOptions } from "ai";
 import { GLOBAL_SCOPE } from "aim";
 import { text } from "markdoc/renderers/text";
 import type { StateManager } from "runtime/state";
@@ -14,6 +14,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOllama } from "ollama-ai-provider";
 import { chromeai as chromeAI } from "chrome-ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { convertToAISDKTool } from "runtime/tools/converter";
 
 export const aiTag: Schema = {
 	render: "ai",
@@ -23,6 +24,7 @@ export const aiTag: Schema = {
 		id: { type: String, required: false },
 		temperature: { type: Number, required: false, default: 0.5 },
 		structuredOutputs: { type: Object, required: false, default: undefined },
+		tools: { type: String, required: false, default: undefined }, // array of tool names
 	},
 	transform(node, config) {
 		return new Tag(
@@ -43,133 +45,87 @@ export async function* ai(
 
 	const attrs = node.transformAttributes(config);
 
-	// Check abort signal before processing
 	if (signal.aborted) {
 		throw new Error("AI execution aborted");
 	}
 
 	const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join("\n");
+	const modelConfig = parseModelString(attrs.model || "openai/gpt-4");
+	const model = await getAIModel(modelConfig, stateManager);
+	const requestedTools = attrs.tools ? attrs.tools.split(",").map((t: string) => t.trim()) : undefined;
 
-	const model = attrs.model || "openai/gpt-4o-mini";
-	const aiProvider = getModelProvider(model, stateManager);
-
-	if (!aiProvider) {
-		throw new Error(`Invalid model provider for model: ${model}`);
+	if (!model) {
+		throw new Error(`Invalid model configuration: ${attrs.model}`);
 	}
 
-	// Check abort signal before text generation
 	if (signal.aborted) {
 		throw new Error("AI execution aborted");
 	}
 
+	const allTools = Object.fromEntries(
+		Object.entries(stateManager.getRuntimeState().options.tools || {}).map(([name, tool]) => [name, convertToAISDKTool(tool)]),
+	);
+
+	const tools = attrs.tools === "*" ? allTools :
+		requestedTools ? Object.fromEntries(
+			Object.entries(allTools).filter(([name]) => requestedTools.includes(name))
+		) : {};
+
+	for (const [name, tool] of Object.entries(tools || {})) {
+		if (tool?.execute) {
+			const originalExecute = tool.execute;
+			tool.execute = async (args: unknown, options: ToolExecutionOptions) => {
+				const result = await originalExecute(args, options);
+
+				stateManager.addToTextRegistry(
+					`${name} called with args: ${JSON.stringify(args)}\nResult: ${JSON.stringify(result)}`,
+					GLOBAL_SCOPE
+				);
+
+				return result;
+			};
+		}
+		else {
+			tool.execute = async (args: unknown) => {
+				stateManager.runtimeOptions.events?.onToolCall?.(name, args);
+			};
+		}
+	}
+
 	const result = await generateText({
-		model: aiProvider.modelProvider(aiProvider.modelName),
+		model,
 		prompt: contextText,
 		temperature: attrs.temperature || 0.5,
 		abortSignal: signal,
+		tools: tools || {},
+		maxSteps: 10,
 	});
+
+	stateManager.addToTextRegistry(text(result.text), GLOBAL_SCOPE);
 
 	let structuredOutputs;
 	if (attrs.structuredOutputs) {
-		// Check abort signal before structured outputs generation
 		if (signal.aborted) {
 			throw new Error("AI execution aborted");
 		}
 
-		// Convert Markdoc schema object to Zod schema
-		// const zodSchema = z.object(
-		//     Object.entries(attrs.structuredOutputs).reduce((schema, [key, value]) => {
-		//         if (!value || typeof value !== 'object' || !('type' in value)) {
-		//             throw new Error(`Invalid schema format for key ${key}. Expected object with 'type' property.`);
-		//         }
-
-		//         let zodType: z.ZodType;
-
-		//         switch ((value.type as string).toLowerCase()) {
-		//             case 'string':
-		//                 zodType = z.string();
-		//                 break;
-		//             case 'number':
-		//                 zodType = z.number();
-		//                 break;
-		//             case 'boolean':
-		//                 zodType = z.boolean();
-		//                 break;
-		//             case 'array':
-		//                 zodType = z.array(z.any());
-		//                 break;
-		//             case 'object':
-		//                 zodType = z.record(z.any());
-		//                 break;
-		//             default:
-		//                 zodType = z.any();
-		//         }
-
-		//         if ('description' in value && value.description) {
-		//             zodType = zodType.describe(value.description as string);
-		//         }
-
-		//         schema[key] = zodType;
-		//         return schema;
-		//     }, {} as Record<string, z.ZodType>)
-		// );
-
-		// Example:
-		// For structuredOutputs like:
-		// {
-		//   name: { type: 'string', description: 'The person\'s name' },
-		//   age: { type: 'number' },
-		//   hobbies: { type: 'array' },
-		//   address: {
-		//     type: 'object',
-		//     properties: {
-		//       street: { type: 'string' },
-		//       city: { type: 'string' },
-		//       country: { type: 'string' }
-		//     }
-		//   },
-		//   family: {
-		//     type: 'array',
-		//     items: {
-		//       type: 'object',
-		//       properties: {
-		//         name: { type: 'string' },
-		//         relation: { type: 'string' }
-		//       }
-		//     }
-		//   }
-		// }
-		//
-		// Creates equivalent Zod schema:
-		// z.object({
-		//   name: z.string().describe('The person\'s name'),
-		//   age: z.number(),
-		//   hobbies: z.array(z.any()),
-		//   address: z.object({
-		//     street: z.string(),
-		//     city: z.string(),
-		//     country: z.string()
-		//   }),
-		//   family: z.array(z.object({
-		//     name: z.string(),
-		//     relation: z.string()
-		//   }))
-		// })
-
 		const structuredOutputsRequest = await generateObject({
-			model: aiProvider.modelProvider(aiProvider.modelName),
-			prompt: `Create an object that matches the following schema: ${JSON.stringify(attrs.structuredOutputs)}\n Here is the context: ${contextText}`,
+			model,
+			prompt: `Create an object that matches the following schema: ${JSON.stringify(attrs.structuredOutputs)}\n Here is the context: ${stateManager.getScopedText(GLOBAL_SCOPE).join("\n")}`,
 			temperature: attrs.temperature || 0.5,
 			output: "no-schema",
 			abortSignal: signal,
 		});
 
 		structuredOutputs = structuredOutputsRequest.object;
+
+		if (structuredOutputs) {
+			stateManager.addToTextRegistry(text(JSON.stringify(structuredOutputs)), GLOBAL_SCOPE);
+		}
 	}
 
 	const aiTag = new Tag("ai");
 
-	// Check abort signal before finalizing
 	if (signal.aborted) {
 		throw new Error("AI execution aborted");
 	}
@@ -184,142 +140,98 @@ export async function* ai(
 		},
 	});
 
-	stateManager.addToTextRegistry(text(result.text), GLOBAL_SCOPE);
-	stateManager.addToTextRegistry(
-		text(JSON.stringify(structuredOutputs)),
-		GLOBAL_SCOPE,
-	);
-
 	aiTag.children.push(result.text);
 
 	yield aiTag;
 }
 
-// Implements CAIMPS (https://github.com/microchipgnu/caimps) and maps to providers used by Vercel AI SDK
-
-export const getModelProvider = (
-	model: string,
-	stateManager: StateManager,
-): {
-	model: string;
+interface ModelConfig {
 	provider: string;
-	modelName: string;
-	hosting: string;
-	modelProvider: any;
-} => {
-	const [provider, modelName] = model.split("/");
-	const hosting = getModelHosting(model);
+	name: string;
+	hosting?: string;
+	extension?: string;
+}
 
-	const createProviderConfig = (modelProvider: any) => ({
-		model,
+function parseModelString(modelString: string): ModelConfig {
+	const [provider, fullModelName = ''] = modelString.split('/');
+	const [modelNameWithExtension = '', hosting = ''] = fullModelName.split('@');
+	const [modelName, extension = ''] = modelNameWithExtension.split(':');
+
+	return {
 		provider,
-		modelName,
+		name: extension ? `${modelName}:${extension}` : modelName,
 		hosting,
-		modelProvider,
-	});
+		extension,
+	};
+}
 
-	if (hosting === "openrouter") {
-		const openRouterProvider = createOpenRouter({
+async function getAIModel(config: ModelConfig, stateManager: StateManager) {
+	if (config.hosting === "openrouter") {
+		const openRouterClient = createOpenRouter({
 			apiKey: stateManager.getSecret("OPENROUTER_API_KEY"),
-		})(`${provider}/${modelName}`);
-		return createProviderConfig(openRouterProvider);
+		});
+		return openRouterClient(`${config.provider}/${config.name}`);
 	}
 
-	switch (provider) {
+	switch (config.provider) {
 		case "openai": {
-			const openAIProvider = createOpenAI({
+			const openAIClient = createOpenAI({
 				apiKey: stateManager.getSecret("OPENAI_API_KEY"),
 			});
-			return createProviderConfig(openAIProvider);
+			return openAIClient(config.name);
 		}
-
 		case "anthropic": {
-			const anthropicProvider = createAnthropic({
+			const anthropicClient = createAnthropic({
 				apiKey: stateManager.getSecret("ANTHROPIC_API_KEY"),
 			});
-			return createProviderConfig(anthropicProvider);
+			return anthropicClient(config.name);
 		}
-
 		case "ollama": {
-			const ollamaProvider = createOllama({
+			const ollamaClient = createOllama({
 				baseURL: stateManager.getSecret("OLLAMA_BASE_URL"),
 			});
-			return createProviderConfig(ollamaProvider);
+			return ollamaClient(config.name);
 		}
-
-		case "google": {
-			if (modelName === "chrome-ai@chrome") {
-				const chromeProvider = chromeAI("text", { temperature: 0.5, topK: 5 });
-				return createProviderConfig(chromeProvider);
+		case "google":
+			if (config.name === "chrome-ai") {
+				return chromeAI("text", { temperature: 0.5, topK: 5 });
 			}
-			throw new Error(`Unknown Google model: ${modelName}`);
-		}
-
+			throw new Error(`Unsupported Google model: ${config.name}`);
 		default:
-			throw new Error(`Unknown model provider: ${provider}`);
+			throw new Error(`Unsupported model provider: ${config.provider}`);
 	}
-};
+}
 
-export const modelProviders = [
-	{
-		provider: "openai",
-		models: [
-			"gpt-3.5-turbo",
-			"gpt-4",
-			"gpt-4-turbo",
-			"gpt-4-32k",
-			"gpt-4-1106-preview",
-			"gpt-4-vision-preview",
-			"gpt-3.5-turbo-16k",
-			"gpt-3.5-turbo-instruct",
-		],
-	},
-	{
-		provider: "google",
-		models: [
-			"gemini-pro",
-			"gemini-pro-vision",
-			"text-bison",
-			"chat-bison",
-			"code-bison",
-			"codechat-bison",
-		],
-	},
-	{
-		provider: "anthropic",
-		models: [
-			"claude-2",
-			"claude-2.1",
-			"claude-3-opus",
-			"claude-3-sonnet",
-			"claude-3-haiku",
-			"claude-instant-1",
-			"claude-instant-1.2",
-		],
-	},
-];
+// export const modelProviders = {
+// 	openai: [
+// 		"gpt-3.5-turbo",
+// 		"gpt-4",
+// 		"gpt-4-turbo",
+// 		"gpt-4-32k",
+// 		"gpt-4-1106-preview",
+// 		"gpt-4-vision-preview",
+// 		"gpt-3.5-turbo-16k",
+// 		"gpt-3.5-turbo-instruct",
+// 	],
+// 	google: [
+// 		"gemini-pro",
+// 		"gemini-pro-vision",
+// 		"text-bison",
+// 		"chat-bison",
+// 		"code-bison",
+// 		"codechat-bison",
+// 	],
+// 	anthropic: [
+// 		"claude-2",
+// 		"claude-2.1",
+// 		"claude-3-opus",
+// 		"claude-3-sonnet",
+// 		"claude-3-haiku",
+// 		"claude-instant-1",
+// 		"claude-instant-1.2",
+// 	],
+// };
 
-export const allModels = modelProviders.flatMap((provider) =>
-	provider.models.map((model) => `${provider.provider}/${model}`),
-);
-
-export const getModelName = (fullModelName: string): string => {
-	const [, modelName] = fullModelName.split("/");
-	return modelName || fullModelName;
-};
-
-export const getProviderName = (fullModelName: string): string => {
-	const [providerName] = fullModelName.split("/");
-	return providerName || "unknown";
-};
-
-export const getModelHosting = (fullModelName: string): string => {
-	const [provider, modelName] = fullModelName.split("/");
-	if (provider === "ollama") return "local";
-	if (modelName?.includes("@")) {
-		const [, host] = modelName.split("@");
-		return host;
-	}
-	if (modelName?.includes("openrouter")) return "openrouter";
-	return "cloud";
-};
+// export const allModels = Object.entries(modelProviders).flatMap(([provider, models]) =>
+// 	models.map(model => `${provider}/${model}`)
+// );

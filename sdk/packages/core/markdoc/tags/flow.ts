@@ -1,3 +1,4 @@
+import { openai } from "@ai-sdk/openai";
 import {
 	Tag,
 	type Config,
@@ -5,6 +6,7 @@ import {
 	type Schema,
 	type RenderableTreeNodes,
 } from "@markdoc/markdoc";
+import { generateObject } from "ai";
 import { aim, GLOBAL_SCOPE, type StateManager } from "index";
 import { nanoid } from "nanoid";
 
@@ -34,78 +36,77 @@ export async function* flow(
 	const signal = runtimeState.options.signals.abort;
 
 	const attrs = node.transformAttributes(config);
-
 	const flowTag = new Tag("flow");
 
-	// Check abort signal before processing
 	if (signal.aborted) {
 		throw new Error("Flow execution aborted");
 	}
 
 	const path = attrs.path;
 	const id = attrs.id || nanoid();
-	const input = attrs.input || {};
 
 	if (!path) {
 		throw new Error("Flow tag must have a path attribute");
 	}
 
 	try {
-		// Check abort signal before loading content
 		if (signal.aborted) {
 			throw new Error("Flow execution aborted");
 		}
 
-		// Determine environment and load flow content
-		const isNode = typeof window === "undefined";
 		let flowContent: string;
 
-		if (isNode) {
-			const fs = await import("fs/promises");
-			flowContent = await fs.readFile(path, "utf-8");
-		} else {
-			const response = await fetch(path);
-			if (!response.ok) {
-				throw new Error(`Failed to fetch flow from '${path}'`);
-			}
-			flowContent = await response.text();
-		}
+		// TODO: get flow content from external resources (files, urls, etc)
+		// for now we get the content from the runtime options
+		flowContent = runtimeState.options.experimental_files?.[path]?.content || "";
 
-		// Check abort signal before compilation
 		if (signal.aborted) {
 			throw new Error("Flow execution aborted");
 		}
 
-		const { ast, errors, execute } = aim({
+		const { executeWithGenerator, frontmatter } = aim({
 			content: flowContent,
 			options: {
-				settings: {
-					useScoping: true,
-				},
-				config,
-				signals: {
-					abort: signal,
-				},
+				...runtimeState.options,
 			},
+			manager: stateManager,
 		});
 
-		if (errors && errors.length > 0) {
-			throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
+		// if (errors && errors.length > 0) {
+		// 	throw new Error(`Flow compilation errors: ${errors.join(", ")}`);
+		// }
+
+		let input = {};
+		if (attrs.input) {
+			input = attrs.input;
+		} else if (frontmatter?.input) {
+			const contextText = stateManager.getScopedText(GLOBAL_SCOPE).join("\n");
+
+			const generatedInput = await generateObject({
+				model: openai("gpt-4o-mini"),
+				prompt: `Create an object that matches the following schema: ${JSON.stringify(frontmatter.input)}\n Here is the context: ${contextText}`,
+				temperature: attrs.temperature || 0.5,
+				output: "no-schema",
+				abortSignal: signal,
+			});
+
+			input = generatedInput.object || {};
 		}
 
-		// Check abort signal before execution
+		flowTag.children = [`Called flow (${path}) with input: ${JSON.stringify(input)}`];
+
+		yield flowTag;
+
+		for await (const result of executeWithGenerator({
+			input: { ...input },
+		})) {
+			yield result as RenderableTreeNodes;
+		}
+
 		if (signal.aborted) {
 			throw new Error("Flow execution aborted");
 		}
 
-		await execute();
-
-		// Check abort signal before finalizing
-		if (signal.aborted) {
-			throw new Error("Flow execution aborted");
-		}
-
-		// Push flow variables to stack
 		stateManager.pushStack({
 			id,
 			scope: GLOBAL_SCOPE,
@@ -116,15 +117,6 @@ export async function* flow(
 			},
 		});
 
-		flowTag.children = [
-			JSON.stringify({
-				path,
-				input,
-				content: flowContent,
-			}),
-		];
-
-		yield flowTag;
 	} catch (error) {
 		throw new Error(`Failed to execute flow '${path}': ${error}`);
 	}

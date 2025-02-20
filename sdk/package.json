@@ -1,25 +1,31 @@
 {
   "name": "@aim-sdk/monorepo",
-  "module": "index.ts", 
+  "module": "index.ts",
   "version": "0.0.1",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/**/*"
   ],
   "devDependencies": {
-    "@changesets/cli": "^2.27.11"
+    "@changesets/cli": "^2.27.11",
+    "@biomejs/biome": "1.9.4"
   },
   "scripts": {
     "clean": "rm -rf packages/*/dist",
     "build": "bun run clean && bun run build:all",
     "build:core": "cd packages/core && bun run build --minify",
-    "build:all": "bun run build:core",
+    "build:all": "bun run build:core && bun run build:adapters:code:quickjs && bun run build:adapters:code:e2b && bun run build:plugins:get-tools",
+    "build:adapters:code:quickjs": "cd packages/adapters/code/quickjs && bun run build",
+    "build:adapters:code:e2b": "cd packages/adapters/code/e2b && bun run build",
+    "build:plugins:get-tools": "cd packages/plugins/get-tools && bun run build",
     "changeset": "changeset",
     "version": "changeset version",
     "prepublish": "bun run scripts/prepare-publish.ts",
     "release": "bun run build && bun run prepublish && changeset publish",
     "version:beta": "changeset pre enter beta && changeset version",
     "release:beta": "changeset pre exit && bun run build && bun run prepublish && changeset publish --tag beta",
-    "version:stable": "changeset pre exit && changeset version"
+    "version:stable": "changeset pre exit && changeset version",
+    "format": "bunx biome format --write",
+    "lint": "bunx biome lint --write"
   }
 }

@@ -1,0 +1,22 @@
+# fly.toml app configuration file generated for inference-server-crimson-dust-4170 on 2025-02-06T20:29:06Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'inference-server-crimson-dust-4170'
+primary_region = 'fra'
+
+[build]
+
+[http_service]
+  internal_port = 3005
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

@@ -2,6 +2,7 @@ import { writeFileSync } from "fs";
 import { transform } from "markdoc/transform";
 import { aim, defaultRuntimeOptions, renderers, Tag } from "../../index";
 import { html } from "../../markdoc/renderers/html";
+import { z } from "zod";
 
 // Sample test content
 const content = {
@@ -210,7 +211,7 @@ console.log("1 + 1 =", sum);
 const greeting = \`Hello \${aimVariables.frontmatter.input.name}, you're looking good today 🔥\`;
 
 // If we return a value it'll be included in the prompt
-export default greeting;
+return greeting;
 \`\`\`
 
 The code returned: {% $example.result %}
@@ -416,6 +417,40 @@ The next number is {% ai #result model="openai/gpt-4o-mini" /%}
 
 Yay, we're done!
 `,
+	openrouter: `
+    How is the weather today in lisbon?
+
+
+    {% ai  
+    model="openai/gpt-4o-mini:online@openrouter" 
+    structuredOutputs={
+        "weather": {
+            "type": "object",
+            "properties": {
+                "temperature": { "type": "number" },
+                "description": { "type": "string" }
+            }
+        }
+} /%}
+`,
+	useTool: `
+
+    Use tool hello and translate to portuguese
+
+    {% ai #hello model="openai/gpt-4o-mini" structuredOutputs="{greeting: string}"/%}
+
+    {% $hello.structuredOutputs.greeting %}
+    `,
+	flow: `
+
+    I would like to talk about flowers in amazonia
+    
+    {% flow #flow path="/test-flow.md" /%}
+
+    I would like to talk about cars in the future
+
+    {% flow #flow path="/test-flow.md" /%}
+    `,
 };
 
 // Create HTML template
@@ -876,6 +911,34 @@ async function main() {
 			signals: {
 				abort: abortController.signal,
 			},
+			experimental_files: {
+				"/test-flow.md": {
+					content: `---
+                    input:
+                      - name: topic
+                        type: string
+                        description: The topic of the flow
+                    ---
+                    Generate a sentence about the topic: {% $frontmatter.input.topic %}
+                {% ai /%}
+                make it crazier
+                {% ai /%}
+                make it funnier
+                {% ai /%}
+                    `,
+				},
+			},
+			tools: {
+				hello: {
+					description: "This is a test tool",
+					parameters: z.object({
+						name: z.string(),
+					}),
+					execute: async (args: { name: string }) => {
+						return `Hello, ${args.name}!`;
+					},
+				},
+			},
 			events: {
 				onStart: (msg: string) => {
 					console.log("🚀 Started:", msg);
@@ -938,6 +1001,7 @@ async function main() {
 				useScoping: false,
 			},
 			config: {},
+			adapters: defaultRuntimeOptions.adapters || [],
 			plugins: [
 				{
 					plugin: {
@@ -1039,6 +1103,6 @@ async function main() {
 	process.exit(0);
 }
 
-const run = content.structuredOutputs;
+const run = content.greeting;
 
 main().catch(console.error);

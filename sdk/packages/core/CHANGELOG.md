@@ -1,5 +1,77 @@
 # @aim-sdk/core
 
+## 0.0.31
+
+### Patch Changes
+
+- add event for tool calls
+
+## 0.0.30
+
+### Patch Changes
+
+- not yielding loop
+
+## 0.0.29
+
+### Patch Changes
+
+- fence
+
+## 0.0.28
+
+### Patch Changes
+
+- fix regfister
+
+## 0.0.27
+
+### Patch Changes
+
+- improve adapter system
+
+## 0.0.26
+
+### Patch Changes
+
+- ai tag tools flexible
+
+## 0.0.25
+
+### Patch Changes
+
+- fix
+
+## 0.0.24
+
+### Patch Changes
+
+- Streamline flow tag execution and generator handling
+
+## 0.0.23
+
+### Patch Changes
+
+- Improve input generation in flow tag with fallback to frontmatter input
+
+## 0.0.22
+
+### Patch Changes
+
+- Enhance AIM SDK core with improved AI and tool integration
+
+## 0.0.21
+
+### Patch Changes
+
+- fix ai
+
+## 0.0.20
+
+### Patch Changes
+
+- ai
+
 ## 0.0.19
 
 ### Patch Changes

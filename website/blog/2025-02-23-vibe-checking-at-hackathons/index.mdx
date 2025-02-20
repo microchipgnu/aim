@@ -1,0 +1,177 @@
+---
+slug: vibe-checking-at-hackathons
+title: Vibe Checking (while at hackathons)
+image: ./cover.png
+authors: [micro]
+unlisted: true
+---
+import { Tweet } from 'react-tweet';
+
+![cover](./cover.png)
+
+Yooo! Micro's here again and this time to talk a bit about where this project is at.
+
+I went radio silent for a month because I was mostly busy collecting feedback and preparing for an official release, but most importantly **experimenting a LOT with AIM**. 
+
+After my last post, I spent a good amount of time building things with AIM and I feel that the best way to test productivity is by building something at hackathons.
+
+Hackathons put the pressure on you to build something in a short amount of time and that's a great way to test your ideas.
+
+<!-- truncate -->
+
+Before we proceed, do you remember this tweet? If not that's fine, but when I said it I truly meant it.
+
+<Tweet id="1888312937695084578" />
+
+
+And for this time let's try something fun and play a song while you're reading this post.
+
+<div style={{
+  display: 'flex',
+  justifyContent: 'center',
+  marginBottom: '4rem',
+  marginTop: '4rem',
+}}>
+    <audio 
+        controls
+        loop
+        className="w-full mb-4 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+        style={{
+            backgroundColor: '#f3f4f6',
+            padding: '0.5rem',
+            borderRadius: '0.5rem'
+        }}
+        >
+        <source 
+            src="/audio/flawed mangoes - killswitch lullaby (slowed + reverb).mp3" 
+            type="audio/mp3" 
+        />
+        Your browser does not support the audio element.
+    </audio>
+</div>
+
+
+
+This is a post will cover the three hackathons I participated in and the projects I built:
+
+- [ETHGlobal Agentic Ethereum](https://ethglobal.com/events/agents)
+- [Sui Agent Typhoon](https://sui.io/sui-agent-typhoon/)
+- [Sozu Virtual Hack](https://x.com/sozuhaus/status/1888977562900332940/)
+
+I picked these hackathons because I've been involved with the crypto community and can get a pretty quick grasp of what is missing and is useful to build at these events. 
+
+
+Lets start with the first hackathon.
+## AIMen 🙏
+
+The first hackathon I participated in was [ETHGlobal Agentic Ethereum](https://ethglobal.com/events/agents). The project was AIMen (pronounced "aim-en"). 
+The goal with this project was to have a self-hosted environment that would allow people to bootstrap and server their documents while tapping into the existing toolkits and tools.
+
+When I started this hackathon, AIM was in a very early stage. I was able to run basic documents, but it was missing features like tools, plugins  and ways to compose and reuse workflows.
+
+So I decided to expand the AIM runtime to accept tools and plugins. Once that was done, my hack consisted of integrating with [Coinbase AgentKit](https://www.coinbase.com/en-pt/developer-platform/discover/launches/introducing-agentkit) and building AI tools for the [TheGraph](https://thegraph.com/).
+
+The goal was to have a self-hosted environment that would allow people to bootstrap and server their documents.
+
+
+Watch the finalist demo I did for Agentic Ethereum below:
+
+<video controls width="100%">
+  <source src="/videos/agentic_ethereum.webm" type="video/webm" />
+</video>
+
+### Technical Details
+
+To initiate a project with AIM, you can use the following command:
+
+```bash
+npx aimx@0.1.56 init
+```
+
+This will create a basic project ready to be deployed. It will also create a `aim.config.ts` file that you can use to configure your project. I wanted to set tools and plugins in the config file.
+
+
+Talk about the tool converters
+
+And that's it for the first hackathon. Here's the announcement of the finalists:
+
+<Tweet id="1890448806975795550" />
+
+You can find the repo [here](https://github.com/microchipgnu/agentic-ethereum-aim).
+
+## Suiiii
+
+The second hackathon I participated in was [Sui Agent Typhoon](https://sui.io/sui-agent-typhoon/) with Suiiii (a reference to Cristiano Ronaldo).
+
+My gut feeling told me that although the first hackathon was successful, there are probably easier ways to do this. And I realized that there was another hackathon happening and I had around 48h to submit something.
+
+It was Saturday night and I told Bárbara (my fianceé) that I was going to be building something else until the end of the weekend. She was like "another one? 🙄" and I was like "yes, another 😫".
+
+I started this hackathon with a pretty clear vision of how the plugin system and tools were working. 
+
+But little did I know that the Sui ecosystem didn't have many AI toolkits and with less than 48h to submit, I had to build something fast.
+
+This was my first time learning about Sui.
+
+So... I decided to write a simple workflow that would get me relevant information about Sui.
+
+```aim
+
+## Sui Agent Typhoon
+
+I'm a newcomer to the Sui blockchain. Please explain what Sui is all about.
+
+{% ai #explanation model="openai/gpt-4o:online@openrouter" /%}
+
+## Recent News
+
+What are the most relevent recent news about Sui? Find news from Q4 2024 to 2025.
+
+{% ai #news model="openai/gpt-4o:online@openrouter" /%}
+
+```
+
+I decided to integrate several projects from the ecosystem as AI tools, namely: 
+
+- Sui: for account management, generate transactions, submit transactions, etc.
+- Suilend: for minting and redeeming sSUI 
+- Bluefin: Dex integration and querying state
+- NAVI: API wrapper for NAVI 
+- Atoma: decentralized inference
+
+
+Here's the demo I did for the hackathon:
+
+<video controls width="100%">
+  <source src="/videos/sui_hack.webm" type="video/webm" />
+</video>
+
+
+To my surprise, I got accepted as a finalist and demoed my project! Here's the announcement of the winners:
+
+<Tweet id="1890575219934523803" />
+
+## [Sozu Virtual Hack](https://x.com/sozuhaus/status/1888977562900332940/)
+
+After presenting to ETHGlobal on Friday (February 14th), I got a DM from [@kellykim](https://x.com/kellykim_xyz) asking if I was interested in joining a hackathon. I was like, "sure, why not? I have less than 12h to build something but I'll try".
+
+Saturday morning (the day of the deadline), I woke up with pretty much no idea about what Mantle was and how to build something for its ecosystem, but I already had a good boilerplate to work with from the previous Sui hackathon.
+
+So... I decided to do expand the app and integrate [Reown AppKit](https://docs.reown.com/appkit/overview) to let users connect their wallets. The idea was to make useful consumer agentic workflows for some of the most popular apps on Mantle.
+
+Then I stumbled upon [GOAT SDK](https://github.com/goat-sdk/goat) and was pretty amazed with all the tools it provides.
+
+
+
+I got accepted as a finalist and demoed my project! I didn't win any prize, but I had a lot of fun building this and still got a pool prize. Here's the announcement of pool prize winners:
+
+<Tweet id="1892176966268432426" />
+
+With this I also got the opportunity to stay at [Sozu Haus](https://x.com/sozuhaus), attend ETHDenver and meet some amazing builders in the space.
+
+If you're interested in talking IRL about this stuff, hit me up! Make sure to follow me on [X](https://x.com/microchipgnu). I also started a little community on Telegram [writeAIM](https://t.me/writeAIM) where we discuss all things AIM.
+
+
+
+
+

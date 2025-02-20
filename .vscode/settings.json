@@ -14,7 +14,10 @@
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "editor.codeActionsOnSave": {
-        "source.organizeImports.biome": true,
-        "quickfix.biome": true
+        "source.organizeImports.biome": "explicit",
+        "quickfix.biome": "explicit"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
     }
 }

@@ -1,6 +1,5 @@
-import { nodes, Tag, type Config, type Node } from "@markdoc/markdoc";
+import { type Config, type Node, Tag, nodes } from "@markdoc/markdoc";
 import { GLOBAL_SCOPE } from "aim";
-import { runQuickJS } from "runtime/code/quickjs";
 import type { StateManager } from "runtime/state";
 
 export const fenceNode = {
@@ -46,36 +45,40 @@ export async function* fence(
 		}
 	}
 
-	const { evalCode } = await runQuickJS({
-		env: {
-			__AIM_VARIABLES__: JSON.stringify(currentConfig.variables),
-		},
-	});
+	const adapter = stateManager.getAdapter("code");
 
-	const evalResult = await evalCode(`
-        import { aimVariables } from "load-vars";
-        import { evaluate } from "eval-code";
+	if (adapter) {
+		try {
+			const result = await adapter.handlers.eval({
+				code: node.attributes.content,
+				language,
+				variables: currentConfig.variables,
+			}, { manager: stateManager });
 
-        const run = async () => {
-            ${node.attributes.content}
-        }
+			const serializedResult = JSON.stringify(result) || '';
 
-        export default await run();
-    `);
+			stateManager.pushStack({
+				id,
+				scope: GLOBAL_SCOPE,
+				variables: {
+					result: serializedResult,
+				}
+			});
 
-	const result = evalResult.ok ? JSON.stringify(evalResult.data) : "";
-
-	stateManager.pushStack({
-		id,
-		variables: {
-			result: evalResult.ok ? JSON.stringify(evalResult.data) : "",
-			error: !evalResult.ok ? JSON.stringify(evalResult.error) : "",
-		},
-		scope: GLOBAL_SCOPE,
-	});
-
-	fenceTag.children = [
-		new Tag("code", { language }, [node.attributes.content]),
-		result,
-	];
+			fenceTag.children = [
+				new Tag("code", { language }, [node.attributes.content]),
+				result,
+			];
+		} catch (err) {
+			stateManager.pushStack({
+				id,
+				scope: GLOBAL_SCOPE,
+				variables: {
+					result: '',
+					error: JSON.stringify(err instanceof Error ? err.message : err),
+					success: false
+				}
+			});
+		}
+	}
 }

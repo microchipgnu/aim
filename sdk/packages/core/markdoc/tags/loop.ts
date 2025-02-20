@@ -71,8 +71,6 @@ export async function* loop(
 		);
 	}
 
-	const loopTag = new Tag("loop");
-
 	const iterables =
 		items || (hasValidCount ? Array.from({ length: numericCount }) : [null]);
 	let i = 0;
@@ -104,9 +102,9 @@ export async function* loop(
 		for (const child of node.children) {
 			for await (const result of walk(child, stateManager)) {
 				if (Array.isArray(result)) {
-					loopTag.children.push(...result);
+					yield* result;
 				} else {
-					loopTag.children.push(result);
+					yield result;
 				}
 			}
 		}
@@ -130,8 +128,6 @@ export async function* loop(
 			}
 		}
 	} while (true);
-
-	yield loopTag;
 
 	// Clean up loop state
 	// stateManager.popStack(GLOBAL_SCOPE);

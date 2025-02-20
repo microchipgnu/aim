@@ -10,7 +10,7 @@ import type {
 	RuntimeOptions,
 	RuntimeState,
 	StackFrame,
-	StateBlock,
+	StateBlock
 } from "types";
 import { getAllEnvVars } from "./envs";
 
@@ -250,10 +250,14 @@ export class StateManager {
 		);
 	}
 
+	getPlugin(name: string): AIMPlugin | undefined {
+		return this.runtimeContext$.value.plugins.get(name);
+	}
+
 	registerAdapter(adapter: AIMAdapter) {
 		const currentContext = this.runtimeContext$.value;
-		if (currentContext.adapters.has(adapter.name)) {
-			throw new Error(`Adapter ${adapter.name} is already registered`);
+		if (currentContext.adapters.has(adapter.type)) {
+			return; // Adapter already registered, do nothing
 		}
 
 		if (adapter.init) {
@@ -261,7 +265,7 @@ export class StateManager {
 		}
 
 		const newAdapters = new Map(currentContext.adapters);
-		newAdapters.set(adapter.name, adapter);
+		newAdapters.set(adapter.type, adapter);
 
 		this.updateContext(
 			{
@@ -272,10 +276,14 @@ export class StateManager {
 		);
 	}
 
+	getAdapter(type: string): AIMAdapter | undefined {
+		return this.runtimeContext$.value.adapters.get(type);
+	}
+
 	private validatePlugin(plugin: AIMPlugin) {
 		const currentContext = this.runtimeContext$.value;
 		if (currentContext.plugins.has(plugin.name)) {
-			throw new Error(`Plugin ${plugin.name} is already registered`);
+			return; // Already registered, do nothing
 		}
 
 		if (plugin.dependencies?.plugins) {

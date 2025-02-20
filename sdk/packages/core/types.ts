@@ -1,10 +1,13 @@
 import type {
 	Config,
-	Schema,
 	Node,
 	RenderableTreeNodes,
+	Schema,
 } from "@markdoc/markdoc";
+import type { CoreTool } from "ai";
+import type { StructuredTool } from "langchain/tools";
 import type { StateManager } from "runtime/state";
+import type { z } from "zod";
 
 export type StateBlock = {
 	timestamp: number;
@@ -98,6 +101,7 @@ export interface RuntimeOptions {
 		onStart?: (startMessage: string) => void;
 		onStep?: (stepDescription: string) => void;
 		onData?: (data: unknown) => void;
+		onToolCall?: (name: string, args: unknown) => void;
 		onOutput?: (output: {
 			success: boolean;
 			data?: unknown;
@@ -120,6 +124,10 @@ export interface RuntimeOptions {
 	getReferencedFlow?: (flowId: string) => Promise<{ name: string } | null>;
 	plugins?: Array<{ plugin: AIMPlugin; options?: unknown }>;
 	adapters?: Array<AIMAdapter>;
+	tools?: Record<string, StructuredTool | CoreTool | AIMTool>;
+	experimental_files?: Record<string, {
+		content: string;
+	}>;
 }
 
 export interface AIMResult {
@@ -138,7 +146,6 @@ export interface AIMOutput {
 
 export interface AIMAdapter {
 	type: string;
-	name: string;
 	init?: () => void;
 	handlers: Record<string, (...args: any[]) => Promise<any>>;
 }
@@ -171,4 +178,11 @@ export interface AIMPlugin {
 		afterExecution?: (context: RuntimeContext, result: any) => Promise<void>;
 		onError?: (context: RuntimeContext, error: Error) => Promise<void>;
 	};
+}
+
+
+export type AIMTool = {
+	description: string;
+	parameters: z.ZodObject<any>;
+	execute: (args: any) => Promise<any>;
 }
