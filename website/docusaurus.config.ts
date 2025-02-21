@@ -161,7 +161,7 @@ const config: Config = {
   favicon: 'img/favicon/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://aim.microchipgnu.pt',
+  url: 'https://aim.tools',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
@@ -220,7 +220,7 @@ const config: Config = {
       tagName: 'link',
       attributes: {
         rel: 'preconnect',
-        href: 'https://aim.microchipgnu.pt',
+        href: 'https://aim.tools',
       },
     },
     // Declare some json-ld structured data
@@ -233,8 +233,8 @@ const config: Config = {
         '@context': 'https://schema.org/',
         '@type': 'Organization',
         name: 'AIM',
-        url: 'https://aim.microchipgnu.pt',
-        logo: 'https://aim.microchipgnu.pt/img/aim-social-card.jpg',
+        url: 'https://aim.tools',
+        logo: 'https://aim.tools/img/aim-social-card.png',
       }),
     },
   ],
