@@ -245,7 +245,7 @@ const config: Config = {
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
     // Replace with your project's social card
-    image: 'img/aim-social-card.jpg',
+    image: 'img/aim-social-card.png',
     mermaid: {
       theme: { light: 'neutral', dark: 'forest' },
     },
