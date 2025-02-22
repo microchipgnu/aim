@@ -1,0 +1,1737 @@
+Repository: docs
+Files analyzed: 36
+Total size: 43.5 KB
+
+Directory structure:
+basic-react-agent.md
+heads-tails.md
+if-else.md
+loop-until.md
+loop.md
+hello-world.md
+multilangual-blog.md
+just-answer.md
+self-improve.md
+step-by-step.md
+calculator.md
+code-block.md
+wikipedia.md
+image-understanding.md
+getting-started.mdx
+inpiration.md
+intro.mdx
+attributes.md
+comments.md
+frontmatter.md
+functions.md
+index.md
+code.md
+index.md
+index.md
+variables.md
+
+
+================================================
+File: cookbook/tutorial/agents/basic-react-agent.md
+================================================
+---
+title: "Basic ReAct agent 🤖"
+sidebar_position: 1
+---
+
+```aim
+---
+title: "Basic ReAct agent 🤖"
+description: "An example of how to build a simple ReAct agent"
+input:
+  - name: question
+    type: string
+    description: "The question to answer"
+---
+<!-- 
+What is an agent? Generally 'agent' is used to refer to any system that can make decisions autonomously about how to solve a problem. It can be used to describe a lot of things from chatbots that can use tools/perform RAG to highly general agents that attempt to solve any given task such AutoGPT. These highly general agents tend not to perform very well!
+
+At the end of the day agents are a collection of prompts, tools and logic, all things that can be done in Wordware!
+
+Here we've built an agent that will work out how to solve the given task by searching Google, writing code and calling out to APIs. It's based on the [**ReAct**: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) paper.
+
+Have a look through the prompt to see how we combine everything you just learnt from simple generations to looping, branching and tool use. Don't worry if you don't completely understand it right away, agents are an advanced topic which deserves it's whole own set of lessons but do run it and see what happens! -->
+
+
+# Instructions
+
+<!-- 
+We start by giving the agent a set of instructions on how the agent should behave. Most of these instructions have been added through trial and error of seeing the ways in which the agent fails e.g. "Never create your own question" was added **after** we observed the agent sometimes deciding to just ask a new question (often easier) and answer that one instead! -->
+
+Answer the following question as best you can by utilising external tools to search for APIs that can help you then - as you are an expert JavaScript programmer - writing JavaScript code that will be run in the browser to execute those APIs. Since you aren't able to install packages you'll have to call any API's using `fetch`.
+
+If the API requires authentication (e.g. an API key) you shouldn't attempt to use it and should instead look for an alternative API.
+
+If the code throws an error take a look at it and try and correct it. Be sure to correct places where a similar error may occur too, not only the line that's in the error message. You should also search for the documentation if there's an error with a client library.
+
+After running the code you should look at the result and check if code is doing the correct thing. If it is that's fine you can move onto the next thought, if not you need to correct the logic errors and try again.
+
+You should not ever require or suggest that the user completes the task themselves. You should complete the whole task yourself. If you don't have the necessary API key, find a different API.
+
+Never create your own question.
+
+# Tools
+
+<!-- 
+Here we describe the tools that the agent can use. We need to give the tool an identifier then clearly describe when the tool should be used and what inputs it should take. -->
+
+You have access to the following tools:
+
+- `googleSearch`: A wrapper around Google Search. Useful for when you need to find information. Input should be a search query.
+- `runCode`: Use this to execute JavaScript scripts. Input should be valid and complete JavaScript code. No external variables can be referenced. No packages can be installed. If you really want to see the output of a value, you should print it out with `console.log(...)`. You should never print very long outputs, only summaries.
+
+
+# Format 
+
+<!-- 
+This part of the instruction is all about how the agent should structure it's response. In the ReAct paper this follows a thought-action-input-observation loop that repeats until the problem is solved. -->
+
+Use the following format
+
+Question: the input question you must answer  
+Thought: you should always think about what to do in one sentence  
+Action: the action to take, should be googleSearch, runCode or done  
+Input: the input to the action  
+Observation: the result of the action
+
+... (this Thought/Action/Input/Observation can repeat N times)
+
+Final answer:
+
+
+# Run
+
+Question: {% $frontmatter.input.question %}
+
+{% loop counter=10 %}
+
+Thought: {% ai #thought model="openai/gpt-4" /%}
+
+Action: {% ai #action model="openai/gpt-4" /%}
+
+{% if action == "googleSearch" %}
+
+Input: {% ai #input model="openai/gpt-4" /%}
+
+{% flow #output model="openai/gpt-4" path="file://./tools/google-search.md" /%}
+
+Observation: {% $output.result %}
+
+{% /if %}
+
+{% if action == "runCode" %}
+
+Input: {% ai #code model="openai/gpt-4" /%}
+
+
+\`\`\`js {#output}
+
+return await eval(v[code])
+
+\`\`\`
+
+<!-- We show the logs from running the code to the model -->
+
+Code ran: {% $output.result %}
+
+{% /if %}
+
+{% if action == "done" %}
+
+<!-- We're done, no need to do anything, this is also checked in the loop parameters so we terminate the loop -->
+
+Done!
+
+{% /if %}
+
+{% if action != "googleSearch" && action != "runCode" && action != "done" %}
+
+<!-- Occasionally the agent will mess up and generate an invalid action, by feeding this back to the model it can self-correct -->
+
+v[action] is not a valid action, should be 'googleSearch', 'runCode' or 'done'
+
+{% /if %}
+
+{% /loop %}
+
+# Final answer: 
+
+<!-- We get the model to output a final answer, this is what we'd show to our user -->
+
+{% $finalAnswer.result %}
+```
+
+
+================================================
+File: cookbook/tutorial/flow-control/_category_.json
+================================================
+{
+  "label": "Flow Control",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "A set of recipes for building AI-powered applications."
+  }
+}
+
+
+================================================
+File: cookbook/tutorial/flow-control/heads-tails.md
+================================================
+---
+title: "Heads or Tails 🪙"
+sidebar_position: 2
+---
+
+```aim
+---
+title: "Heads or Tails 🪙"
+description: "A coin flip game with conditional responses"
+---
+
+We just tossed a coin, was it heads or tails?
+
+The last tosses were heads, heads, tails, heads, tails, heads, heads, heads.
+
+Output 'heads' or 'tails' only.
+
+{% ai #flip model="openai/gpt-4o-mini" /%}
+
+<!-- We reference the value of the flip in this if-else block -->
+
+{% if equals($flip.result, "heads") %}
+
+    Heads, I win!
+
+    Should I gloat? Write yes or no only.
+
+    {% ai #gloat model="openai/gpt-4o-mini" /%}
+
+    GLOAT {% $gloat.result %}
+
+<!-- It's possible to nest container blocks inside other container blocks. In fact you can put all the same things in the body of a container block as you can in a prompt -->
+
+        {% if equals($gloat.result, "yes") %}
+
+            Now, write a gloating song. Output just the song.
+
+            {% ai #song model="openai/gpt-4o-mini" /%}
+
+        {% /if %}
+
+        {% else /%}
+
+            Now, be humble and congratulate the loser on their well played match.
+
+            {% ai #humble model="openai/gpt-4o-mini" /%}
+
+        {% /if %}
+
+        {% if equals($flip.result, "tails") %}
+
+            Tails, you lose! 😏
+
+        {% /if %}
+
+    {% else /%}
+
+    Neither heads nor tails, everyone loses 🤷‍♂️
+
+{% /if %}
+
+{% $flip.result %}
+
+```
+
+
+================================================
+File: cookbook/tutorial/flow-control/if-else.md
+================================================
+---
+title: "If Else"
+sidebar_position: 1
+---
+
+```aim
+---
+title: "If else"
+description: "An example of how to use AIM to create a document."
+input:
+  - name: topic
+    type: string
+    description: "The topic to write about"
+  - name: type
+    type: string
+    description: "The type of writing to create"
+  - name: tone
+    type: string
+    description: "The emotional tone to use"
+---
+
+<!-- 
+We can use if-else statements to conditionally run parts of the prompt. When the prompt is ran only the matching block will be included.
+
+If blocks can compare values in the following ways:
+
+*   **Match** — does the first value equal the 2nd value
+    
+*   **Contains** — does the search value appear in the input
+    
+*   **Relative** — how does the 1st value compare to the 2nd value based on the chosen comparison
+    
+
+If the if expression evaluates to true that block will be included. If no if expressions match the 'else' block will be ran instead. 
+-->
+
+Write a {% $frontmatter.input.type %} about {% $frontmatter.input.topic %}
+
+{% if equals($frontmatter.input.tone, "happy") %}
+  Make it full of joy and happiness. 
+
+  {% else equals($frontmatter.input.tone, "sad") /%}
+
+  generate a sad prompt
+
+  {% ai #sad-prompt model="openai/gpt-4o-mini" /%}
+
+  {% $sad-prompt.result %}
+
+  {% else equals($frontmatter.input.tone, "silly") /%}
+
+  Make it full of sadness and despair. 
+
+  {% else /%}
+
+  It should have the following tone: {% $frontmatter.input.tone %}
+
+{% /if %}
+
+{% ai #output model="openai/gpt-4o-mini" /%}
+
+{% $output.result %}
+```
+
+
+================================================
+File: cookbook/tutorial/flow-control/loop-until.md
+================================================
+---
+title: Loop until a condition is met
+sidebar_position: 4
+---
+
+```aim
+
+---
+title: Loop until a condition is met
+description: Use loops to repeat a block of code until a condition is met.
+input:
+    - name: number
+      type: number
+      description: The number to stop at
+---
+
+Output a random number between 1 and 100. Output just the number.
+
+{% loop lessThanOrEqual($value.result, $frontmatter.input.number) #loop %}
+
+    {% ai #value model="openai/gpt-4o" /%}
+    
+{% /loop %}
+
+Yay, we're done! The number is {% $value.result %} and it took {% $loop.index %} tries.
+```
+
+
+================================================
+File: cookbook/tutorial/flow-control/loop.md
+================================================
+---
+title: Loop
+sidebar_position: 3
+---
+
+```aim
+---
+title: Loop
+description: Use loops to repeat a block of code multiple times.
+input:
+    - name: count
+      type: number
+      description: The number of times to repeat the block
+---
+
+Let's do the {% $frontmatter.input.count %} times table. 
+
+Output just the next number.
+
+{% loop #loop count=$frontmatter.input.count %}
+
+  {% add($loop.index, 1) %} x {% $frontmatter.input.count %} = {% ai #result model="openai/gpt-4o-mini" /%}
+
+{% /loop %}
+
+Yay, we're done!
+```
+
+
+================================================
+File: cookbook/tutorial/hello-world.md
+================================================
+---
+title: "👋🌍 Hello World"
+sidebar_position: 1
+---
+
+## Hello World Example
+```aim
+---
+title: "Hello World 👋🌍"
+description: "By the way, this is the prompt description. Just like the title above and any comments (in gray) below it's there for you and isn't part of the context that's given to the LLM"
+input:
+  - name: name
+    type: string
+    description: "The name to greet"
+---
+
+<!-- This is a comment. You can use it to annotate parts of the prompt with additional descriptions. We use it extensively in these tutorials to describe what's happening. Comments are not executed in the runtime. -->
+
+Say hello to {% $frontmatter.input.name %}.
+
+{% ai #greeting model="openai/gpt-4o-mini" /%}
+
+```
+
+Now we can extend this example by adding a new input to the frontmatter and using it in the prompt.
+
+## Hello World Example Extension
+
+```aim
+---
+title: "Hello World 👋🌍"
+description: "An example of the extension, **try doing it yourself before peeking!** We add a new 'style' input and tell the model to use that style by referencing that value in the prompt using `$style`."
+input:
+  - name: name
+    type: string
+    description: "The name to greet"
+  - name: style
+    type: string
+    description: "The style to use"
+---
+
+Say hello to {% $frontmatter.input.name %}.
+
+Use the following style: {% $frontmatter.input.style %}. Do not use any other style. Do not use emojis.
+
+{% ai #greeting model="openai/gpt-4o-mini" /%}
+
+{% $greeting.result %}
+
+```
+
+
+================================================
+File: cookbook/tutorial/prompts-calling-prompts/_category_.json
+================================================
+{
+  "label": "Prompts Calling Prompts",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "A set of recipes for building AI-powered applications."
+  }
+}
+
+
+================================================
+File: cookbook/tutorial/prompts-calling-prompts/multilangual-blog.md
+================================================
+---
+title: "Multilingual blog 🌍"
+sidebar_position: 1
+---
+
+When you're writing a blog post you might want to write it in multiple languages. This example shows how to create two flows that can be used together to write a blog post in multiple languages.
+
+Let's first create a flow that translates text into different languages.
+
+```aim {% title="translate.md" %}
+---
+title: "Translate 🌍"
+description: "Translates the input into the given language"
+input:
+  - name: input
+    type: string
+    description: "The text to translate"
+  - name: language
+    type: string
+    description: "The target language"
+---
+
+Translate the "{% $frontmatter.input.input %}" into {% $frontmatter.input.language %}:
+
+{% ai #translation model="openai/gpt-4o" /%}
+
+{% $translation.result %}
+```
+
+And then we can create a flow that uses this prompt to translate text into different languages.
+
+
+```aim {% title="multilingual-blog.md" %}
+---
+title: "Multilingual blog 🌍"
+description: "An example of how to use prompts that call other prompts"
+input:
+  - name: topic
+    type: string
+    description: "The topic to write about"
+---
+
+Write a short blog post about {% $frontmatter.input.topic %}.
+
+{% ai #blog model="openai/gpt-4o" /%}
+
+## French 🇫🇷
+
+{% flow #french input={input: $blog.result, language: "French"} path="translate.md" /%}
+
+## Spanish 🇪🇸
+
+{% flow #spanish input={input: $blog.result, language: "Spanish"} path="translate.md" /%}
+
+## Pirate 🏴‍☠️
+
+{% flow #pirate input={input: $blog.result, language: "Pirate"} path="translate.md" /%}
+
+```
+
+
+================================================
+File: cookbook/tutorial/thinking-time/_category_.json
+================================================
+{
+  "label": "🧠 Thinking Time",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "A set of recipes for building AI-powered applications."
+  }
+}
+
+
+================================================
+File: cookbook/tutorial/thinking-time/just-answer.md
+================================================
+---
+title: "Just Answer"
+sidebar_position: 1
+---
+
+
+Here we get a model to answer wordy maths questions by just outputting the answer. The results aren't good!
+
+**Try these questions**
+
+1.  There are 15 trees in the grove. Grove workers will plant trees in the grove today. After they are done, there will be 21 trees. How many trees will the grove workers plant today?
+    
+2.  From March to August, Sam made $460 doing 23 hours of yard work. However, from September to February, Sam was only able to work for 8 hours. If Sam is saving up to buy a video game console that costs $600 and has already spent $340 to fix his car, how many more hours does he need to work before he can buy the video game console?
+    
+3.  There were nine computers in the server room. Five more computers were installed each day, from Monday to Thursday. How many computers are in the server room at the end of the week?
+    
+4.  The flowers cost $9, the clay pot costs $20 more than the flower, and the bag of soil costs $2 less than the flower. How much does it cost to plant the flowers?
+    
+5.  Of the 90 people on William's bus, 3/5 were Dutch. Of the 1/2 of the Dutch who were also American, 1/3 got window seats. What's the number of Dutch Americans who sat at the windows?
+    
+
+**Correct answers**
+
+1.  6
+    
+2.  16
+    
+3.  29
+    
+4.  45
+    
+5.  9 
+
+## Code
+
+```aim
+---
+title: "Just answer the question"
+description: "A simple example of how to use AIM to create a document."
+input:
+  - name: question
+    type: string
+    description: "The math question to be answered"
+---
+
+Answer the question: {% $frontmatter.input.question %}
+
+Output the number and only the number.
+
+{% ai #answer model="openai/gpt-4o-mini" /%}
+
+{% $answer.result %}
+
+```
+
+
+================================================
+File: cookbook/tutorial/thinking-time/self-improve.md
+================================================
+---
+title: "Self Improve"
+sidebar_position: 3
+---
+
+```aim
+---
+title: "Self-improve"
+description: "A self-improving example of how to use AIM to create a document."
+input:
+  - name: topic
+    type: string
+    description: "The topic to be explained"
+---
+
+I'd like you to explain {% $frontmatter.input.topic %} to a 12 year old.
+
+{% ai #thought model="openai/gpt-4o-mini" /%}
+
+{% $thought.result %}
+
+Judge the above explanation on it's correctness, conciseness and understandability for a 12 year old. Suggest some feedback to improve it.
+
+{% ai #feedback model="openai/gpt-4o-mini" /%}
+
+{% $feedback.result %}
+
+Now improve the explanation based on the feedback.
+
+{% ai #improved model="openai/gpt-4o-mini" /%}
+
+{% $improved.result %}
+```
+
+
+
+================================================
+File: cookbook/tutorial/thinking-time/step-by-step.md
+================================================
+---
+title: "Step by Step"
+sidebar_position: 2
+---
+
+```aim
+---
+title: "Step by step"
+description: "A step by step example of how to use AIM to create a document."
+input:
+  - name: question
+    type: string
+    description: "The math question to be answered"
+---
+
+<!-- First we get the model to think through the answer -->
+
+{% $frontmatter.input.question %}
+
+{% ai #thinking model="openai/gpt-4o-mini" /%}
+
+<!-- We're even using a much smaller, faster and cheaper model here; Mistral 7B rather than GPT-3.5. 
+Mistral 7B is 7.5x lower cost on output tokens 
+(see the [model documentation](https://www.notion.so/wordware/Models-615b76d7498f4e06ae522a329695da74)). -->
+
+{% ai #thought model="openai/gpt-4o-mini" /%}
+
+<!-- Lastly, we extract the final answer -->
+
+This was your thought: {% $thought.result %}
+
+Now output the final number and only the number.
+
+{% ai #answer model="openai/gpt-4o-mini" /%}
+
+{% $answer.result %}
+
+```
+
+
+================================================
+File: cookbook/tutorial/tool-use/_category_.json
+================================================
+{
+  "label": "🔧 Tool Use",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "A set of recipes for building AI-powered applications."
+  }
+}
+
+
+================================================
+File: cookbook/tutorial/tool-use/calculator.md
+================================================
+---
+title: "Calculator 🧮"
+sidebar_position: 2
+---
+
+```aim
+---
+title: "Calculator 🧮"
+description: "Using code blocks to solve math problems"
+input:
+  - name: maths_question
+    type: string
+    description: "The math question to solve"
+---
+
+<!-- LLMs are bad at maths but good at code... Let's see how much better they do at maths questions when writing code to solve the problem instead. -->
+
+Here's a maths question:
+
+{% $frontmatter.input.maths_question %}
+
+<!-- Then we tell it to write some code to solve the question: -->
+
+Write a JavaScript function that returns the result of this question. Do not log anything. Output just the code and a call to the function.
+
+
+{% ai #generated_code model="openai/gpt-4o" /%}
+
+<!-- Then we run the code that the LLM wrote: -->
+
+{% $generated_code.result %}
+
+`\`\`\js {% #eval %}
+// We pass code that was generated as a string into \`eval\` which will execute it 
+// First we remove any backticks/wrappers around the code
+const code = aimVariables.generated_code.result.replaceAll(/\`\`\`javascript/g, "").replaceAll(/\`\`\`js/g, "").replaceAll(/\`\`\`JavaScript/g, "").replaceAll(/\`\`\`JS/g, "").replaceAll(/\`\`\`/g, "");
+
+console.log("vars", code);
+
+return eval(code);
+`\`\`\
+
+The answer is: {% $eval.result %}
+
+<!-- The LLM got the answer right! 🎉 -->
+```
+
+
+================================================
+File: cookbook/tutorial/tool-use/code-block.md
+================================================
+---
+title: "Code Block Introduction 🤓"
+sidebar_position: 1
+---
+
+```aim
+---
+title: "Code Block Introduction 🤓"
+description: "An example of how to use code blocks in AIM"
+input:
+  - name: name
+    type: string
+    description: "The name to greet"
+---
+
+<!-- Sometimes it helps to run some code e.g.
+
+- Performing maths/executing logic
+- Gathering relevant and up-to-date information from an external data source  
+- Parsing/formatting
+- Leveraging external services as part of an end-to-end program e.g. image generation, speech synthesis, speech-to-text, etc.
+
+Here we give an example 'Hello world' code block with functions, logging and returning values.
+
+Don't worry if you can't code, you probably won't need to write the code yourself. You can either copy code from other Wordware projects or get an LLM to write the code for you! 🤯
+
+You can add a code execution block by typing /code -->
+
+\`\`\`js {% #example %} 
+// The code execution node will execute the given JavaScript code
+
+// For example we can write functions ...
+function addNumbers(n1, n2) {
+  return n1 + n2;
+}
+
+// ... call those functions ...
+const sum = addNumbers(1, 1);
+
+// ... log outputs ...
+console.log("1 + 1 =", sum);
+
+// ... and even mention values from outside the code
+const greeting = `Hello ${aimVariables.frontmatter.input.name}, you're looking good today 🔥`;
+
+// If we return a value it'll be included in the prompt
+return greeting;
+`\`\`\
+
+The code returned: {% $example.result %}
+
+```
+
+
+================================================
+File: cookbook/tutorial/tool-use/wikipedia.md
+================================================
+---
+title: "Q&A with Wikipedia 📚"
+sidebar_position: 3
+---
+
+```aim
+---
+title: "Q&A with Wikipedia 📚"
+description: "Using code blocks to query Wikipedia"
+input:
+  - name: question
+    type: string
+    description: "The question to answer"
+---
+
+<!-- The code block is connected to the web so it can be used to hit external APIs too. This can be very useful in a number of ways. Here we show how it can be used to query for up-to-date information from Wikipedia. -->
+
+Retrieval assisted (RAG) question answering using Wikipedia.
+e.g. Try asking "When did OceanGate sink?", "How tall is the tallest penguin species?"
+
+Question: {% $frontmatter.input.question %}
+
+<!-- First we get the language model to generate a search term -->
+
+Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term.
+
+{% ai #search_term model="openai/gpt-4o-mini" /%}
+
+<!-- This chunk of code will hit Wikipedia's API and extract the top 3 articles -->
+
+
+`\`\`\js {% #wikipedia_results %}
+
+// Read the term generated by the language model
+let input;
+try {
+    input = aimVariables.search_term.result.trim().replace(/^"+|"+$/g, '');
+} catch (error) {
+    console.error("Error reading search term:", error);
+    return { result: "", error: error.toString() };
+}
+
+console.log("Searching for the term", input);
+
+try {
+    const maxResults = 3;
+    const searchTerm = encodeURIComponent(input.trim());
+    const url = `https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch=${searchTerm}&srlimit=${maxResults}&utf8=&origin=*`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const fetchExtract = async (title) => {
+        console.log("Retrieving", title);
+        const extractUrl = `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=${encodeURIComponent(title)}&redirects=1&origin=*`;
+        const extractResponse = await fetch(extractUrl);
+        const extractData = await extractResponse.json();
+        const pageId = Object.keys(extractData.query.pages)[0];
+        const extract = extractData.query.pages[pageId].extract;
+        return [title, extract];
+    }
+
+    console.log("data", data);
+
+    try {
+        if (data?.query?.search?.length > 0) {
+            console.log("Got some results extracting top", data?.query?.search?.length);
+            const extracts = await Promise.all(data?.query?.search?.map(result => fetchExtract(result.title)));
+            return { result: extracts, error: null };
+        } else {
+            return { result: "No results found.", error: null };
+        }
+    } catch (error) {
+        console.error("Error extracting Wikipedia results:", error);
+        return { result: "", error: error.toString() };
+    }
+} catch (error) {
+    console.error("Error processing Wikipedia results:", error);
+    return { result: "", error: error.toString() };
+}
+    
+`\`\`\
+<!-- The code returns the top 3 Wikipedia articles that match the search term -->
+
+## Answer:
+
+Based on the information above give the most helpful answer to the question.
+
+
+Results: {% debug($wikipedia_results) %}
+
+Question: {% $frontmatter.input.question %}
+{% ai #answer model="openai/gpt-4o-mini" /%}
+
+{% $answer.result %}
+```
+
+
+================================================
+File: cookbook/tutorial/visual-understanding/_category_.json
+================================================
+{
+  "label": "Visual Understanding",
+  "position": 6,
+  "link": {
+    "type": "generated-index",
+    "description": "A set of recipes for building AI-powered applications."
+  }
+}
+
+
+================================================
+File: cookbook/tutorial/visual-understanding/image-understanding.md
+================================================
+---
+title: "Image Understanding 🖼️"
+sidebar_position: 1
+---
+
+```aim
+---
+title: "Visual Understanding 🖼️"
+description: "Understanding visual information"
+---
+
+
+What's in this image?
+
+{% media #image src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" /%}
+
+<!-- OR if you want to use the markdown syntax for a static image -->
+
+<!-- ![Image](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png) -->
+
+<!-- For prompts with images you need to use a vision model such as GPT-4 Vision, any of the Claude 3 models or Gemini Vision. Check out the [model documentation](https://wordware.notion.site/Models-615b76d7498f4e06ae522a329695da74)
+
+Here we use the **Haiku** model (from the Anthropic Claude 3 family). You can try different models by selecting the generation below and choosing a different vision-enabled model. -->
+
+{% ai #image_understanding model="anthropic/claude-3-haiku" /%}
+
+{% $image_understanding.result %}
+```
+
+
+================================================
+File: getting-started.mdx
+================================================
+---
+sidebar_position: 2
+title: Getting Started
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+
+The easiest way to get started with AIM is to run the following command:
+
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bunx aimx init
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npx aimx init
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpx aimx init
+    ```
+  </TabItem>
+</Tabs>
+
+
+This will ask a name for your project and create a new AIM project in the current directory. 
+
+Then install the dependencies:
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bun i
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npm i
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpm i
+    ```
+  </TabItem>
+</Tabs>
+
+Once the project is initialized, you can start writing your Markdown AIM documents in the `./files` directory.
+
+You can run the following command to execute your AIM documents:
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bunx aimx run ./files
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npx aimx run ./files
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpx aimx run ./files
+    ```
+  </TabItem>
+</Tabs>
+
+This will prompt you with the existing files in the `./files` directory and ask you to select one to execute.
+
+You can also run individual files by running:
+
+<Tabs>
+  <TabItem value="bun" label="Bun" default>
+    ```bash
+    bunx aimx run ./files/example.md
+    ```
+  </TabItem>
+  <TabItem value="npm" label="NPM">
+    ```bash
+    npx aimx run ./files/example.md
+    ```
+  </TabItem>
+  <TabItem value="pnpm" label="PNPM">
+    ```bash
+    pnpx aimx run ./files/example.md
+    ```
+  </TabItem>
+</Tabs>
+
+And that's it! You can now start writing your AIM documents and execute them.
+
+Now you can set your `.env` file and add things to `aim.config.ts` to customize your project.
+
+
+
+
+
+
+
+
+================================================
+File: inpiration.md
+================================================
+---
+title: Inspiration and Resources
+---
+
+I think it is important to mention that there are many other projects and resources that inspired me to create AIM and that I used to actively shape the direction of this project.
+
+1. [Wordware](https://wordware.ai) - IDE that enables users to build complex AI agents and applications using natural language programming.
+2. [Jupyter Notebook](https://jupyter.org) - Interactive computing environment that allows users to write and execute code in multiple programming languages.
+3. [Tldraw Computer](https://computer.tldraw.com/) - An infinite canvas for natural language computing. Create workflows of connected components that generate and transform data, using a multi-modal language model as a runtime to execute instructions.
+4. [Obsidian](https://obsidian.md/) - An app for taking notes, linking them together, and building a knowledge base. The founder is also very inspiring with blog posts like [File Over App](https://stephango.com/file-over-app).
+5. [Ink And Switch - End-user Programming](https://www.inkandswitch.com/end-user-programming/) - An article that explores the idea of end-user programming.
+6. [Greg Fodor's "Rebooting the Web in 3D with Webspaces"](https://gfodor.medium.com/rebooting-the-web-in-3d-with-webspaces-9e58847e042c/) - An article exploring how to create self-hosted 3D worlds using HTML.
+
+And a few others I can't think of right now.
+
+
+
+================================================
+File: intro.mdx
+================================================
+---
+sidebar_position: 1
+title: Introduction
+---
+
+Hey there! 👋
+
+First of all, thanks for checking out AIM. I have started thinking about [Prompt-driven Programming](/blog/welcome) while ago and after a few weeks of drafting a solution, I'm finally ready to share it with you.
+
+Here are the things that you should know about AIM:
+- AIM is a **(natural) programming language** written in Markdown with a few extensions. Knowing Markdown is a plus, but not required.
+- AIM aims to be a **simple** and **flexible** way to express your solutions to problems, using natural language.
+- AIM is not perfect and it is the result of my thought process around the relatively new concept of [Prompt-driven Programming](/blog/welcome).
+
+If this sounds interesting to you, you can keep scrolling down.
+
+---
+
+First of all, the famous [Hello, World!](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) example in AIM looks like this: 
+
+```aim title="hello-world.aim"
+Hello, World!
+```
+
+Of course, this is not your common programming language, but it is the most natural way to express solutions to problems.
+
+Let's take a look at an interactive example. Note that in this example, we're using different programming languages (Python and JavaScript) to print similar messages. **You can click the "Run" button to see the output**.
+
+import {CodePreview} from '@site/src/components/code-preview';
+
+<CodePreview title="another-example.aim" example="dreamer"></CodePreview>
+
+This demonstrates how AIM can seamlessly integrate multiple languages in a single document, while maintaining readability and flow. The code blocks are embedded naturally within the markdown text, making it easy to combine narrative and executable code.
+
+
+================================================
+File: syntax/attributes.md
+================================================
+---
+title: "Attributes"
+sidebar_position: 3
+---
+
+Attributes let you pass data to AIM tags, similar to HTML attributes or React props.
+
+You can pass values of type: `number`, `string`, `boolean`, JSON `array`, or JSON `object` either directly or using variables. With a tag, you can use HTML-like syntax.
+
+```aim
+
+{% ai
+  #greetUser
+  model="openai/gpt-4o-mini"
+  temperature=0.7
+/%}
+
+```
+
+To pass attributes to a node, you can't use the HTML-like syntax. Instead, use *annotation* syntax. Put the attributes after the node, in their own set of curly braces (`{%` and `%}`).
+
+```aim
+{% table %}
+
+- Function {% width="25%" %}
+- Returns  {% colspan=2 %}
+- Example  {% align=$side %}
+
+{% /table %}
+```
+
+(Annotation syntax also works with tags. But it's required with nodes.)
+
+Strings within attributes must be double-quoted. If you want to include a literal double-quote in a string, you can escape it with using \".
+
+```aim
+{% data delimited="\"" /%}
+```
+
+### Attribute shorthand
+
+In either syntax, you can use `.my-class-name` and `#my-id` as shorthand for `class="my-class-name"` and `id="my-id"`.
+
+```aim
+{% ai #greetUser .my-class-name model="openai/gpt-4o-mini"  /%}
+```
+
+
+
+
+================================================
+File: syntax/comments.md
+================================================
+---
+title: "Comments"
+sidebar_position: 4
+---
+
+AIM supports [Markdown comment syntax](https://spec.commonmark.org/0.30/#example-624). Adding comments will not be rendered in the output nor executed in runtime.
+
+```aim
+<!-- This is a comment -->
+
+This is not a comment
+```
+
+
+================================================
+File: syntax/frontmatter.md
+================================================
+---
+title: "Frontmatter"
+sidebar_position: 5
+---
+
+Frontmatter is a YAML metadata block at the top of the document. It's used to define document-level settings. This field is optional.
+
+```aim
+---
+title: Example AIM Document
+description: "An example of how to build an AIM document"
+input:
+  - name: userName
+    type: string
+    description: "The name of the user to greet"
+---
+```
+
+Here's a list of the available frontmatter fields:
+
+- `title`: The title of the document
+- `description`: The description of the document
+- `input`: The input of the document
+- `output`: The output of the document
+
+### Input
+
+The `input` field is an array of objects. Each object represents an input field.
+
+```aim
+input:
+  - name: userName
+    type: string
+    description: "The name of the user to greet"
+```
+
+### Output
+
+The `output` field is an array of objects. Each object represents an output field.
+
+```aim
+output:
+  - name: userName
+    type: string
+    description: "The name of the user to greet"
+```
+
+
+
+================================================
+File: syntax/functions.md
+================================================
+---
+title: "Functions"
+sidebar_position: 6
+---
+
+Functions are callable from the body of the document, inside an annotation, or within tag attributes.
+
+Functions are comma-separated. Trailing commas are not supported in function calls.
+
+```aim
+{% functionName(arg1, arg2) %}
+```
+
+AIM comes out-of-the-box with six built-in functions: `equals`, `and`, `or`, `not`, `default`, and `debug`.
+
+- **equals**: Compares two values and returns `true` if they are equal, otherwise `false`.
+
+- **default**: Returns the second parameter if the first parameter is `undefined`
+- **debug**: Serializes the value as JSON and logs it to the console.
+
+### And/Or/Not
+Use these logical operators to create complex conditional logic within `if` tags:
+
+- **and**: Returns `true` only when both arguments evaluate to `true`. For example, `and($isAdmin, $hasPermission)` ensures both conditions are met.
+- **or**: Returns `true` when at least one argument is `true`. For example, `or($isLoggedIn, $isGuest)` allows either condition to pass.
+- **not**: Inverts a boolean value - returns `false` for `true` inputs and vice versa. Useful for checking if something is absent, like `not($isBlocked)`.
+
+These functions can be combined for more sophisticated conditions. For example:
+`and(not($isBlocked), or($isAdmin, $hasPermission))` checks that a user isn't blocked AND is either an admin OR has permission.
+
+```aim
+This is always shown
+{% if and(not($a), or($b, $c)) %}
+This is shown only if $a is falsy and either $b or $c is true.
+{% /if %}
+```
+
+### Equals
+
+Use this function to compare two values.
+
+```aim
+{% if equals($a, $b) %}
+  $a and $b are equal
+{% /if %}
+```
+
+### Default
+
+This function is useful to set a value for a variable that might not exist.
+
+```aim
+{% if default($showPrompt, true) %}
+Hey there!
+{% /if %}
+```
+
+### Debug
+
+This function simply renders the value as a serialized JSON value in the document. This can be useful for determining what value is in a variable.
+
+```aim
+{% debug($myVar) %}
+```
+
+
+
+================================================
+File: syntax/index.md
+================================================
+---
+sidebar_position: 2
+title: Syntax
+---
+
+AIM syntax is a superset of Markdown, specifically the [CommonMark specification](https://commonmark.org/). AIM adds a few extensions to the syntax, such as tags and annotations (following [Markdoc syntax](https://markdoc.dev/docs/syntax)). 
+
+For a formal gramar of the Markdoc tag syntax, refer to the [Markdoc syntax specification](https://markdoc.dev/spec).
+
+An AIM document consists of:
+
+- [**Frontmatter**](#frontmatter): YAML metadata defining document-level settings.
+- [**Nodes**](#nodes): Standard Markdown (specifically the [CommonMark specification](https://commonmark.org/)) treated as content within commands. 
+- [**Tags**](#tags): As defined in the [Markdoc syntax specification](https://markdoc.dev/spec).
+- [**Variables**](#variables): Prefixed with `$` and allow you to reference the result of a command.
+- [**Functions**](#functions): Look and feel similar to JavaScript functions. They're callable from the body of the document, inside an annotation, or within tag attributes. Functions are comma-separated. Trailing commas are not supported in function calls.
+- [**Comments**](#comments): AIM supports [Markdown comment syntax](https://spec.commonmark.org/0.30/#example-624). Adding comments will not be rendered in the output nor executed in runtime.
+
+**Example**
+
+```aim
+---
+title: Example AIM Document
+description: "An example of how to build an AIM document"
+input:
+  - name: userName
+    type: string
+    description: "The name of the user to greet"
+---
+
+# Welcome to AIM
+
+Hello, {% $frontmatter.input.userName %}!
+
+{% ai #greetUser model="openai/gpt-4o-mini" /%}
+
+{% $greetUser.result %}
+
+<!-- This is a comment -->
+
+```
+
+
+================================================
+File: syntax/nodes/code.md
+================================================
+---
+title: "Code"
+sidebar_position: 1
+---
+
+The `fence` node is used to execute code. It allows you to execute code and return the result.
+
+Right now, only JavaScript is supported. It uses [QuickJS](https://sebastianwessel.github.io/quickjs/) to execute the code.
+
+Set the `id` attribute to a unique identifier for referencing the result. The result will be stored under the `id` variable.
+
+```aim
+
+The next piece of code will return "Hello, world!"
+
+\`\`\`js {% #code %} <!-- ticks are escaped here, remove the slashes in your code -->
+
+const result = "Hello, world!";
+
+
+export default result;
+\`\`\`
+
+{% $code.result %} 
+
+
+<!-- It will return "Hello, world!" -->
+```
+
+#### Accessing variables
+
+You can access runtime variables within the `fence` node. Runtime variables are injected into the `__AIM_VARIABLES__` environment variable.
+
+```aim
+
+{% set #var string="Hello, world!" /%}
+
+\`\`\`js {% #code %}
+
+const result = aimVariables.var.string;
+
+export default result;
+\`\`\`
+
+{% $code.result %}
+```
+
+
+#### Async/Await
+
+You can use `async`/`await` to execute asynchronous code.
+
+```aim
+\`\`\`js {% #code %}
+
+const result = async (username) => await fetch(`https://api.github.com/users/${username}`);
+
+export default await result("microchipgnu");
+\`\`\`
+
+{% $code.result %}
+```
+
+
+================================================
+File: syntax/nodes/index.md
+================================================
+---
+title: "Nodes"
+sidebar_position: 1
+---
+
+Nodes are elements that AIM inherits from Markdown, specifically the [CommonMark specification](https://commonmark.org/). AIM nodes enable you to customize how your document executes without using any custom syntax—it consists entirely of Markdown.
+
+AIM comes out of the box with built-in nodes for each of the [CommonMark specification](https://commonmark.org/) types.
+
+Here's a list of the built-in nodes: `document`, `heading`, `paragraph`, `hr`, `image`, `fence`, `blockquote`, `list`, `item`, `table`, `thead`, `tbody`, `tr`, `td`, `th`, `inline`, `strong`, `em`, `s`, `link`, `code`, `text`, `hardbreak`, `softbreak`, `error`.
+
+
+
+
+================================================
+File: syntax/tags/index.md
+================================================
+---
+title: "Tags"
+sidebar_position: 2
+---
+
+Tags are a syntactic extension to the standard Markdown. Similar to React components and HTML elements, tags are composable, and you can customize them with attributes.
+
+```aim
+{% tagName #id attribute="value" /%}
+```
+
+AIM comes out-of-the-box with 7 built-in tags: `ai`, `media`, `if`, `else`, `loop`, `flow`, `set`, `input`, and `table`.
+
+
+### AI
+
+Integrate AI inference. 
+
+The `ai` tag accepts the following attributes:
+
+- `model` (required, default: "openai/gpt-4-mini"): The AI model to use, following the [CAIMPS](https://github.com/microchipgnu/caimps) format `provider/model`
+- `id` (optional): A unique identifier for referencing the AI response
+- `temperature` (optional, default: 0.5): Controls randomness in the model's output. Higher values (e.g., 0.8) make output more random, lower values (e.g., 0.2) make it more focused
+
+The tag will execute the AI inference and store the result, which can be accessed using `{% $id.result %}`. The context from surrounding text is automatically included in the prompt.
+
+#### Example
+
+```aim
+{% ai #greetUser model="openai/gpt-4o-mini" /%}
+```
+
+### Media
+
+Embed multimedia content like images, videos, and audio files.
+
+The `media` tag accepts the following attributes:
+
+- `type` (required): The type of media - "image", "video", or "audio"
+- `src` (required): URL or path to the media file
+
+#### Example
+
+```aim
+{% media type="image/jpeg" src="https://example.com/image.jpg" /%}
+```
+
+### Loop
+
+Iterate over collections or a specified number of times. The `loop` tag allows you to repeat content either by iterating through an array of items or executing a fixed number of times.
+
+The `loop` tag accepts the following attributes:
+
+- `items` (optional): An array to iterate over
+- `count` (optional): Number of times to repeat the content
+- `id` (optional): A unique identifier for the loop
+
+Note: Either `items` or `count` must be specified.
+
+Within the loop, you have access to the following variables:
+- `index`: Current iteration number (starts at 1)
+- `total`: Total number of iterations
+- `isFirst`: Boolean indicating if this is the first iteration
+- `isLast`: Boolean indicating if this is the last iteration
+- `item`: Current item from the items array (when using `items`)
+
+#### Examples
+
+Iterate over an array:
+
+```aim
+{% loop #greetUser items=["John", "Jane", "Jim"] /%}
+```
+
+Iterate 10 times:
+
+```aim
+{% loop #greetUser count=10 /%}
+```
+
+### Flow
+
+Reference external AIM flows.
+
+```aim
+{% flow #greetUser model="openai/gpt-4o-mini" /%}
+```
+
+### If/Else
+
+Dynamically execute content when specific conditions are met using the `{% if %}` and `{% else /%}` tags. AIM uses conditionals with variables and functions.
+
+:::warning
+
+Unlike JavaScript, Markdoc only considers `undefined`, `null`, and `false` as falsey values.
+
+:::
+
+Use the `if` tag to execute content when a condition evaluates to `true`.
+
+```aim
+{% if $condition %}
+  This content will be executed if the condition is true
+  {% else /%}
+  This content will be executed if the condition is false
+{% /if %}
+```
+
+Use the `else` tag to execute alternate content when the `if` condition isn't met. You can use multiple `else` statements, and the final `else` tag triggers when none of the other conditions are met.
+
+
+```aim
+{% if $myFunVar %}
+  Only appear if $myFunVar!
+  {% else /%}
+  This appears if not $myFunVar!
+{% /if %}
+
+{% if $myFunVar %}
+  Only appear if $myFunVar!
+  {% else $otherFunVar /%}
+  This appears if not $myFunVar and $otherFunVar!
+  {% else /%}
+  This appears if not $myFunVar and not $otherFunVar
+{% /if %}
+```
+
+### Set
+
+Set tags are used to define variables in your document. The set tag is self-closing and requires an ID attribute to identify the variable being set.
+
+You can set different types of variables:
+
+- Objects using the `object` attribute
+- Numbers using the `number` attribute  
+- Strings using the `string` attribute
+- Booleans using the `boolean` attribute
+- Arrays using the `array` attribute
+
+```aim
+{% set #var object={name: "John", age: 30} boolean=true /%}
+
+Access the name using {% $var.object.name %}
+```
+
+### Table
+
+While Markdoc supports CommonMark tables, it also supports a list based syntax that allows for easy injection of rich content, like bulleted lists and code samples.
+
+#### Basic Table
+
+A basic Markdoc table uses list syntax with each row separated by three dashes `---`.
+
+```aim
+{% table %}
+* Heading 1
+* Heading 2
+---
+* Row 1 Cell 1
+* Row 1 Cell 2
+---
+* Row 2 Cell 1
+* Row 2 cell 2
+{% /table %}
+```
+
+#### Table with rich content
+
+Markdoc tables support rich text, including code samples and lists.
+
+```aim
+{% table %}
+* Foo
+* Bar
+* Baz
+---
+*
+  \`\`\`
+  puts "Some code here."
+  \`\`\`
+*
+  {% list type="checkmark" %}
+  * Bulleted list in table
+  * Second item in bulleted list
+  {% /list %}
+* Text in a table
+---
+*
+  A "loose" list with
+
+  multiple line items
+* Test 2
+* Test 3
+---
+* Test 1
+* A cell that spans two columns {% colspan=2 %}
+{% /table %}
+```
+
+#### Table without headings
+
+If you don't need headings, you can omit them.
+
+```aim
+{% table %}
+---
+* foo
+* bar
+---
+* foo
+* bar
+{% /table %}
+```
+
+#### Set column and row spans
+
+You can set the column and row spans of a cell using the `{% colspan=2 %}` and `{% rowspan=2 %}` attributes.
+
+```aim
+{% table %}
+---
+* foo
+* bar
+---
+* foo {% colspan=2 %}
+{% /table %}
+```
+
+#### Text alignment
+
+You can align text in a cell using the `{% align="left" %}`, `{% align="center" %}`, or `{% align="right" %}` attributes.
+
+```aim
+{% table %}
+---
+* foo {% align="left" %}
+* bar {% align="center" %}
+* baz {% align="right" %}
+---
+* foo
+* bar
+* baz
+{% /table %}
+```
+
+
+
+
+
+================================================
+File: syntax/variables.md
+================================================
+---
+title: "Variables"
+sidebar_position: 7
+---
+
+Variables let you customize your AIM documents at runtime.
+
+```aim
+Here I am rendering a custom {% $variable %}
+```
+
+
+###  Scoping
+
+Variables have different scopes:
+
+- **Global**: Defined in frontmatter or top-level set commands.
+- **Block**: Limited to the current block and its children.
+- **Flow**: Shared between connected flow blocks.
+
+```aim
+{% set #globalVar value="Available everywhere" /%}
+
+{% loop #loopVar count=3 /%}
+  {% set #loopVar value="Only in loop" /%}
+  {% $globalVar %} yields "Available everywhere"
+  {% $loopVar %} yields "Only in loop"
+{% /loop %}
+
+{% $globalVar %} yields "Available everywhere"
+{% $loopVar %} yields `null`
+```
+
+### Caveats
+
+AIM doesn't support passing variables to certain [nodes](#nodes), such as the `href` of a `link` Node. Instead, pass your variable to the `href` attribute of a custom `link` [Tag](#tags).
+
+:::danger[Incorrect]
+
+```aim
+[Link]({% $variable %})
+```
+
+:::
+
+:::tip[Correct]
+
+```aim
+{% link href=$myVar %} Link {% /link %}
+```
+
+:::
+
+
+

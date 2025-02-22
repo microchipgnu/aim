@@ -1,0 +1,1215 @@
+Repository: wordware.ai
+Files analyzed: 24
+Total size: 33.6 KB
+
+Directory structure:
+  1-hello-world.md
+  2-hello-world-ext.md
+  1-just-answer.md
+  2-step-by-step.md
+  3-self-improve.md
+  1-if-else.md
+  2-heads-tails.md
+  3-loop.md
+  4-loop-until.md
+  1-code-block.md
+  2-calculator.md
+  3-wikipedia-qa.md
+    multilangual-blog.md
+    translate.md
+    1-qa-wikipedia-google.md
+      google-search.md
+      qa-wikipedia-google.md
+      wikipedia-search.md
+  visual-understanding.md
+  basic-react-agent.md
+  extract-menu-info.md
+    javascript-coding-agent.md
+    slack.md
+    tiktok-trending.md
+
+================================================
+File: 1-hello-world/1-hello-world.md
+================================================
+---
+title: "Hello World 👋🌍"
+description: "By the way, this is the prompt description. Just like the title above and any comments (in gray) below it's there for you and isn't part of the context that's given to the LLM"
+input:
+  - name: name
+    type: string
+    description: "The name to greet"
+---
+
+<!-- 
+
+This is a comment. You can use it to annotate parts of the prompt with additional descriptions. We use it extensively in these tutorials to describe what's happening.
+
+Since comments aren't included in prompts when they're executed you can also use it to disable certain sections of the prompt without deleting them!
+
+To make a comment simply wrap text in &lt;!-- --&gt; tags.
+
+Ok, let's get started on the prompt itself... 
+
+-->
+
+Say hello to {% $frontmatter.input.name %}.
+
+{% ai #greeting model="openai/gpt-4o-mini" /%}
+
+<!-- ### Explanation
+
+First up we have a little bit of text with a '**mention**'. Mentions are references to values in the 'prompt program', they get replaced by the actual value when the prompt is ran.
+
+You can create mentions by typing 'v[' followed by the variable path you want to reference.
+
+In this case we're referencing the **input** value "name". Inputs are defined in the frontmatter at the top of the file.
+
+Next we have a '**generation**'. This is an output from a language model, we'll be using these a lot!
+
+You can create generations using the ::ai{} syntax with a unique ID and model specification. The generation ID is just there to help you identify and reference the output; it doesn't affect the output from the LLM itself.
+
+-->
+
+
+================================================
+File: 1-hello-world/2-hello-world-ext.md
+================================================
+---
+title: "Hello World 👋🌍"
+description: "An example of the extension, **try doing it yourself before peeking!** We add a new 'style' input and tell the model to use that style by referencing that value in the prompt using `$style`."
+input:
+  - name: name
+    type: string
+    description: "The name to greet"
+  - name: style
+    type: string
+    description: "The style to use"
+---
+
+Say hello to {% $frontmatter.input.name %}.
+
+Use the following style: {% $frontmatter.input.style %}. Do not use any other style. Do not use emojis.
+
+{% ai #greeting model="openai/gpt-4o-mini" /%}
+
+{% $greeting.result %}
+
+
+
+================================================
+File: 2-thinking/1-just-answer.md
+================================================
+---
+title: "Just answer the question"
+description: "A simple example of how to use AIM to create a document."
+input:
+  - name: question
+    type: string
+    description: "The math question to be answered"
+---
+
+<!-- 
+
+Here we get a model to answer wordy maths questions by just outputting the answer. The results aren't good!
+
+**Try these questions**
+
+1.  There are 15 trees in the grove. Grove workers will plant trees in the grove today. After they are done, there will be 21 trees. How many trees will the grove workers plant today?
+    
+2.  From March to August, Sam made $460 doing 23 hours of yard work. However, from September to February, Sam was only able to work for 8 hours. If Sam is saving up to buy a video game console that costs $600 and has already spent $340 to fix his car, how many more hours does he need to work before he can buy the video game console?
+    
+3.  There were nine computers in the server room. Five more computers were installed each day, from Monday to Thursday. How many computers are in the server room at the end of the week?
+    
+4.  The flowers cost $9, the clay pot costs $20 more than the flower, and the bag of soil costs $2 less than the flower. How much does it cost to plant the flowers?
+    
+5.  Of the 90 people on William's bus, 3/5 were Dutch. Of the 1/2 of the Dutch who were also American, 1/3 got window seats. What's the number of Dutch Americans who sat at the windows?
+    
+
+**Correct answers**
+
+1.  6
+    
+2.  16
+    
+3.  29
+    
+4.  45
+    
+5.  9 
+
+-->
+
+Answer the question: {% $frontmatter.input.question %}
+
+Output the number and only the number.
+
+{% ai #answer model="openai/gpt-4o-mini" /%}
+
+{% $answer.result %}
+
+
+================================================
+File: 2-thinking/2-step-by-step.md
+================================================
+---
+title: "Step by step"
+description: "A step by step example of how to use AIM to create a document."
+input:
+  - name: question
+    type: string
+    description: "The math question to be answered"
+---
+
+<!-- First we get the model to think through the answer -->
+
+{% $frontmatter.input.question %}
+
+{% ai #thinking model="openai/gpt-4o-mini" /%}
+
+<!-- We're even using a much smaller, faster and cheaper model here; Mistral 7B rather than GPT-3.5. 
+Mistral 7B is 7.5x lower cost on output tokens 
+(see the [model documentation](https://www.notion.so/wordware/Models-615b76d7498f4e06ae522a329695da74)). -->
+
+{% ai #thought model="openai/gpt-4o-mini" /%}
+
+<!-- Lastly, we extract the final answer -->
+
+This was your thought: {% $thought.result %}
+
+Now output the final number and only the number.
+
+{% ai #answer model="openai/gpt-4o-mini" /%}
+
+{% $answer.result %}
+
+
+================================================
+File: 2-thinking/3-self-improve.md
+================================================
+---
+title: "Self-improve"
+description: "A self-improving example of how to use AIM to create a document."
+input:
+  - name: topic
+    type: string
+    description: "The topic to be explained"
+---
+
+I'd like you to explain {% $frontmatter.input.topic %} to a 12 year old.
+
+{% ai #thought model="openai/gpt-4o-mini" /%}
+
+{% $thought.result %}
+
+Judge the above explanation on it's correctness, conciseness and understandability for a 12 year old. Suggest some feedback to improve it.
+
+{% ai #feedback model="openai/gpt-4o-mini" /%}
+
+{% $feedback.result %}
+
+Now improve the explanation based on the feedback.
+
+{% ai #improved model="openai/gpt-4o-mini" /%}
+
+{% $improved.result %}
+
+
+
+================================================
+File: 3-flow-control/1-if-else.md
+================================================
+---
+title: "If else"
+description: "An example of how to use AIM to create a document."
+input:
+  - name: topic
+    type: string
+    description: "The topic to write about"
+  - name: type
+    type: string
+    description: "The type of writing to create"
+  - name: tone
+    type: string
+    description: "The emotional tone to use"
+---
+
+<!-- 
+We can use if-else statements to conditionally run parts of the prompt. When the prompt is ran only the matching block will be included.
+
+If blocks can compare values in the following ways:
+
+*   **Match** — does the first value equal the 2nd value
+    
+*   **Contains** — does the search value appear in the input
+    
+*   **Relative** — how does the 1st value compare to the 2nd value based on the chosen comparison
+    
+
+If the if expression evaluates to true that block will be included. If no if expressions match the 'else' block will be ran instead. 
+-->
+
+Write a {% $frontmatter.input.type %} about {% $frontmatter.input.topic %}
+
+{% if equals($frontmatter.input.tone, "happy") %}
+  Make it full of joy and happiness. 
+
+  {% else equals($frontmatter.input.tone, "sad") /%}
+
+  generate a sad prompt
+
+  {% ai #sad-prompt model="openai/gpt-4o-mini" /%}
+
+  {% $sad-prompt.result %}
+
+  {% else equals($frontmatter.input.tone, "silly") /%}
+
+  Make it full of sadness and despair. 
+
+  {% else /%}
+
+  It should have the following tone: {% $frontmatter.input.tone %}
+
+{% /if %}
+
+{% ai #output model="openai/gpt-4o-mini" /%}
+
+
+================================================
+File: 3-flow-control/2-heads-tails.md
+================================================
+---
+title: "Heads or Tails 🪙"
+description: "A coin flip game with conditional responses"
+---
+
+We just tossed a coin, was it heads or tails?
+
+The last tosses were heads, heads, tails, heads, tails, heads, heads, heads.
+
+Output 'heads' or 'tails' only.
+
+{% ai #flip model="openai/gpt-4o-mini" /%}
+
+<!-- We reference the value of the flip in this if-else block -->
+
+{% if equals($flip.result, "heads") %}
+
+    Heads, I win!
+
+    Should I gloat? Write yes or no only.
+
+    {% ai #gloat model="openai/gpt-4o-mini" /%}
+
+    GLOAT {% $gloat.result %}
+
+<!-- It's possible to nest container blocks inside other container blocks. In fact you can put all the same things in the body of a container block as you can in a prompt -->
+
+        {% if equals($gloat.result, "yes") %}
+
+            Now, write a gloating song. Output just the song.
+
+            {% ai #song model="openai/gpt-4o-mini" /%}
+
+        {% /if %}
+
+        {% else /%}
+
+            Now, be humble and congratulate the loser on their well played match.
+
+            {% ai #humble model="openai/gpt-4o-mini" /%}
+
+        {% /if %}
+
+        {% if equals($flip.result, "tails") %}
+
+            Tails, you lose! 😏
+
+        {% /if %}
+
+    {% else /%}
+
+    Neither heads nor tails, everyone loses 🤷‍♂️
+
+{% /if %}
+
+{% $flip.result %}
+
+
+
+================================================
+File: 3-flow-control/3-loop.md
+================================================
+---
+title: Loop
+description: Use loops to repeat a block of code multiple times.
+input:
+    - name: count
+      type: number
+      description: The number of times to repeat the block
+---
+
+Let's do the {% $frontmatter.input.count %} times table. 
+
+Output just the next number.
+
+{% loop #loop count=$frontmatter.input.count %}
+
+  {% add($loop.index, 1) %} x {% $frontmatter.input.count %} = {% ai #result model="openai/gpt-4o-mini" /%}
+
+{% /loop %}
+
+Yay, we're done!
+
+
+================================================
+File: 3-flow-control/4-loop-until.md
+================================================
+---
+title: Loop until a condition is met
+description: Use loops to repeat a block of code until a condition is met.
+input:
+    - name: number
+      type: number
+      description: The number to stop at
+---
+
+Output a random number between 1 and 100. Output just the number.
+
+{% loop lessThanOrEqual($value.result, $frontmatter.input.number) #loop %}
+
+    {% ai #value model="openai/gpt-4o" /%}
+    
+{% /loop %}
+
+Yay, we're done! The number is {% $value.result %} and it took {% $loop.index %} tries.
+
+
+================================================
+File: 4-tool-use/1-code-block.md
+================================================
+---
+title: "Code Block Introduction 🤓"
+description: "An example of how to use code blocks in AIM"
+input:
+  - name: name
+    type: string
+    description: "The name to greet"
+---
+
+<!-- Sometimes it helps to run some code e.g.
+
+- Performing maths/executing logic
+- Gathering relevant and up-to-date information from an external data source  
+- Parsing/formatting
+- Leveraging external services as part of an end-to-end program e.g. image generation, speech synthesis, speech-to-text, etc.
+
+Here we give an example 'Hello world' code block with functions, logging and returning values.
+
+Don't worry if you can't code, you probably won't need to write the code yourself. You can either copy code from other Wordware projects or get an LLM to write the code for you! 🤯
+
+You can add a code execution block by typing /code -->
+
+```js {% #example %} 
+// The code execution node will execute the given JavaScript code
+
+// For example we can write functions ...
+function addNumbers(n1, n2) {
+  return n1 + n2;
+}
+
+// ... call those functions ...
+const sum = addNumbers(1, 1);
+
+// ... log outputs ...
+console.log("1 + 1 =", sum);
+
+// ... and even mention values from outside the code
+const greeting = `Hello ${aimVariables.frontmatter.input.name}, you're looking good today 🔥`;
+
+// If we return a value it'll be included in the prompt
+return greeting;
+```
+
+The code returned: {% $example.result %}
+
+
+
+================================================
+File: 4-tool-use/2-calculator.md
+================================================
+---
+title: "Calculator 🧮"
+description: "Using code blocks to solve math problems"
+input:
+  - name: maths_question
+    type: string
+    description: "The math question to solve"
+---
+
+<!-- LLMs are bad at maths but good at code... Let's see how much better they do at maths questions when writing code to solve the problem instead. -->
+
+Here's a maths question:
+
+{% $frontmatter.input.maths_question %}
+
+<!-- Then we tell it to write some code to solve the question: -->
+
+Write a JavaScript function that returns the result of this question. Do not log anything. Output just the code and a call to the function.
+
+
+{% ai #generated_code model="openai/gpt-4o" /%}
+
+<!-- Then we run the code that the LLM wrote: -->
+
+{% $generated_code.result %}
+
+```js {% #eval %}
+// We pass code that was generated as a string into \`eval\` which will execute it 
+// First we remove any backticks/wrappers around the code
+const code = aimVariables.generated_code.result.replaceAll(/\`\`\`javascript/g, "").replaceAll(/\`\`\`js/g, "").replaceAll(/\`\`\`JavaScript/g, "").replaceAll(/\`\`\`JS/g, "").replaceAll(/\`\`\`/g, "");
+
+console.log("vars", code);
+
+return eval(code);
+```
+
+The answer is: {% $eval.result %}
+
+<!-- The LLM got the answer right! 🎉 -->
+
+
+================================================
+File: 4-tool-use/3-wikipedia-qa.md
+================================================
+---
+title: "Q&A with Wikipedia 📚"
+description: "Using code blocks to query Wikipedia"
+input:
+  - name: question
+    type: string
+    description: "The question to answer"
+---
+
+<!-- The code block is connected to the web so it can be used to hit external APIs too. This can be very useful in a number of ways. Here we show how it can be used to query for up-to-date information from Wikipedia. -->
+
+Retrieval assisted (RAG) question answering using Wikipedia.
+e.g. Try asking "When did OceanGate sink?", "How tall is the tallest penguin species?"
+
+Question: {% $frontmatter.input.question %}
+
+<!-- First we get the language model to generate a search term -->
+
+Let's search Wikipedia to answer this question. What's the best search term to use? Output just the search term.
+
+{% ai #search_term model="openai/gpt-4o-mini" /%}
+
+<!-- This chunk of code will hit Wikipedia's API and extract the top 3 articles -->
+
+
+```js {% #wikipedia_results %}
+
+// Read the term generated by the language model
+let input;
+try {
+    input = aimVariables.search_term.result.trim().replace(/^"+|"+$/g, '');
+} catch (error) {
+    console.error("Error reading search term:", error);
+    return { result: "", error: error.toString() };
+}
+
+console.log("Searching for the term", input);
+
+try {
+    const maxResults = 3;
+    const searchTerm = encodeURIComponent(input.trim());
+    const url = `https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch=${searchTerm}&srlimit=${maxResults}&utf8=&origin=*`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const fetchExtract = async (title) => {
+        console.log("Retrieving", title);
+        const extractUrl = `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=${encodeURIComponent(title)}&redirects=1&origin=*`;
+        const extractResponse = await fetch(extractUrl);
+        const extractData = await extractResponse.json();
+        const pageId = Object.keys(extractData.query.pages)[0];
+        const extract = extractData.query.pages[pageId].extract;
+        return [title, extract];
+    }
+
+    console.log("data", data);
+
+    try {
+        if (data?.query?.search?.length > 0) {
+            console.log("Got some results extracting top", data?.query?.search?.length);
+            const extracts = await Promise.all(data?.query?.search?.map(result => fetchExtract(result.title)));
+            return { result: extracts, error: null };
+        } else {
+            return { result: "No results found.", error: null };
+        }
+    } catch (error) {
+        console.error("Error extracting Wikipedia results:", error);
+        return { result: "", error: error.toString() };
+    }
+} catch (error) {
+    console.error("Error processing Wikipedia results:", error);
+    return { result: "", error: error.toString() };
+}
+    
+```
+<!-- The code returns the top 3 Wikipedia articles that match the search term -->
+
+## Answer:
+
+Based on the information above give the most helpful answer to the question.
+
+
+Results: {% debug($wikipedia_results) %}
+
+Question: {% $frontmatter.input.question %}
+{% ai #answer model="openai/gpt-4o-mini" /%}
+
+{% $answer.result %}
+
+
+================================================
+File: 5-prompts-calling-prompts/1-multilangual-blog/multilangual-blog.md
+================================================
+---
+title: "Multilingual blog 🌍"
+description: "An example of how to use prompts that call other prompts"
+input:
+  - name: topic
+    type: string
+    description: "The topic to write about"
+---
+
+<!-- When a prompt calls another prompt it's a bit like one function calling another in software. 
+
+You create sub-prompts that do one thing really well and reuse those throughout your projects.
+
+It's extremely useful when you've got a chain of prompts where each part needs quite different instructions/personas and you don't want all the context from previous generations to be passed in. -->
+
+Write a short blog post about {% $frontmatter.input.topic %}.
+
+{% ai #blog_post model="openai/gpt-3.5-turbo" /%}
+
+<!-- To create a prompt node type /prompt then select the prompt you want to run in the sidebar and provide the inputs. 
+Inputs can be references to variables or literal values.
+
+Here we have created a prompt that will translate an input into the given language. We run it multiple times to get outputs in French, Spanish and Pirate 🏴‍☠️ -->
+
+## French 🇫🇷
+
+<!-- When a prompt is called none of the context from the current prompt is included other than the values passed as inputs -->
+
+{% flow #french input=$blog_post language="French" path="file://./translate.md" /%}
+
+## Spanish 🇪🇸
+
+{% flow #spanish input=$blog_post language="Spanish" path="file://./translate.md" /%}
+
+## Pirate 🏴‍☠️
+
+{% flow #pirate input=$blog_post language="Pirate" path="file://./translate.md" /%}
+
+
+
+================================================
+File: 5-prompts-calling-prompts/1-multilangual-blog/translate.md
+================================================
+---
+title: "Translate 🌍"
+description: "Translates the input into the given language"
+input:
+  - name: input
+    type: string
+    description: "The text to translate"
+  - name: language
+    type: string
+    description: "The target language"
+---
+
+<!-- This prompt is called from the multilingual blog example to translate text into different languages -->
+
+Translate the "{% $frontmatter.input.input %}" into {% $frontmatter.input.language %}:
+
+{% ai #translation model="openai/gpt-3.5-turbo" /%}
+
+{% $translation.result %}
+
+
+
+================================================
+File: 5-prompts-calling-prompts/2-tools/1-qa-wikipedia-google.md
+================================================
+---
+title: QA Wikipedia Google
+description: QA Wikipedia Google
+---
+
+# Question
+
+================================================
+File: 5-prompts-calling-prompts/2-tools/tools/google-search.md
+================================================
+---
+title: "Google Search 🔎"
+description: "Searches Google for the given query"
+input:
+  - name: query
+    type: string
+    description: "The search query"
+---
+
+<!-- This tool uses the Serper API to search Google and return relevant results -->
+
+Searching Google for: {% $frontmatter.input.query %}
+
+```js {#output}
+// Reference the input query and remove any quotation marks
+const input = {{ $frontmatter.input.query }}.trim().replace(/^"+|"+$/g, '');
+
+const hl = "en";
+const gl = "us";
+const maxResults = 10;
+const serperApiKey = "8f1bba1ec8674a3caf4fe3b1e4c87ec93e0a04e3"; 
+
+// Call the serper API
+const response = await fetch(`https://google.serper.dev/search?q=${input}&gl=${gl}&hl=${hl}`, {
+            method: 'POST',
+            headers: {
+                "X-API-KEY": serperApiKey,
+                "Content-Type": "application/json"
+            }
+        });
+
+if (!response.ok) {
+   throw new Error(`Request failed with status: ${response.status}`);
+}
+
+const results = await response.json();
+
+const snippets = [];
+
+if (results.answerBox) {
+  const answerBox = results.answerBox;
+  if (answerBox.answer) return answerBox.answer;
+  if (answerBox.snippet) return answerBox.snippet.replace("\n", " ");
+  if (answerBox.snippetHighlighted) return answerBox.snippetHighlighted.join(", ");
+}
+
+if (results.knowledgeGraph) {
+  const kg = results.knowledgeGraph;
+  const title = kg.title;
+  const entityType = kg.type;
+
+  if (entityType) snippets.push(`${title}: ${entityType}.`);
+  const description = kg.description;
+  if (description) snippets.push(description);
+  for (const attribute in kg.attributes) {
+    snippets.push(`${title} ${attribute}: ${kg.attributes[attribute]}.`);
+  }
+}
+
+results.organic.slice(0, maxResults).forEach(result => {
+  if (result.snippet) snippets.push(`${result.snippet}, ${result.link}`);
+  for (const attribute in result.attributes) {
+    snippets.push(`${attribute}: ${result.attributes[attribute]}.`);
+  }
+});
+
+if (snippets.length === 0) {
+  return "No good Google Search Result was found";
+}
+
+export default snippets.join("\n- ");
+```
+
+{% $output.result %}
+
+
+================================================
+File: 5-prompts-calling-prompts/2-tools/tools/qa-wikipedia-google.md
+================================================
+---
+title: "Q&A with Wikipedia and Google 🔍"
+description: "Answers questions using Wikipedia and Google search"
+input:
+  - name: question
+    type: string
+    description: "The question to answer"
+---
+
+<!-- This prompt combines Wikipedia and Google search to provide comprehensive answers -->
+
+Question: {% $frontmatter.input.question %}
+
+<!-- First get the language model to generate a search term -->
+
+Let's search for information to answer this question. What's the best search term to use? Output just the search term.
+
+{% ai #search_term model="anthropic/claude-3-haiku" /%}
+
+<!-- Search both Wikipedia and Google using the search term -->
+
+{% flow #wikipedia_results input=$search_term path="file://./wikipedia-search.md" /%}
+
+{% flow #google_results input=$search_term path="file://./google-search.md" /%}
+
+## Answer:
+
+Based on the information from Wikipedia and Google searches above, provide a comprehensive answer to:
+
+{% $frontmatter.input.question %}
+
+{% ai #final_answer model="openai/gpt-3.5-turbo" /%}
+
+{% $final_answer.result %}
+
+
+
+================================================
+File: 5-prompts-calling-prompts/2-tools/tools/wikipedia-search.md
+================================================
+---
+title: "Wikipedia Search 🔍"
+description: "Searches Wikipedia for the given query"
+input:
+  - name: query
+    type: string
+    description: "The search query"
+---
+
+<!-- This tool queries Wikipedia's API to search articles and return relevant extracts -->
+
+Searching Wikipedia for: {% $frontmatter.input.query %}
+
+```js {#output}
+// Read the term generated by the language model
+const input = {{ $frontmatter.input.query }}.trim().replace(/^"+|"+$/g, '');
+console.log("Searching for the term", input);
+
+// Query Wikipedia for relevant pages
+const maxResults = 3;
+const searchTerm = encodeURIComponent(input.trim());
+const url = "https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch=" + searchTerm + "&srlimit=" + maxResults + "&utf8=&origin=*";
+const response = await fetch(url);
+const data = await response.json();
+
+const fetchExtract = async (title) => {
+  console.log("Retrieving", title);
+  const extractUrl = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=" + encodeURIComponent(title) + "&redirects=1&origin=*";
+  const extractResponse = await fetch(extractUrl);
+  const extractData = await extractResponse.json();
+  const pageId = Object.keys(extractData.query.pages)[0];
+  const extract = extractData.query.pages[pageId].extract;
+  return [title, extract];
+}
+
+if (data.query.search.length > 0) {
+  console.log("Got some results extracting top", data.query.search.length);
+  const extracts = await Promise.all(data.query.search.map(result => fetchExtract(result.title)));
+  return extracts.map(([title, extract]) => `${title} \n${extract}`).join("\n\n");
+} else {
+  return "No results found.";
+}
+```
+
+{% $output.result %}
+
+
+================================================
+File: 6-visual-understanding/visual-understanding.md
+================================================
+---
+title: "Visual Understanding 🖼️"
+description: "Understanding visual information"
+---
+
+
+What's in this image?
+
+{% media #image src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" /%}
+
+<!-- OR if you want to use the markdown syntax for a static image -->
+
+<!-- ![Image](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png) -->
+
+<!-- For prompts with images you need to use a vision model such as GPT-4 Vision, any of the Claude 3 models or Gemini Vision. Check out the [model documentation](https://wordware.notion.site/Models-615b76d7498f4e06ae522a329695da74)
+
+Here we use the **Haiku** model (from the Anthropic Claude 3 family). You can try different models by selecting the generation below and choosing a different vision-enabled model. -->
+
+{% ai #image_understanding model="anthropic/claude-3-haiku" /%}
+
+{% $image_understanding.result %}
+
+
+================================================
+File: 7-agents/basic-react-agent.md
+================================================
+---
+title: "Basic ReAct agent 🤖"
+description: "An example of how to build a simple ReAct agent"
+input:
+  - name: question
+    type: string
+    description: "The question to answer"
+---
+<!-- 
+What is an agent? Generally 'agent' is used to refer to any system that can make decisions autonomously about how to solve a problem. It can be used to describe a lot of things from chatbots that can use tools/perform RAG to highly general agents that attempt to solve any given task such AutoGPT. These highly general agents tend not to perform very well!
+
+At the end of the day agents are a collection of prompts, tools and logic, all things that can be done in Wordware!
+
+Here we've built an agent that will work out how to solve the given task by searching Google, writing code and calling out to APIs. It's based on the [**ReAct**: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) paper.
+
+Have a look through the prompt to see how we combine everything you just learnt from simple generations to looping, branching and tool use. Don't worry if you don't completely understand it right away, agents are an advanced topic which deserves it's whole own set of lessons but do run it and see what happens! -->
+
+
+# Instructions
+
+<!-- 
+We start by giving the agent a set of instructions on how the agent should behave. Most of these instructions have been added through trial and error of seeing the ways in which the agent fails e.g. "Never create your own question" was added **after** we observed the agent sometimes deciding to just ask a new question (often easier) and answer that one instead! -->
+
+Answer the following question as best you can by utilising external tools to search for APIs that can help you then - as you are an expert JavaScript programmer - writing JavaScript code that will be run in the browser to execute those APIs. Since you aren't able to install packages you'll have to call any API's using `fetch`.
+
+If the API requires authentication (e.g. an API key) you shouldn't attempt to use it and should instead look for an alternative API.
+
+If the code throws an error take a look at it and try and correct it. Be sure to correct places where a similar error may occur too, not only the line that's in the error message. You should also search for the documentation if there's an error with a client library.
+
+After running the code you should look at the result and check if code is doing the correct thing. If it is that's fine you can move onto the next thought, if not you need to correct the logic errors and try again.
+
+You should not ever require or suggest that the user completes the task themselves. You should complete the whole task yourself. If you don't have the necessary API key, find a different API.
+
+Never create your own question.
+
+# Tools
+
+<!-- 
+Here we describe the tools that the agent can use. We need to give the tool an identifier then clearly describe when the tool should be used and what inputs it should take. -->
+
+You have access to the following tools:
+
+- `googleSearch`: A wrapper around Google Search. Useful for when you need to find information. Input should be a search query.
+- `runCode`: Use this to execute JavaScript scripts. Input should be valid and complete JavaScript code. No external variables can be referenced. No packages can be installed. If you really want to see the output of a value, you should print it out with `console.log(...)`. You should never print very long outputs, only summaries.
+
+
+# Format 
+
+<!-- 
+This part of the instruction is all about how the agent should structure it's response. In the ReAct paper this follows a thought-action-input-observation loop that repeats until the problem is solved. -->
+
+Use the following format
+
+Question: the input question you must answer  
+Thought: you should always think about what to do in one sentence  
+Action: the action to take, should be googleSearch, runCode or done  
+Input: the input to the action  
+Observation: the result of the action
+
+... (this Thought/Action/Input/Observation can repeat N times)
+
+Final answer:
+
+
+# Run
+
+Question: {% $frontmatter.input.question %}
+
+{% loop counter=10 %}
+
+Thought: {% ai #thought model="openai/gpt-4" /%}
+
+Action: {% ai #action model="openai/gpt-4" /%}
+
+{% if action == "googleSearch" %}
+
+Input: {% ai #input model="openai/gpt-4" /%}
+
+{% flow #output model="openai/gpt-4" path="file://./tools/google-search.md" /%}
+
+Observation: {% $output.result %}
+
+{% /if %}
+
+{% if action == "runCode" %}
+
+Input: {% ai #code model="openai/gpt-4" /%}
+
+
+```js {#output}
+
+return await eval(v[code])
+
+```
+
+<!-- We show the logs from running the code to the model -->
+
+Code ran: {% $output.result %}
+
+{% /if %}
+
+{% if action == "done" %}
+
+<!-- We're done, no need to do anything, this is also checked in the loop parameters so we terminate the loop -->
+
+Done!
+
+{% /if %}
+
+{% if action != "googleSearch" && action != "runCode" && action != "done" %}
+
+<!-- Occasionally the agent will mess up and generate an invalid action, by feeding this back to the model it can self-correct -->
+
+v[action] is not a valid action, should be 'googleSearch', 'runCode' or 'done'
+
+{% /if %}
+
+{% /loop %}
+
+# Final answer: 
+
+<!-- We get the model to output a final answer, this is what we'd show to our user -->
+
+{% $finalAnswer.result %}
+
+
+================================================
+File: 8-structured-generation/extract-menu-info.md
+================================================
+---
+title: "Extract Menu Information 🍽️"
+description: "Extract structured menu information from an image"
+input:
+  - name: image
+    type: image/png|image/jpeg|image/jpg|image/webp
+    description: "The menu image to extract information from"
+---
+
+{% $frontmatter.input.image %}
+
+<!-- First we'll extract the text from the image using Gemini -->
+
+{% ai #extracted_text model="google/gemini-1.5-pro" /%}
+
+<!-- Now we'll structure the extracted text into a specific JSON format -->
+
+Based on the text above, format the menu information into the following structure:
+{
+  "restaurant_name": string,
+  "menu_items": [
+    {
+      "name": string,
+      "price": number,
+      "description": string
+    }
+  ]
+}
+
+{% ai #structured_menu model="openai/gpt-4" /%}
+
+<!-- OR -->
+
+{% structured-output #structured_menu_2 type="json" schema="{restaurant_name: string, menu_items: [{name: string, price: number, description: string}]}" /%}
+
+Output: 
+
+Name: {% $structured_menu_2.restaurant_name %}
+
+{% loop items=$structured_menu_2.menu_items %}
+
+Name: {% $item.name %}
+
+Price: {% $item.price %}
+
+Description: {% $item.description %}
+
+{% /loop %}
+
+
+
+
+
+================================================
+File: to-organize/autonomous-agents/javascript-coding-agent.md
+================================================
+---
+title: "JavaScript Coding Agent"
+description: "A JavaScript coding agent"
+input:
+  - name: problem
+    type: string
+    description: "The problem to solve"
+---
+
+Write JavaScript code that solves {% $frontmatter.input.problem %}. Return only the code and nothing else. Do not create the dictionary since it has already been assigned. Avoid using libraries that are not in the JavaScript standard libraries. You should provide code in ``` format.
+
+{% loop contains($eval.result, "end") #loopId %}
+
+    {% ai #code model="openai/gpt-4o" /%}
+
+    Now run the code:
+
+    ```js {% #output %}
+    // Function to strip off ``` and any surrounding text from the code string using regex
+    function stripCodeString(code) {
+    const match = code.match(/```[\w]*\n([\s\S]+?)\n```/);
+    if (match && match[1]) {
+        return match[1];
+    }
+    throw new Error('Invalid code format');
+    }
+
+    // Assume @code is the code string passed to this function
+    const rawCode = @code;
+
+    const strippedCode = stripCodeString(rawCode);
+
+    // We pass the stripped code that was generated as a string into `eval` which will execute it 
+    // This code block has 'continue on error' enabled so that the agent will keep running if there's an error in the code and try to fix it
+    return await eval(strippedCode);
+    ```
+
+    Result: {% debug($output) %}
+
+    Given that result and the logs for the execution, did the JavaScript code work and produced valid result? Reply `end` if it did and `retry` if it did not. Do not return anything but that one word answer. Also if the following count is larger than 5 then you must. reply `end`. Count: {% $loopId.count %}
+
+    {% ai #eval model="openai/gpt-4o" /%}
+
+    {% if contains($eval.result, "retry") %}
+        Make a change to the code and try again, so that it works next time.
+    {% /if %}
+
+{% /loop %}
+
+Final result:
+
+{% $output.code %}
+
+
+================================================
+File: to-organize/tools-and-integrations/slack.md
+================================================
+---
+title: Send a message to Slack
+input:
+  - name: message
+    type: string
+    description: "The message to send to Slack"
+  - name: channelId
+    type: string
+    description: "The channel to send the message to"
+  - name: token
+    type: string
+    description: "The Slack token to use"
+---
+
+## Channel Config
+
+1. Right click on the channel you want to send a message to and select "View Channel Details"
+2. Copy the channel ID
+
+## Token Config
+
+You only need to do this once and it'll work for all channels in the workspace that you create it.
+
+1.  Visit [this link](https://api.slack.com/apps) and login to your Slack account
+2.  Click 'Create new app' and select 'From an app manifest'
+3.  Select the workspace you want to use then paste the following app manifest (delete the triple backticks (```) if they appear at the start and end of the file), then click "Next" then "Create".
+
+```json
+{
+    "display_information": {
+        "name": "Wordware message sender",
+        "description": "An app to send messages to Slack channels via API.",
+        "background_color": "#000000"
+    },
+    "features": {
+        "bot_user": {
+            "display_name": "Wordware bot",
+            "always_online": true
+        }
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "chat:write",
+                "chat:write.public"
+            ]
+        }
+    },
+    "settings": {
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": false,
+        "token_rotation_enabled": false
+    }
+}
+```
+
+4.  Click 'Install your app' then 'Allow'
+5.  In the left sidebar select 'OAuth & Permissions' then copy the 'Bot User OAuth Token'. This should start with `xoxb-`. That's the `SLACK_BOT_TOKEN` that you'll need to enter here
+
+
+```js
+const body = {
+  channel: aimVariables.frontmatter.input.channelId,
+  blocks: [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: aimVariables.frontmatter.input.message,
+      }
+    },
+  ]
+};
+
+try {
+  const r = await fetch("https://slack.com/api/chat.postMessage", {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-type": "application/json; charset=utf-8",
+      "Authorization": "Bearer " + aimVariables.frontmatter.input.token,
+    }
+  });
+
+  const data = await r.json();
+  console.log(data);
+  if (!data.ok) {
+    console.error(`Error calling code: '${data.error}'`);
+  } else {
+    console.log("Your message was sent successfully");
+  }
+} catch(e) {
+  console.error("Something went wrong calling Slack:", e);
+  throw e;
+}
+```
+
+
+================================================
+File: to-organize/tools-and-integrations/tiktok-trending.md
+================================================
+Scraper we used can be found here - [link](https://rapidapi.com/SocialScrapper/api/tiktok-scrapper-videos-music-challenges-downloader)
+
+```js
+const url = 'https://tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com/trending/US';
+const options = {
+	method: 'GET',
+	headers: {
+		'x-rapidapi-key': '46f98799b7mshd071ca36a5e5440p12322bjsnbea781639e7f',
+		'x-rapidapi-host': 'tiktok-scrapper-videos-music-challenges-downloader.p.rapidapi.com'
+	}
+};
+
+try {
+	const response = await fetch(url, options);
+	const result = await response.text();
+	console.log(result);
+    return result;
+} catch (error) {
+	console.error(error);
+}
+```
+
+
