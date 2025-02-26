@@ -1,0 +1,40 @@
+{
+	"name": "@aim-sdk/adapters-e2b",
+	"version": "0.0.3",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js"
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@aim-sdk/tsconfig": "workspace:*",
+		"tsup": "^8.4.0",
+		"typescript": "^5.7.3",
+		"@types/node": "^20.17.19"
+	},
+	"dependencies": {
+		"@aim-sdk/core": "workspace:*",
+		"@e2b/code-interpreter": "^1.0.4",
+		"zod": "^3.24.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "tsup",
+		"clean": "rm -rf dist",
+		"type-check": "tsc --noEmit",
+		"lint": "biome lint",
+		"format": "biome check --write",
+		"test": "bun test",
+		"dev": "tsup --watch"
+	},
+	"files": ["dist/**/*", "README.md", "package.json"]
+}

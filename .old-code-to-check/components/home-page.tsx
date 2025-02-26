@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { FileCode, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Input } from "@/components/ui/input";
+import { Link } from 'react-router-dom';
 
 interface Route {
   path: string;
@@ -16,10 +16,12 @@ interface HomePageProps {
 export function HomePage({ routes }: HomePageProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredRoutes = routes.filter(route => {
+  const filteredRoutes = routes.filter((route) => {
     const searchTerm = searchQuery.toLowerCase();
-    return route.path.toLowerCase().includes(searchTerm) || 
-           route.file.toLowerCase().includes(searchTerm);
+    return (
+      route.path.toLowerCase().includes(searchTerm) ||
+      route.file.toLowerCase().includes(searchTerm)
+    );
   });
 
   return (

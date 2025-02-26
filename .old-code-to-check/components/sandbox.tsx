@@ -1,16 +1,20 @@
-import { ExecutionForm } from "@/components/route-view/execution-form";
-import { LogsTab } from "@/components/route-view/execution-tabs/logs-tab";
-import { OutputTab } from "@/components/route-view/execution-tabs/output-tab";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
+import { ExecutionForm } from '@/components/route-view/execution-form';
+import { LogsTab } from '@/components/route-view/execution-tabs/logs-tab';
+import { OutputTab } from '@/components/route-view/execution-tabs/output-tab';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { configurePrismSyntax } from '@/lib/aim-syntax-highlight';
 import { SignInButton, UserButton, useUser } from '@clerk/clerk-react';
 import MonacoEditor from '@monaco-editor/react';
-import { Loader2, PlayIcon, SaveIcon, StopCircle, Upload } from "lucide-react";
+import { Loader2, PlayIcon, SaveIcon, StopCircle, Upload } from 'lucide-react';
 import React from 'react';
-import { base64ToUnicode, unicodeToBase64 } from "../../../utils/encode-decode";
+import { base64ToUnicode, unicodeToBase64 } from '../../../utils/encode-decode';
 
 export function Sandbox() {
   const [code, setCode] = React.useState<string>('');
@@ -48,7 +52,9 @@ export function Sandbox() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       try {
@@ -56,21 +62,25 @@ export function Sandbox() {
         setCode(text);
       } catch (error) {
         console.error('Failed to read file:', error);
-        setLogs(prev => [...prev, `Error reading file: ${error}`]);
+        setLogs((prev) => [...prev, `Error reading file: ${error}`]);
       }
     }
   };
 
   const handleRun = async () => {
     try {
-      const response = await fetch('/api/aim/info?' + new URLSearchParams({
-        content: unicodeToBase64(code)
-      }), {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await fetch(
+        '/api/aim/info?' +
+          new URLSearchParams({
+            content: unicodeToBase64(code),
+          }),
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
       if (!response.ok) {
         throw new Error('Failed to get document info');
@@ -87,7 +97,7 @@ export function Sandbox() {
     } catch (e) {
       console.error('Failed to parse frontmatter:', e);
       setFrontmatter(null);
-      setLogs(prev => [...prev, `Error: ${e}`]);
+      setLogs((prev) => [...prev, `Error: ${e}`]);
     }
   };
 
@@ -99,7 +109,7 @@ export function Sandbox() {
         }
 
         const response = await fetch(`/api/abort/${requestIdRef.current}`, {
-          method: 'POST'
+          method: 'POST',
         });
 
         if (!response.ok) {
@@ -108,7 +118,7 @@ export function Sandbox() {
         }
 
         setIsRunning(false);
-        setLogs(prev => [...prev, 'Execution aborted']);
+        setLogs((prev) => [...prev, 'Execution aborted']);
         abortControllerRef.current = null;
         requestIdRef.current = '';
       } catch (error) {
@@ -134,9 +144,9 @@ export function Sandbox() {
         },
         body: JSON.stringify({
           content: unicodeToBase64(code),
-          input: variables
+          input: variables,
         }),
-        signal
+        signal,
       });
 
       if (!response.ok) {
@@ -166,16 +176,16 @@ export function Sandbox() {
               const data = JSON.parse(line.slice(6));
 
               if (data.message) {
-                setLogs(prev => [...prev, `Log: ${data.message}`]);
+                setLogs((prev) => [...prev, `Log: ${data.message}`]);
               }
               if (data.error) {
-                setLogs(prev => [...prev, `Error: ${data.error}`]);
+                setLogs((prev) => [...prev, `Error: ${data.error}`]);
               }
               if (data.output) {
-                setResult(prev => [...prev, data.output]);
+                setResult((prev) => [...prev, data.output]);
               }
               if (data.data) {
-                setResult(prev => [...prev, data.data]);
+                setResult((prev) => [...prev, data.data]);
               }
             } catch (e) {
               console.error('Failed to parse SSE data:', e);
@@ -184,13 +194,13 @@ export function Sandbox() {
         }
       }
 
-      setLogs(prev => [...prev, 'Execution completed']);
+      setLogs((prev) => [...prev, 'Execution completed']);
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         console.log('Fetch aborted');
       } else {
         console.error('Failed to execute code:', error);
-        setLogs(prev => [...prev, `Error: ${error}`]);
+        setLogs((prev) => [...prev, `Error: ${error}`]);
       }
     } finally {
       setIsRunning(false);
@@ -239,7 +249,8 @@ export function Sandbox() {
           <div className="flex flex-col items-center gap-4 max-w-md text-center">
             <h2 className="text-2xl font-bold">Welcome to AIM Sandbox</h2>
             <p className="text-gray-400">
-              This is an interactive environment where you can write, test and experiment with AIM code. Sign in to get started.
+              This is an interactive environment where you can write, test and
+              experiment with AIM code. Sign in to get started.
             </p>
           </div>
           <SignInButton mode="modal" />
@@ -253,7 +264,9 @@ export function Sandbox() {
       {/* Top Bar */}
       <div className="h-12 flex items-center justify-between px-4 bg-[#252526] border-b border-[#3c3c3c]">
         <div className="flex items-center gap-4">
-          <a href="/" className="text-sm font-medium hover:text-[#007acc]">AIM Sandbox</a>
+          <a href="/" className="text-sm font-medium hover:text-[#007acc]">
+            AIM Sandbox
+          </a>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -328,7 +341,7 @@ export function Sandbox() {
               folding: true,
               lineDecorationsWidth: 10,
               bracketPairColorization: { enabled: true },
-              padding: { top: 8 }
+              padding: { top: 8 },
             }}
           />
         </ResizablePanel>
@@ -359,11 +372,17 @@ export function Sandbox() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="output" className="p-4 h-[calc(100%-2.25rem)] overflow-auto">
+              <TabsContent
+                value="output"
+                className="p-4 h-[calc(100%-2.25rem)] overflow-auto"
+              >
                 <OutputTab result={result} isLoading={isRunning} />
               </TabsContent>
 
-              <TabsContent value="events" className="p-4 h-[calc(100%-2.25rem)] overflow-auto">
+              <TabsContent
+                value="events"
+                className="p-4 h-[calc(100%-2.25rem)] overflow-auto"
+              >
                 <LogsTab logs={logs} />
               </TabsContent>
             </Tabs>

@@ -1,60 +1,58 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ReactJson from 'react-json-view';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { configurePrismSyntax } from '@/lib/aim-syntax-highlight';
 import MonacoEditor from '@monaco-editor/react';
-import { configurePrismSyntax } from "@/lib/aim-syntax-highlight";
+import ReactJson from 'react-json-view';
 
 interface ContentTabProps {
-    rawContent: string;
-    htmlContent: string;
-    ast: any;
+  rawContent: string;
+  htmlContent: string;
+  ast: any;
 }
 
 export function ContentTab({ rawContent, htmlContent, ast }: ContentTabProps) {
-    return (
-        <Card className="h-full overflow-hidden border-slate-200">
-            <CardHeader className="border-b bg-slate-50/50 px-6">
-                <CardTitle className="text-lg font-semibold">
-                    Content View
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 h-[calc(100%-5rem)]">
-                <Tabs defaultValue="markdown" className="h-full">
-                    <TabsList className="w-full justify-start rounded-none border-b bg-slate-50/50 px-6">
-                        <TabsTrigger value="markdown">Markdown</TabsTrigger>
-                        <TabsTrigger value="html">HTML</TabsTrigger>
-                        <TabsTrigger value="ast">AST</TabsTrigger>
-                    </TabsList>
+  return (
+    <Card className="h-full overflow-hidden border-slate-200">
+      <CardHeader className="border-b bg-slate-50/50 px-6">
+        <CardTitle className="text-lg font-semibold">Content View</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0 h-[calc(100%-5rem)]">
+        <Tabs defaultValue="markdown" className="h-full">
+          <TabsList className="w-full justify-start rounded-none border-b bg-slate-50/50 px-6">
+            <TabsTrigger value="markdown">Markdown</TabsTrigger>
+            <TabsTrigger value="html">HTML</TabsTrigger>
+            <TabsTrigger value="ast">AST</TabsTrigger>
+          </TabsList>
 
-                    <ScrollArea className="h-[calc(100%-44px)]">
-                        <TabsContent value="markdown" className="p-6 m-0">
-                            <MonacoEditor
-                                height="400px"
-                                defaultLanguage="aim"
-                                theme="aim-light"
-                                value={rawContent}
-                                beforeMount={configurePrismSyntax}
-                                options={{
-                                    readOnly: true,
-                                    minimap: { enabled: false },
-                                    fontSize: 14,
-                                    wordWrap: 'on',
-                                    lineNumbers: 'off',
-                                    folding: false,
-                                    lineDecorationsWidth: 0,
-                                    lineNumbersMinChars: 0,
-                                    glyphMargin: false,
-                                    scrollBeyondLastLine: false,
-                                    padding: { top: 8 }
-                                }}
-                            />
-                        </TabsContent>
+          <ScrollArea className="h-[calc(100%-44px)]">
+            <TabsContent value="markdown" className="p-6 m-0">
+              <MonacoEditor
+                height="400px"
+                defaultLanguage="aim"
+                theme="aim-light"
+                value={rawContent}
+                beforeMount={configurePrismSyntax}
+                options={{
+                  readOnly: true,
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  wordWrap: 'on',
+                  lineNumbers: 'off',
+                  folding: false,
+                  lineDecorationsWidth: 0,
+                  lineNumbersMinChars: 0,
+                  glyphMargin: false,
+                  scrollBeyondLastLine: false,
+                  padding: { top: 8 },
+                }}
+              />
+            </TabsContent>
 
-                        <TabsContent value="html" className="p-6 m-0">
-                            <div className="content-preview">
-                                <style scoped>
-                                    {`
+            <TabsContent value="html" className="p-6 m-0">
+              <div className="content-preview">
+                <style scoped>
+                  {`
                                     .content-preview h1 {
                                         font-size: 1.5rem;
                                         font-weight: 600;
@@ -122,30 +120,33 @@ export function ContentTab({ rawContent, htmlContent, ast }: ContentTabProps) {
                                         display: none;
                                     }
                                     `}
-                                </style>
-                                <div className="content-preview" dangerouslySetInnerHTML={{ __html: htmlContent }} />
-                            </div>
-                        </TabsContent>
+                </style>
+                <div
+                  className="content-preview"
+                  dangerouslySetInnerHTML={{ __html: htmlContent }}
+                />
+              </div>
+            </TabsContent>
 
-                        <TabsContent value="ast" className="p-6 m-0">
-                            {ast && (
-                                <ReactJson
-                                    src={ast}
-                                    theme="rjv-default"
-                                    name={null}
-                                    collapsed={2}
-                                    enableClipboard={false}
-                                    displayDataTypes={false}
-                                    style={{
-                                        backgroundColor: 'transparent',
-                                        fontFamily: 'inherit'
-                                    }}
-                                />
-                            )}
-                        </TabsContent>
-                    </ScrollArea>
-                </Tabs>
-            </CardContent>
-        </Card>
-    );
+            <TabsContent value="ast" className="p-6 m-0">
+              {ast && (
+                <ReactJson
+                  src={ast}
+                  theme="rjv-default"
+                  name={null}
+                  collapsed={2}
+                  enableClipboard={false}
+                  displayDataTypes={false}
+                  style={{
+                    backgroundColor: 'transparent',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              )}
+            </TabsContent>
+          </ScrollArea>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
 }

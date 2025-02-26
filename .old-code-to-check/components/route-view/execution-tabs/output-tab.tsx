@@ -1,43 +1,41 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { renderers } from '@markdoc/markdoc';
 import { PlayCircle } from 'lucide-react';
 import React from 'react';
-import {
-    renderers
-} from '@markdoc/markdoc';
 
 interface OutputTabProps {
-    result: any[];
-    isLoading?: boolean;
+  result: any[];
+  isLoading?: boolean;
 }
 
 export function OutputTab({ result, isLoading = false }: OutputTabProps) {
-    // Create a ref to scroll to bottom
-    const resultsEndRef = React.useRef<HTMLDivElement>(null);
+  // Create a ref to scroll to bottom
+  const resultsEndRef = React.useRef<HTMLDivElement>(null);
 
-    // Scroll to bottom when new results come in
-    React.useEffect(() => {
-        if (resultsEndRef.current) {
-            resultsEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [result]);
+  // Scroll to bottom when new results come in
+  React.useEffect(() => {
+    if (resultsEndRef.current) {
+      resultsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [result]);
 
-    return (
-        <Card className="h-full overflow-hidden border-slate-200">
-            <CardHeader className="border-b bg-slate-50/50 px-6">
-                <CardTitle className="text-lg font-semibold">
-                    Execution Results
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 h-[calc(100%-5rem)]">
-                {result.length === 0 && !isLoading ? (
-                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                        <PlayCircle className="h-12 w-12 mb-4" />
-                        <p>Click the Run button to see execution results</p>
-                    </div>
-                ) : (
-                    <div className="output-preview">
-                        <style scoped>
-                            {`
+  return (
+    <Card className="h-full overflow-hidden border-slate-200">
+      <CardHeader className="border-b bg-slate-50/50 px-6">
+        <CardTitle className="text-lg font-semibold">
+          Execution Results
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0 h-[calc(100%-5rem)]">
+        {result.length === 0 && !isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <PlayCircle className="h-12 w-12 mb-4" />
+            <p>Click the Run button to see execution results</p>
+          </div>
+        ) : (
+          <div className="output-preview">
+            <style scoped>
+              {`
                             .output-preview h1 {
                                 font-size: 1.5rem;
                                 font-weight: 600;
@@ -143,32 +141,32 @@ export function OutputTab({ result, isLoading = false }: OutputTabProps) {
                                 }
                             }
                             `}
-                        </style>
-                        <div className="p-6 overflow-auto h-full">
-                            {result.map((item, index) => {
-                                if (Array.isArray(item) && item.length === 0) return null;
-                                if (!item) return null;
+            </style>
+            <div className="p-6 overflow-auto h-full">
+              {result.map((item, index) => {
+                if (Array.isArray(item) && item.length === 0) return null;
+                if (!item) return null;
 
-                                return (
-                                    <div
-                                        key={index}
-                                        className="animate-fadeIn"
-                                        dangerouslySetInnerHTML={{ __html: renderers.html(item) }}
-                                    />
-                                );
-                            })}
-                            {isLoading && (
-                                <div className="flex justify-center mt-4">
-                                    <div className="loading">
-                                        <div />
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={resultsEndRef} />
-                        </div>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    );
+                return (
+                  <div
+                    key={index}
+                    className="animate-fadeIn"
+                    dangerouslySetInnerHTML={{ __html: renderers.html(item) }}
+                  />
+                );
+              })}
+              {isLoading && (
+                <div className="flex justify-center mt-4">
+                  <div className="loading">
+                    <div />
+                  </div>
+                </div>
+              )}
+              <div ref={resultsEndRef} />
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }

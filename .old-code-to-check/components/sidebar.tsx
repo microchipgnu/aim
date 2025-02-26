@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sidebar,
   SidebarContent,
@@ -7,10 +7,22 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
-} from "@/components/ui/sidebar";
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
-import { ChevronDown, ChevronRight, FileCode, Folder, FolderOpen, Home } from 'lucide-react';
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
+import {
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/clerk-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  Folder,
+  FolderOpen,
+  Home,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -34,10 +46,12 @@ interface FolderStructure {
 
 export function AppSidebar({ routes }: SidebarProps) {
   const location = useLocation();
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['/']));
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set(['/']),
+  );
 
   const toggleFolder = (folderPath: string) => {
-    setExpandedFolders(prev => {
+    setExpandedFolders((prev) => {
       const next = new Set(prev);
       if (next.has(folderPath)) {
         next.delete(folderPath);
@@ -52,11 +66,11 @@ export function AppSidebar({ routes }: SidebarProps) {
     const structure: FolderStructure = {
       '/': {
         files: [],
-        folders: {}
-      }
+        folders: {},
+      },
     };
 
-    routes.forEach(route => {
+    routes.forEach((route) => {
       const parts = route.path.split('/');
       let currentLevel = structure['/'];
 
@@ -69,7 +83,7 @@ export function AppSidebar({ routes }: SidebarProps) {
           if (!currentLevel.folders[part]) {
             currentLevel.folders[part] = {
               files: [],
-              folders: {}
+              folders: {},
             };
           }
           currentLevel = currentLevel.folders[part];
@@ -80,11 +94,12 @@ export function AppSidebar({ routes }: SidebarProps) {
     return structure;
   }, [routes]);
 
-  const renderFolder = (structure: FolderStructure, path: string = '') => {
+  const renderFolder = (structure: FolderStructure, path = '') => {
     return Object.entries(structure).map(([folderName, content]) => {
       const fullPath = path ? `${path}/${folderName}` : folderName;
       const isExpanded = expandedFolders.has(fullPath);
-      const hasSubContent = content.files.length > 0 || Object.keys(content.folders).length > 0;
+      const hasSubContent =
+        content.files.length > 0 || Object.keys(content.folders).length > 0;
 
       return (
         <div key={folderName}>
@@ -94,11 +109,12 @@ export function AppSidebar({ routes }: SidebarProps) {
                 className="flex items-center px-2 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
                 onClick={() => hasSubContent && toggleFolder(fullPath)}
               >
-                {hasSubContent && (
-                  isExpanded ?
-                    <ChevronDown className="w-4 h-4 mr-1" /> :
+                {hasSubContent &&
+                  (isExpanded ? (
+                    <ChevronDown className="w-4 h-4 mr-1" />
+                  ) : (
                     <ChevronRight className="w-4 h-4 mr-1" />
-                )}
+                  ))}
                 {content.folders && Object.keys(content.folders).length > 0 ? (
                   <FolderOpen className="w-4 h-4 mr-2" />
                 ) : (
@@ -112,7 +128,10 @@ export function AppSidebar({ routes }: SidebarProps) {
             <div className="ml-4">
               {content.files.map((route, index) => (
                 <SidebarMenuItem key={index}>
-                  <SidebarMenuButton asChild isActive={location.pathname === `/${route.path}`}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === `/${route.path}`}
+                  >
                     <Link to={`/${route.path}`}>
                       <FileCode className="w-4 h-4 mr-2" />
                       <span>{route.path.split('/').pop() || route.path}</span>
@@ -121,7 +140,7 @@ export function AppSidebar({ routes }: SidebarProps) {
                 </SidebarMenuItem>
               ))}
               {Object.entries(content.folders).map(([subFolder, subContent]) =>
-                renderFolder({ [subFolder]: subContent }, fullPath)
+                renderFolder({ [subFolder]: subContent }, fullPath),
               )}
             </div>
           )}
@@ -155,12 +174,20 @@ export function AppSidebar({ routes }: SidebarProps) {
       <SidebarFooter>
         <div className="p-4 space-y-2">
           <Button asChild variant="outline" className="w-full">
-            <a href="https://github.com/microchipgnu/aim" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/microchipgnu/aim"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               GitHub
             </a>
           </Button>
           <Button asChild variant="outline" className="w-full">
-            <a href="https://aim.microchipgnu.pt" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://aim.microchipgnu.pt"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Documentation
             </a>
           </Button>

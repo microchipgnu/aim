@@ -2,11 +2,11 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 export interface RouteInfo {
-    path: string;
-    file: string;
-    type: 'dynamic' | 'static';
-    segments: number;
-    extension: string;
+  path: string;
+  file: string;
+  type: 'dynamic' | 'static';
+  segments: number;
+  extension: string;
 }
 
 /**
@@ -17,15 +17,18 @@ export interface RouteInfo {
  * - (group) for route groups that don't affect URL path
  * - @parallel/sequential for parallel/sequential route groups
  */
-export async function getAIMRoutes(directory: string, extensions: string[] = ['aim', 'aimd', 'md', 'mdx']): Promise<RouteInfo[]> {
+export async function getAIMRoutes(
+  directory: string,
+  extensions: string[] = ['aim', 'aimd', 'md', 'mdx'],
+): Promise<RouteInfo[]> {
   const routes: RouteInfo[] = [];
-  
-  async function scan(dir: string, routePrefix: string = '') {
+
+  async function scan(dir: string, routePrefix = '') {
     const entries = await fs.readdir(dir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
-      
+
       if (entry.isDirectory()) {
         // Skip private folders starting with _
         if (entry.name.startsWith('_')) {
@@ -60,28 +63,34 @@ export async function getAIMRoutes(directory: string, extensions: string[] = ['a
             routePart = entry.name;
           }
         }
-          
+
         await scan(fullPath, path.join(routePrefix, routePart));
-      } else if (entry.isFile() && extensions.some(ext => entry.name.endsWith(`.${ext}`))) {
+      } else if (
+        entry.isFile() &&
+        extensions.some((ext) => entry.name.endsWith(`.${ext}`))
+      ) {
         // Skip files starting with _
         if (entry.name.startsWith('_')) {
           continue;
         }
 
         // Convert file name to route part (index.aim -> /, about.aim -> /about)
-        const isIndex = extensions.some(ext => entry.name === `index.${ext}`);
+        const isIndex = extensions.some((ext) => entry.name === `index.${ext}`);
         const routePart = isIndex
           ? ''
-          : '/' + entry.name.replace(new RegExp(`\\.(${extensions.join('|')})$`), '');
-          
-        const routePath = path.join('api', routePrefix, routePart).replace(/\\/g, '/');
-        
+          : '/' +
+            entry.name.replace(new RegExp(`\\.(${extensions.join('|')})$`), '');
+
+        const routePath = path
+          .join('api', routePrefix, routePart)
+          .replace(/\\/g, '/');
+
         routes.push({
           path: routePath,
           file: fullPath,
           type: routePath.includes('[') ? 'dynamic' : 'static',
           segments: routePath.split('/').filter(Boolean).length,
-          extension: path.extname(fullPath).slice(1)
+          extension: path.extname(fullPath).slice(1),
         });
       }
     }

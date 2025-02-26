@@ -1,0 +1,42 @@
+{
+  "name": "aim-sdk-repo",
+  "workspaces": [
+    "packages/*",
+    "packages/adapters/*",
+    "packages/plugins/*",
+    "apps/inference-server/*",
+    "apps/website/*",
+    "tools/*",
+    "examples/*"
+  ],
+  "license": "Apache License",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev --no-cache --concurrency 20 --continue",
+    "lint": "turbo lint",
+    "format": "biome check --write",
+    "test": "turbo test",
+    "clean": "turbo clean",
+    "type-check": "turbo type-check",
+    "version": "changeset version && bun .github/scripts/cleanup-examples-changesets && bun install",
+    "release": "turbo build test format && changeset publish"
+  },
+  "lint-staged": {
+    "*": ["biome check --write"]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@aim-sdk/biome-config": "workspace:*",
+    "@types/bun": "^1.2.4",
+    "turbo": "2.4.4",
+    "concurrently": "^9.1.2",
+    "@changesets/cli": "2.28.1",
+    "publint": "^0.3.6",
+    "react": "19.0.0"
+  },
+  "packageManager": "bun@1.2.4",
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "aimx",
+  "description": "A terminal tool for AIM projects",
+  "version": "0.1.56",
+  "private": false,
+  "bin": {
+    "aimx": "dist/index.cjs"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist/**/*", "README.md", "package.json"],
+
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "lint": "biome lint",
+    "format": "biome check --write",
+    "test": "bun test",
+    "dev": "tsup --watch"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@changesets/cli": "^2.28.1",
+    "@types/bun": "^1.2.4",
+    "@aim-sdk/tsconfig": "workspace:*",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.3",
+    "@types/node": "^20.17.19"
+  },
+  "dependencies": {
+    "@aim-sdk/core": "workspace:*",
+    "chalk": "^5.4.1",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.7",
+    "esbuild": "^0.25.0",
+    "ora": "^8.1.1"
+  }
+}
