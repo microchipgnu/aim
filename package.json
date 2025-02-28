@@ -6,7 +6,7 @@
     "packages/plugins/*",
     "apps/inference-server/*",
     "apps/website/*",
-    "tools/*",
+    "config/*",
     "examples/*"
   ],
   "license": "Apache License",
@@ -20,7 +20,7 @@
     "clean": "turbo clean",
     "type-check": "turbo type-check",
     "version": "changeset version && bun .github/scripts/cleanup-examples-changesets && bun install",
-    "release": "turbo build test format && changeset publish"
+    "release": "turbo build test format --filter=./packages/* && changeset publish"
   },
   "lint-staged": {
     "*": ["biome check --write"]

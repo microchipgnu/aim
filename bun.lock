@@ -14,6 +14,14 @@
         "turbo": "2.4.4",
       },
     },
+    "config/biome-config": {
+      "name": "@aim-sdk/biome-config",
+      "version": "0.0.0",
+    },
+    "config/tsconfig": {
+      "name": "@aim-sdk/tsconfig",
+      "version": "0.0.0",
+    },
     "examples/start-here": {
       "name": "start-here-2",
       "version": "0.0.0",
@@ -142,14 +150,6 @@
         "typescript": "^5.7.3",
       },
     },
-    "tools/biome-config": {
-      "name": "@aim-sdk/biome-config",
-      "version": "0.0.0",
-    },
-    "tools/tsconfig": {
-      "name": "@aim-sdk/tsconfig",
-      "version": "0.0.0",
-    },
   },
   "packages": {
     "@adraffy/ens-normalize": ["@adraffy/ens-normalize@1.11.0", "", {}, "sha512-/3DDPKHqqIqxUULp8yP4zODUY1i+2xvVWsv8A79xGWdCAG+8sb0hRh0Rk2QyOJUnnbyPUAZYcpBuRe3nS2OIUg=="],
@@ -170,7 +170,7 @@
 
     "@aim-sdk/adapters-quickjs": ["@aim-sdk/adapters-quickjs@workspace:packages/adapters/quickjs"],
 
-    "@aim-sdk/biome-config": ["@aim-sdk/biome-config@workspace:tools/biome-config"],
+    "@aim-sdk/biome-config": ["@aim-sdk/biome-config@workspace:config/biome-config"],
 
     "@aim-sdk/core": ["@aim-sdk/core@workspace:packages/core"],
 
@@ -178,7 +178,7 @@
 
     "@aim-sdk/plugins-goat": ["@aim-sdk/plugins-goat@workspace:packages/plugins/goat"],
 
-    "@aim-sdk/tsconfig": ["@aim-sdk/tsconfig@workspace:tools/tsconfig"],
+    "@aim-sdk/tsconfig": ["@aim-sdk/tsconfig@workspace:config/tsconfig"],
 
     "@babel/runtime": ["@babel/runtime@7.26.9", "", { "dependencies": { "regenerator-runtime": "^0.14.0" } }, "sha512-aA63XwOkcl4xxQa3HjPMqOP6LiK0ZDv3mUPYEFXkpHbaFjtGggE1A61FjFzJnB+p7/oy2gA8E+rcBNl/zC1tMg=="],
 
