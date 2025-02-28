@@ -1,11 +1,14 @@
 {
   "name": "@aim-sdk/core",
-  "version": "0.0.0",
+  "version": "0.0.32",
   "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": ["dist/**/*", "CHANGELOG.md"],
+  "files": [
+    "dist/**/*",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
@@ -43,7 +46,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@aim-sdk/tsconfig": "workspace:*",
+    "@aim-sdk/tsconfig": "*",
     "@types/js-yaml": "^4.0.9",
     "@types/react": "^19.0.7",
     "tsup": "^8.4.0",

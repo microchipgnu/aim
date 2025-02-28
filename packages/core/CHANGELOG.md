@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.32
+
+### Patch Changes
+
+- 10b4a17: fix release version
+
 ## 0.0.31
 
 ### Patch Changes
