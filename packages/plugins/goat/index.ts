@@ -1,37 +1,37 @@
-import { http } from "viem";
-import { createWalletClient } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { base } from "viem/chains";
-import type { AIMPlugin } from "../../core/types";
+import { http } from 'viem';
+import { createWalletClient } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { base } from 'viem/chains';
+import type { AIMPlugin } from '../../core/types';
 
 export const goatPlugin: AIMPlugin = {
-	name: "goat",
-	version: "0.0.1",
-	tags: {
-		tools: {
-			render: "tools",
-			execute: async function* ({ state }) {
-				const tools = state.options.tools;
-				yield Object.keys(tools || {}).join(",");
-			},
-		},
-	},
+  name: 'goat',
+  version: '0.0.1',
+  tags: {
+    tools: {
+      render: 'tools',
+      execute: async function* ({ state }) {
+        const tools = state.options.tools;
+        yield Object.keys(tools || {}).join(',');
+      },
+    },
+  },
 };
 
-require("dotenv").config();
+require('dotenv').config();
 
 const PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY as `0x${string}`;
 
 if (!PRIVATE_KEY) {
-	throw new Error("WALLET_PRIVATE_KEY is not set");
+  throw new Error('WALLET_PRIVATE_KEY is not set');
 }
 
 const account = privateKeyToAccount(PRIVATE_KEY);
 
 const walletClient = createWalletClient({
-	account,
-	transport: http(process.env.RPC_PROVIDER_URL),
-	chain: base,
+  account,
+  transport: http(process.env.RPC_PROVIDER_URL),
+  chain: base,
 });
 
 // (async () => {

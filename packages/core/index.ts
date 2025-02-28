@@ -1,4 +1,4 @@
-import { aim } from './aim';
+import { aim, defaultRuntimeOptions } from './aim';
 import { html } from './markdoc/renderers/html';
 import { react, reactStatic } from './markdoc/renderers/react';
 import { text } from './markdoc/renderers/text';
@@ -6,7 +6,7 @@ import { baseEnvVars } from './runtime/envs/default';
 import { process } from './runtime/process';
 import { createStateManager } from './runtime/state';
 
-export { aim, process, createStateManager, baseEnvVars };
+export { aim, process, createStateManager, baseEnvVars, defaultRuntimeOptions };
 
 export const renderers = {
   html,

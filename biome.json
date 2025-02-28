@@ -1,22 +1,39 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["@aim-sdk/biome-config"],
+  "extends": ["./config/biome-config/biome.json"],
   "linter": {
     "rules": {
       "style": {
-        "noNonNullAssertion": "off",
-        "noUnusedTemplateLiteral": "off",
-        "useNodejsImportProtocol": "off",
-        "useTemplate": "off"
+        "noNonNullAssertion": "info",
+        "noUnusedTemplateLiteral": "info",
+        "useNodejsImportProtocol": "info",
+        "useTemplate": "info",
+        "useSelfClosingElements": "info",
+        "noUselessElse": "info"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "info"
       },
       "complexity": {
-        "noForEach": "off"
+        "noForEach": "info",
+        "noUselessConstructor": "info"
       },
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "info",
+        "noArrayIndexKey": "info",
+        "noImplicitAnyLet": "info"
       },
       "performance": {
-        "noAccumulatingSpread": "warn"
+        "noAccumulatingSpread": "info"
+      },
+      "a11y": {
+        "useButtonType": "info",
+        "useFocusableInteractive": "info",
+        "useSemanticElements": "info",
+        "noRedundantRoles": "info"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "info"
       }
     }
   },

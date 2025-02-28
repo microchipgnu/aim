@@ -1,6 +1,9 @@
 {
   "name": "gateway",
-  "version": "0.1.0",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "restricted"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -12,7 +15,7 @@
     "db:migrate": "bunx drizzle-kit migrate"
   },
   "dependencies": {
-    "@aim-sdk/core": "workspace:*",
+    "@aim-sdk/core": "*",
     "@aws-sdk/client-s3": "^3.750.0",
     "@aws-sdk/lib-storage": "^3.750.0",
     "@aws-sdk/s3-request-presigner": "^3.750.0",

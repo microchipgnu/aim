@@ -1,39 +1,25 @@
 {
   "name": "aim-sdk-repo",
-  "workspaces": [
-    "packages/*",
-    "packages/adapters/*",
-    "packages/plugins/*",
-    "apps/inference-server/*",
-    "apps/website/*",
-    "config/*",
-    "examples/*"
-  ],
+  "workspaces": ["packages/**", "config/**", "examples/**"],
   "license": "Apache License",
   "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  },
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev --no-cache --concurrency 20 --continue",
-    "lint": "turbo lint",
-    "format": "biome check --write",
-    "test": "turbo test",
     "clean": "turbo clean",
-    "type-check": "turbo type-check",
-    "version": "changeset version && bun .github/scripts/cleanup-examples-changesets && bun install",
-    "release": "turbo build test format --filter=./packages/* && changeset publish"
-  },
-  "lint-staged": {
-    "*": ["biome check --write"]
+    "typecheck": "turbo typecheck",
+    "lint": "biome check --diagnostic-level=error --max-diagnostics=200",
+    "lint:fix": "biome check --diagnostic-level=error --write",
+    "changeset": "changeset",
+    "version": "changeset version && bun .github/scripts/cleanup-examples-changesets && bun lint:fix",
+    "release": "bun lint:fix && turbo build --filter=./packages/* && changeset publish"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@aim-sdk/biome-config": "workspace:*",
-    "@types/bun": "^1.2.4",
-    "turbo": "2.4.4",
-    "concurrently": "^9.1.2",
     "@changesets/cli": "2.28.1",
-    "publint": "^0.3.6",
-    "react": "19.0.0"
+    "turbo": "2.4.4"
   },
   "packageManager": "bun@1.2.4",
   "engines": {

@@ -1,12 +1,12 @@
 {
   "name": "@aim-sdk/biome-config",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
-  "type": "module",
-  "exports": {
-    ".": "./biome.json"
-  },
   "publishConfig": {
     "access": "public"
+  },
+  "exports": {
+    ".": "./biome.json"
   }
 }

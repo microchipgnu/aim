@@ -20,11 +20,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist/**/*",
-    "README.md",
-    "package.json"
-  ],
+  "files": ["dist/**/*", "README.md", "package.json"],
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
