@@ -22,17 +22,34 @@ The AIM project is structured as a monorepo containing several key packages:
    - Handles state management
    - Processes multimedia content
 
-2. **@aim-sdk/server**
-   - Serves AIM projects
-   - Handles API endpoints
-   - Manages routing and request processing
-   - Provides development server capabilities
+2. **@aim-sdk/adapters**
+   - Provides integrations with various execution environments
+   - Includes adapters for code execution (e2b, quickjs)
+   - Enables extensibility for different runtime environments
 
-3. **CLI (aimd)**
+3. **CLI (aimx)**
    - Command-line interface for AIM projects
    - Project initialization and management
    - Development server controls
    - Build and deployment tools
+
+### Applications
+
+1. **Gateway**
+   - Serves as the main API gateway for AIM projects
+   - Handles authentication and user management
+   - Manages project storage and versioning
+   - Provides RESTful APIs for client applications
+
+2. **Inference Server**
+   - Handles AI model inference requests
+   - Manages model loading and execution
+   - Optimizes resource usage for AI operations
+
+3. **Website**
+   - Documentation and marketing website
+   - User guides and tutorials
+   - API documentation
 
 ### Project Structure
 
