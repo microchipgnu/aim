@@ -1,6 +1,6 @@
 {
   "name": "@aim-sdk/core",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -11,13 +11,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "build:watch": "tsup --watch",
     "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit",
-    "lint": "biome lint",
-    "format": "biome check --write",
-    "test": "bun test",
-    "dev": "bun run build:watch"
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     "./package.json": "./package.json",

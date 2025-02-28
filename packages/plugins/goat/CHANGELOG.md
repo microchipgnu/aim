@@ -1,5 +1,13 @@
 # @aim-sdk/plugins-goat
 
+## 0.0.4
+
+### Patch Changes
+
+- 9b44089: update turbo configuration
+- Updated dependencies [9b44089]
+  - @aim-sdk/core@0.0.33
+
 ## 0.0.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.33
+
+### Patch Changes
+
+- 9b44089: update turbo configuration
+
 ## 0.0.32
 
 ### Patch Changes
