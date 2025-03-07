@@ -14,7 +14,7 @@
     "lint:fix": "biome check --diagnostic-level=error --write",
     "changeset": "changeset",
     "version": "changeset version && bun .github/scripts/cleanup-examples-changesets && bun lint:fix",
-    "release": "bun lint:fix && turbo build --filter=./packages/* && changeset publish"
+    "release": "bun lint:fix && turbo build --filter=./packages/** && changeset publish"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
