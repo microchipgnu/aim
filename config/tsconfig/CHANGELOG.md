@@ -1,5 +1,11 @@
 # @markeljan/ai-tsconfig
 
+## 0.0.1
+
+### Patch Changes
+
+- a68edd2: testing
+
 ## 0.2.0
 
 ### Minor Changes

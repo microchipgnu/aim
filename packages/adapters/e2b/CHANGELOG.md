@@ -1,5 +1,13 @@
 # @aim-sdk/adapters-e2b
 
+## 0.0.5
+
+### Patch Changes
+
+- a68edd2: testing
+- Updated dependencies [a68edd2]
+  - @aim-sdk/core@0.0.34
+
 ## 0.0.4
 
 ### Patch Changes

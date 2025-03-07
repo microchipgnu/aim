@@ -1,12 +1,15 @@
 {
   "name": "@aim-sdk/plugins-goat",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": ["dist/**/*", "CHANGELOG.md"],
+  "files": [
+    "dist/**/*",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",

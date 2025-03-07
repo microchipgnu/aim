@@ -1,6 +1,6 @@
 {
   "name": "@aim-sdk/adapters-e2b",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publishConfig": {
     "access": "public"
   },
@@ -32,5 +32,9 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
-  "files": ["dist/**/*", "README.md", "package.json"]
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "package.json"
+  ]
 }

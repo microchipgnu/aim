@@ -1,11 +1,14 @@
 {
   "name": "@aim-sdk/core",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": ["dist/**/*", "CHANGELOG.md"],
+  "files": [
+    "dist/**/*",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
