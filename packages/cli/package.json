@@ -1,7 +1,7 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.59",
+  "version": "0.1.60",
   "private": false,
   "bin": {
     "aimx": "dist/index.cjs"

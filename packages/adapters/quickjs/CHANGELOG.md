@@ -1,5 +1,13 @@
 # @aim-sdk/adapters-quickjs
 
+## 0.0.3
+
+### Patch Changes
+
+- c5fe6a2: testing
+- Updated dependencies [c5fe6a2]
+  - @aim-sdk/core@0.0.35
+
 ## 0.0.2
 
 ### Patch Changes
