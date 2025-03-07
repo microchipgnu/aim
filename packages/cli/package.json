@@ -1,10 +1,10 @@
 {
   "name": "aimx",
   "description": "A terminal tool for AIM projects",
-  "version": "0.1.61",
+  "version": "0.1.62",
   "private": false,
   "bin": {
-    "aimx": "dist/index.cjs"
+    "aimx": "dist/index.js"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -14,7 +14,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.js"
     }
   },
   "publishConfig": {

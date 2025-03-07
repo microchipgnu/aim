@@ -1,5 +1,11 @@
 # aimx
 
+## 0.1.62
+
+### Patch Changes
+
+- 1317e34: fix package.json
+
 ## 0.1.61
 
 ### Patch Changes
