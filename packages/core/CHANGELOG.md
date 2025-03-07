@@ -1,5 +1,11 @@
 # @aim-sdk/core
 
+## 0.0.36
+
+### Patch Changes
+
+- 0f574ad: testing
+
 ## 0.0.35
 
 ### Patch Changes

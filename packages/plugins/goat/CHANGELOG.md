@@ -1,5 +1,13 @@
 # @aim-sdk/plugins-goat
 
+## 0.0.7
+
+### Patch Changes
+
+- 0f574ad: testing
+- Updated dependencies [0f574ad]
+  - @aim-sdk/core@0.0.36
+
 ## 0.0.6
 
 ### Patch Changes
