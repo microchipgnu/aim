@@ -1,0 +1,28 @@
+{
+  "name": "aim-sdk-repo",
+  "workspaces": ["packages/**", "config/**", "examples/**"],
+  "license": "Apache License",
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "scripts": {
+    "build": "turbo build",
+    "clean": "turbo clean",
+    "typecheck": "turbo typecheck",
+    "lint": "biome check --diagnostic-level=error --max-diagnostics=200",
+    "lint:fix": "biome check --diagnostic-level=error --write",
+    "changeset": "changeset",
+    "version": "changeset version && bun .github/scripts/cleanup-examples-changesets && bun lint:fix",
+    "release": "bun lint:fix && turbo build --filter=./packages/** && changeset publish"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@changesets/cli": "2.28.1",
+    "turbo": "2.4.4"
+  },
+  "packageManager": "bun@1.2.4",
+  "engines": {
+    "node": ">=18"
+  }
+}

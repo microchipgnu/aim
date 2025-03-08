@@ -1,0 +1,51 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["./config/biome-config/biome.json"],
+  "linter": {
+    "rules": {
+      "style": {
+        "noNonNullAssertion": "info",
+        "noUnusedTemplateLiteral": "info",
+        "useNodejsImportProtocol": "info",
+        "useTemplate": "info",
+        "useSelfClosingElements": "info",
+        "noUselessElse": "info"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "info"
+      },
+      "complexity": {
+        "noForEach": "info",
+        "noUselessConstructor": "info"
+      },
+      "suspicious": {
+        "noExplicitAny": "info",
+        "noArrayIndexKey": "info",
+        "noImplicitAnyLet": "info"
+      },
+      "performance": {
+        "noAccumulatingSpread": "info"
+      },
+      "a11y": {
+        "useButtonType": "info",
+        "useFocusableInteractive": "info",
+        "useSemanticElements": "info",
+        "noRedundantRoles": "info"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "info"
+      }
+    }
+  },
+  "files": {
+    "ignore": [
+      "node_modules",
+      "dist",
+      "build",
+      "public",
+      "server",
+      "apps/gateway/src/db",
+      ".old-code-to-check"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/turbo/schema.json",
+  "globalEnv": ["NODE_ENV"],
+  "tasks": {
+    "build": {
+      "env": ["NODE_ENV"],
+      "outputLogs": "new-only",
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "typecheck": {},
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "clean": {
+      "cache": false,
+      "outputs": []
+    }
+  }
+}

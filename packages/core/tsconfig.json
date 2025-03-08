@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@aim-sdk/tsconfig/ts-library.json",
+
+  "exclude": ["*/dist", "dist", "build", "node_modules"],
+  "compilerOptions": {
+    "types": ["bun-types"]
+  }
+}
