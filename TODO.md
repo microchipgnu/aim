@@ -12,11 +12,11 @@ Building AIM (a natural markup language for AI) tooling. This includes:
 
 0. **Overall Project** [IN PROGRESS]
     - 🚧 llms.txt
-    - 🚧 README
-    - 🚧 LICENSE
-    - ❌ Syntax highlighting
+    - ✅ README
+    - ✅ LICENSE
+    - ✅ Syntax highlighting
 
-1. **AIM Server** [IN PROGRESS]+
+1. **AIM Server** [IN PROGRESS]
     - ✅ Create a basic server
     - ✅ Introduce NextJS like routing system
     - ✅ Serve UI to navigate AIM documents
@@ -43,7 +43,7 @@ Building AIM (a natural markup language for AI) tooling. This includes:
     - ❌ Testing 
     - ❌ Generate diagram flow of how things connect
 
-3. **AIM UI** [IN PROGRESS]
+3. **AIM Gateway** [IN PROGRESS]
     - ✅ Navigate AIM documents
     - ✅ Visualize AIM document
     - ✅ Execute AIM document
@@ -58,19 +58,21 @@ Building AIM (a natural markup language for AI) tooling. This includes:
     - ✅ Create custom Markdoc nodes for AI, Loop, etc.
     - ✅ Runtime for executing AIM documents
     - ✅ Add plugin system
-    - 🚧 Introduce adapters
+    - ✅ Add `tool` concept (maybe via tags)
+    - ✅ Introduce adapters
     - ❌ Testing 
-    - ❌ Add `tool` concept (maybe via tags)
     - ❌ 100% compatibility with ai-sdk
  
 5. **AIM Website** [IN PROGRESS]
     - ✅ Create Docusaurus site
     - ✅ Syntax highlighting
-    - 🚧 Blog
+    - ✅ Blog
         - ✅ Prompt-driven Programming
         - ✅ Syntax Decisions
-    - 🚧 Docs
+        - ✅ Vibe checking while hackathoning
+    - ✅ Docs
         - ✅ Syntax
         - 🚧 Cookbook
 
-6. **Starter Project** [IN PROGRESS]
+6.  **Starter Project** 
+    - ✅ Examples
