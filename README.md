@@ -4,7 +4,7 @@ AI Markup Language (AIM) is a markup language designed to create interactive, in
 
 By merging the simplicity of Markdown with advanced programming constructs and multimedia capabilities, AIM enables users to build dynamic workflows, integrate AI tasks, and deliver rich, interactive content. 
 
-AIM documents have the file extension `.aim`, `.aimd` or `.md`.
+AIM documents have the file extension `.md` or `.aim`.
 
 ## **Architecture**
 
@@ -55,13 +55,19 @@ The AIM project is structured as a monorepo containing several key packages:
 
 ```
 aim/
-├── cli/ # Command line interface
-├── sdk/ # Core SDK packages
-│ └── packages/
+├── packages/
 │   ├── core/ # Core functionality
-│   └── server/ # Server implementation
-├── website/ # Documentation website
-└── start-here/ # Getting started guide and template project
+│   ├── plugins/ # Plugins
+│   ├── adapters/ # Adapters
+│   └── cli/ # CLI
+├── apps/
+│   ├── gateway/ # API gateway
+│   ├── inference-server/ # AI model inference
+│   └── website/ # Documentation website
+├── examples/
+│   └── start-here/ # Getting started guide and template project
+├── config/ # Configuration files
+└── .github/ # GitHub workflows and templates
 ```
 
 ## **Getting Started**
@@ -91,5 +97,7 @@ To get started with AIM, please refer to the [Getting Started](./start-here/READ
    - Deployment utilities
 
 ---
+
+## Syntax Highlighting
 
 For VS Code (and other editors based on VS Code), you can install the [AIM Syntax](https://marketplace.cursorapi.com/items?itemName=stripe.markdoc-language-support) extension.
