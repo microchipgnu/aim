@@ -157,7 +157,7 @@ const customDark = {
 const config: Config = {
   themes: ['@docusaurus/theme-mermaid'],
   title: 'AIM',
-  tagline: 'The Markup Language for AI Prompt-driven Programming',
+  tagline: 'The Markup Language for Natural Language Programming',
   favicon: 'img/favicon/favicon.ico',
 
   // Set the production url of your site here
