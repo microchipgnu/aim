@@ -1,4 +1,4 @@
-# quickjs
+# @aim-sdk/adapters-e2b
 
 To install dependencies:
 

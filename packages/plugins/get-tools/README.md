@@ -1,4 +1,4 @@
-# quickjs
+# @aim-sdk/plugins-get-tools
 
 To install dependencies:
 

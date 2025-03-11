@@ -1,4 +1,4 @@
-# quickjs
+# @aim-sdk/adapters-quickjs
 
 To install dependencies:
 
