@@ -9,6 +9,7 @@ import { GLOBAL_SCOPE } from '../../aim';
 import { resolveValue } from '../../markdoc/utils';
 import { walk } from '../../runtime/process';
 import type { StateManager } from '../../runtime/state';
+import type { AIMConfig } from '../../types';
 
 export function truthy(value: any) {
   return value !== false && value !== undefined && value !== null;
@@ -35,13 +36,13 @@ export const loopTag: Schema = {
 
 export async function* loop(
   node: Node,
-  config: Config,
+  config: AIMConfig,
   stateManager: StateManager,
 ): AsyncGenerator<RenderableTreeNodes> {
   const runtimeState = stateManager.getRuntimeState();
   const signal = runtimeState.options.signals.abort;
 
-  const attrs = node.transformAttributes(config);
+  const attrs = node.transformAttributes(config as Config);
 
   const count = resolveValue(attrs.count, config);
   const items = resolveValue(attrs.items, config);

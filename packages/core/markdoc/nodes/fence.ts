@@ -1,6 +1,7 @@
-import { type Config, type Node, Tag, nodes } from '@markdoc/markdoc';
+import type { Config, Node, RenderableTreeNode } from '@markdoc/markdoc';
+import { Tag, nodes } from '@markdoc/markdoc';
 import { GLOBAL_SCOPE } from '../../aim';
-import type { StateManager } from '../../runtime/state';
+import type { AIMConfig, StateManager } from '../../types';
 
 export const fenceNode = {
   ...nodes.fence,
@@ -12,11 +13,11 @@ export const fenceNode = {
 
 export async function* fence(
   node: Node,
-  config: Config,
+  config: AIMConfig,
   stateManager: StateManager,
 ) {
   const currentConfig = stateManager.getCurrentConfig(config);
-  const attrs = node.transformAttributes(config);
+  const attrs = node.transformAttributes(config as Config);
 
   const fenceTag = new Tag('fence');
   yield fenceTag;
@@ -50,11 +51,11 @@ export async function* fence(
   if (adapter) {
     try {
       const result = await adapter.handlers.eval(
-        {
-          code: node.attributes.content,
+        [
+          node.attributes.content,
           language,
-          variables: currentConfig.variables,
-        },
+          currentConfig.variables,
+        ],
         { manager: stateManager },
       );
 
@@ -70,7 +71,7 @@ export async function* fence(
 
       fenceTag.children = [
         new Tag('code', { language }, [node.attributes.content]),
-        result,
+        result as RenderableTreeNode,
       ];
     } catch (err) {
       stateManager.pushStack({

@@ -1,4 +1,4 @@
-import type { Config, ConfigFunction } from '@markdoc/markdoc';
+import type { ConfigFunction } from '@markdoc/markdoc';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { scan, shareReplay } from 'rxjs/operators';
 import type {
@@ -12,6 +12,7 @@ import type {
   StackFrame,
   StateBlock,
 } from '../types';
+import { validateWithResult } from '../validation';
 
 // Create a StateManager class to handle isolated state
 export class StateManager {
@@ -33,57 +34,68 @@ export class StateManager {
     initialConfig: AIMConfig,
     public runtimeOptions: RuntimeOptions,
   ) {
+    // Validate the initial config with our schema
+    const configResult = validateWithResult('AIMConfigSchema', initialConfig);
+    if (!configResult.success) {
+      console.warn(`Initial config validation warning: ${configResult.error}`);
+      // We'll still continue as the config might have additional custom properties
+    }
+
+    // Validate runtime options
+    const optionsResult = validateWithResult('RuntimeOptionsSchema', runtimeOptions);
+    if (!optionsResult.success) {
+      console.warn(`Runtime options validation warning: ${optionsResult.error}`);
+      // We'll still continue as the options might have additional custom properties
+    }
+
     // Initialize runtime context
     const initialContext: RuntimeContext = {
       stack: [],
       data: {},
       plugins: new Map(),
       adapters: new Map(),
-      config: initialConfig,
       textRegistry: {},
+      config: initialConfig,
     };
 
-    this.runtimeContext$.next(initialContext);
+    // Create runtime methods
+    const methods = this.createRuntimeMethods();
 
-    // Initialize runtime state with runtimeOptions
-    const initialState: RuntimeState = {
-      options: {
-        ...runtimeOptions,
-        config: initialConfig,
-        settings: {
-          ...runtimeOptions.settings,
-          useScoping: runtimeOptions.settings?.useScoping ?? true,
-        },
-      },
+    // Create runtime state
+    const runtimeState: RuntimeState = {
+      options: runtimeOptions,
       context: {
         ...initialContext,
-        methods: this.createRuntimeMethods(),
+        methods,
       },
     };
 
-    this.runtimeState$.next(initialState);
+    // Initialize subjects
+    this.runtimeContext$.next(initialContext);
+    this.runtimeState$.next(runtimeState);
 
-    // Setup state chain updates
+    // Setup state updates subscription
     this.stateUpdates$
       .pipe(
         scan(
-          (
-            chain: StateBlock[],
-            update: { state: RuntimeContext; action: string },
-          ) => {
-            const prevState = chain[chain.length - 1]?.state || initialContext;
-            const newBlock = this.createStateBlock(
+          (chain, update) => {
+            const prevState =
+              chain.length > 0
+                ? chain[chain.length - 1].state
+                : initialContext;
+            const block = this.createStateBlock(
               prevState,
               update.state,
               update.action,
             );
-            return [...chain, newBlock];
+            return [...chain, block];
           },
-          [],
+          [] as StateBlock[],
         ),
         shareReplay(1),
       )
       .subscribe(this.stateChain$);
+
     // Initialize secrets from environment variables
     const envVars = runtimeOptions.env || {};
     const secrets: Record<string, string> = {};
@@ -112,7 +124,7 @@ export class StateManager {
         this.addToTextRegistry(text, scope),
       clearTextRegistry: async ({ scope }: { scope: string }) =>
         this.clearTextRegistry(scope),
-      getCurrentConfig: async (config: Config) => this.getCurrentConfig(config),
+      getCurrentConfig: async (config: AIMConfig) => this.getCurrentConfig(config),
       getRuntimeContext: async () => this.getRuntimeContext(),
     };
   }
@@ -152,26 +164,31 @@ export class StateManager {
   }
 
   pushStack(frame: StackFrame) {
-    const currentContext = this.runtimeContext$.value;
-    const existingFrameIndex = currentContext.stack.findIndex(
-      (f: { id: string; scope: string }) =>
-        f.id === frame.id && f.scope === frame.scope,
-    );
-
-    const newStack = [...currentContext.stack];
-    if (existingFrameIndex !== -1) {
-      newStack[existingFrameIndex] = {
-        ...newStack[existingFrameIndex],
-        variables: {
-          ...newStack[existingFrameIndex].variables,
-          ...frame.variables,
-        },
-      };
-    } else {
-      newStack.push(frame);
+    // Validate stack frame
+    const frameResult = validateWithResult('StackFrameSchema', frame);
+    if (!frameResult.success) {
+      throw new Error(`Invalid stack frame: ${frameResult.error}`);
     }
 
-    this.updateContext({ ...currentContext, stack: newStack }, 'pushStack');
+    const currentContext = this.runtimeContext$.value;
+    const existingFrameIndex = currentContext.stack.findIndex(
+      (f: { id: string }) => f.id === frame.id,
+    );
+
+    let updatedStack;
+    if (existingFrameIndex >= 0) {
+      updatedStack = [...currentContext.stack];
+      updatedStack[existingFrameIndex] = frame;
+    } else {
+      updatedStack = [...currentContext.stack, frame];
+    }
+
+    const newContext = {
+      ...currentContext,
+      stack: updatedStack,
+    };
+
+    this.updateContext(newContext, `pushStack:${frame.id}`);
   }
 
   popStack(scope: string) {
@@ -200,8 +217,8 @@ export class StateManager {
       data: {},
       plugins: new Map(),
       adapters: new Map(),
-      config: this.runtimeContext$.value.config,
       textRegistry: {},
+      config: this.runtimeContext$.value.config,
     };
     this.updateContext(newContext, 'resetContext');
   }
@@ -229,25 +246,41 @@ export class StateManager {
   }
 
   registerPlugin(plugin: AIMPlugin, options?: unknown) {
+    // Validate plugin
+    const pluginResult = validateWithResult('AIMPluginSchema', plugin);
+    if (!pluginResult.success) {
+      throw new Error(`Invalid plugin: ${pluginResult.error}`);
+    }
+     
     this.validatePlugin(plugin);
     const currentContext = this.runtimeContext$.value;
-
+    
+    // Initialize plugin if needed
     if (plugin.init) {
-      plugin.init(currentContext.config, options);
+      try {
+        plugin.init(currentContext.config, options);
+      } catch (error) {
+        throw new Error(`Failed to initialize plugin ${plugin.name}: ${error}`);
+      }
     }
 
+    // Register plugin
     const newPlugins = new Map(currentContext.plugins);
     newPlugins.set(plugin.name, plugin);
-    const newConfig = this.mergePluginConfig(plugin, currentContext.config);
 
-    this.updateContext(
-      {
-        ...currentContext,
-        plugins: newPlugins,
-        config: newConfig,
-      },
-      'registerPlugin',
+    // Merge plugin config with current config
+    const mergedConfig = this.mergePluginConfig(
+      plugin,
+      currentContext.config,
     );
+
+    const newContext = {
+      ...currentContext,
+      plugins: newPlugins,
+      config: mergedConfig,
+    };
+
+    this.updateContext(newContext, `registerPlugin:${plugin.name}`);
   }
 
   getPlugin(name: string): AIMPlugin | undefined {
@@ -255,25 +288,38 @@ export class StateManager {
   }
 
   registerAdapter(adapter: AIMAdapter) {
+    // Validate adapter
+    const adapterResult = validateWithResult('AIMAdapterSchema', adapter);
+    if (!adapterResult.success) {
+      throw new Error(`Invalid adapter: ${adapterResult.error}`);
+    }
+     
     const currentContext = this.runtimeContext$.value;
     if (currentContext.adapters.has(adapter.type)) {
-      return; // Adapter already registered, do nothing
+      throw new Error(`Adapter with type ${adapter.type} already registered`);
     }
 
+    // Initialize adapter if needed
     if (adapter.init) {
-      adapter.init();
+      try {
+        adapter.init();
+      } catch (error) {
+        throw new Error(
+          `Failed to initialize adapter ${adapter.type}: ${error}`,
+        );
+      }
     }
 
+    // Register adapter
     const newAdapters = new Map(currentContext.adapters);
     newAdapters.set(adapter.type, adapter);
 
-    this.updateContext(
-      {
-        ...currentContext,
-        adapters: newAdapters,
-      },
-      'registerAdapter',
-    );
+    const newContext = {
+      ...currentContext,
+      adapters: newAdapters,
+    };
+
+    this.updateContext(newContext, `registerAdapter:${adapter.type}`);
   }
 
   getAdapter(type: string): AIMAdapter | undefined {
@@ -281,30 +327,46 @@ export class StateManager {
   }
 
   private validatePlugin(plugin: AIMPlugin) {
+    // Use our schema validation
+    const validationResult = validateWithResult('AIMPluginSchema', plugin);
+    
+    if (!validationResult.success) {
+      const issues = validationResult.issues.map(issue => 
+        `${issue.path}: ${issue.message}`
+      ).join(', ');
+      
+      throw new Error(`Plugin validation failed: ${validationResult.error}. Issues: ${issues}`);
+    }
+    
+    // Additional custom validations can go here...
     const currentContext = this.runtimeContext$.value;
     if (currentContext.plugins.has(plugin.name)) {
-      return; // Already registered, do nothing
+      throw new Error(`Plugin ${plugin.name} already registered`);
     }
 
     if (plugin.dependencies?.plugins) {
       for (const dep of plugin.dependencies.plugins) {
-        if (!currentContext.plugins.get(dep.name)) {
+        if (!currentContext.plugins.has(dep.name)) {
           throw new Error(
-            `Plugin ${plugin.name} requires ${dep.name}, but it's not registered`,
+            `Plugin ${plugin.name} depends on ${dep.name} which is not registered`,
           );
         }
+        // TODO: Add version check
       }
     }
 
     if (plugin.dependencies?.adapters) {
       for (const dep of plugin.dependencies.adapters) {
-        if (!currentContext.adapters.get(dep.name)) {
+        if (!currentContext.adapters.has(dep.name)) {
           throw new Error(
-            `Plugin ${plugin.name} requires adapter ${dep.name}, but it's not registered`,
+            `Plugin ${plugin.name} depends on adapter ${dep.name} which is not registered`,
           );
         }
+        // TODO: Add version check
       }
     }
+     
+    return true;
   }
 
   private mergePluginConfig(
@@ -335,22 +397,32 @@ export class StateManager {
     newState: RuntimeContext,
     action: string,
   ): StateBlock {
-    return {
+    const stateBlock = {
       timestamp: Date.now(),
       action,
-      hash: crypto.randomUUID(),
-      previousHash: this.stateChain$.value.at(-1)?.hash || 'genesis',
+      hash: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      previousHash:
+        this.stateChain$.value.length > 0
+          ? this.stateChain$.value[this.stateChain$.value.length - 1].hash
+          : 'genesis',
       state: newState,
       diff: {
         stack: newState.stack.length - prevState.stack.length,
-        textRegistry:
-          Object.keys(newState.textRegistry).length -
+        textRegistry: Object.keys(newState.textRegistry).length -
           Object.keys(prevState.textRegistry).length,
-        data:
-          Object.keys(newState.data).length -
+        data: Object.keys(newState.data).length -
           Object.keys(prevState.data).length,
       },
     };
+     
+    // Validate the created state block
+    const blockResult = validateWithResult('StateBlockSchema', stateBlock);
+    if (!blockResult.success) {
+      console.warn(`State block validation warning: ${blockResult.error}`);
+      // We'll still return the block but log the warning
+    }
+     
+    return stateBlock;
   }
 
   private updateContext(newContext: RuntimeContext, action: string) {
@@ -394,14 +466,21 @@ export class StateManager {
     }
 
     const stackVariables: Record<string, any> = {};
-    Object.values(scopedVariables).forEach((scopeVars) => {
-      Object.assign(stackVariables, scopeVars);
-    });
+
+    // Merge all scoped variables into a flat object
+    // We need to iterate through each scope's variables
+    for (const scope in scopedVariables) {
+      // For each scope, merge all frame variables
+      const scopeVars = scopedVariables[scope];
+      for (const frameId in scopeVars) {
+        Object.assign(stackVariables, scopeVars[frameId]);
+      }
+    }
 
     return stackVariables;
   }
 
-  getCurrentConfig(config: Config): Config {
+  getCurrentConfig(config: AIMConfig): AIMConfig {
     const currentConfig = this.runtimeState$.value.options.config;
     const stackVariables = this.processScopedVariables();
     return {
@@ -416,18 +495,30 @@ export class StateManager {
   }
 
   getRuntimeState(): RuntimeState {
+    if (!this.runtimeState$.value) {
+      throw new Error('Runtime state is not initialized');
+    }
     return this.runtimeState$.value;
   }
 
   getRuntimeContext(): RuntimeContext {
+    if (!this.runtimeContext$.value) {
+      throw new Error('Runtime context is not initialized');
+    }
     return this.runtimeContext$.value;
   }
 
   getStateHistory(): StateBlock[] {
+    if (!this.stateChain$.value) {
+      throw new Error('State chain is not initialized');
+    }
     return this.stateChain$.value;
   }
 
   getStateAtBlock(hash: string): RuntimeContext | undefined {
+    if (!this.stateChain$.value) {
+      throw new Error('State chain is not initialized');
+    }
     return this.stateChain$.value.find((b: { hash: string }) => b.hash === hash)
       ?.state;
   }

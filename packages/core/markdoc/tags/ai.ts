@@ -12,8 +12,7 @@ import { type ToolExecutionOptions, generateObject, generateText } from 'ai';
 import { chromeai as chromeAI } from 'chrome-ai';
 import { createOllama } from 'ollama-ai-provider';
 import { GLOBAL_SCOPE } from '../../aim';
-import type { StateManager } from '../../runtime/state';
-import { convertToAISDKTool } from '../../runtime/tools/converter';
+import type { AIMConfig, AIMTool, StateManager } from '../../types';
 import { text } from '../renderers/text';
 
 export const aiTag: Schema = {
@@ -37,13 +36,13 @@ export const aiTag: Schema = {
 
 export async function* ai(
   node: Node,
-  config: Config,
+  config: AIMConfig,
   stateManager: StateManager,
 ): AsyncGenerator<RenderableTreeNodes> {
   const runtimeState = stateManager.getRuntimeState();
   const signal = runtimeState.options.signals.abort;
 
-  const attrs = node.transformAttributes(config);
+  const attrs = node.transformAttributes(config as Config);
 
   if (signal.aborted) {
     throw new Error('AI execution aborted');
@@ -65,26 +64,28 @@ export async function* ai(
   }
 
   const allTools = Object.fromEntries(
-    Object.entries(stateManager.getRuntimeState().options.tools || {}).map(
-      ([name, tool]) => [name, convertToAISDKTool(tool)],
+    Object.entries(runtimeState.options.tools || {}).map(
+      ([name, tool]) => [name, tool],
     ),
   );
 
-  const tools =
+  const tools: Record<string, AIMTool> =
     attrs.tools === '*'
-      ? allTools
+      ? allTools as Record<string, AIMTool>
       : requestedTools
         ? Object.fromEntries(
             Object.entries(allTools).filter(([name]) =>
               requestedTools.includes(name),
             ),
-          )
+          ) as Record<string, AIMTool>
         : {};
 
   for (const [name, tool] of Object.entries(tools || {})) {
     if (tool?.execute) {
       const originalExecute = tool.execute;
-      tool.execute = async (args: unknown, options: ToolExecutionOptions) => {
+      
+      tool.execute = async (args: unknown, ...rest: unknown[]) => {
+        const options = rest[0] as ToolExecutionOptions;
         const result = await originalExecute(args, options);
 
         stateManager.addToTextRegistry(

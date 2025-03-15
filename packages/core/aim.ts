@@ -26,7 +26,7 @@ import { parallelTag } from './markdoc/tags/parallel';
 import { setTag } from './markdoc/tags/set';
 import { execute, executeGenerator } from './runtime/execute';
 import { StateManager } from './runtime/state';
-import type { RuntimeOptions } from './types';
+import type { AIMPlugin, RuntimeOptions } from './types';
 
 export const GLOBAL_SCOPE = 'global';
 
@@ -116,7 +116,7 @@ export function aim({
 
   // Convert plugins to Markdoc tags
   const pluginsConvertedToMarkdocTags: Record<string, Schema> =
-    options.plugins?.reduce((acc, p) => {
+    options.plugins?.reduce((acc: Record<string, Schema>, p: { plugin: AIMPlugin, options: unknown }) => {
       const tags = Object.entries(p.plugin.tags || {}).reduce(
         (filtered, [key, tag]) => {
           const { runtime, ...tagWithoutRuntime } = tag as any;
@@ -265,7 +265,7 @@ export function aim({
 
       const generator = executeGenerator({
         node: ast,
-        stateManager: stateManager as any,
+        stateManager: stateManager,
       });
 
       const timeoutId = setTimeout(() => {

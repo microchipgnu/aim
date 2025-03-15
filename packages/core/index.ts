@@ -6,7 +6,11 @@ import { baseEnvVars } from './runtime/envs/default';
 import { process } from './runtime/process';
 import { createStateManager } from './runtime/state';
 
-export { aim, process, createStateManager, baseEnvVars, defaultRuntimeOptions };
+// Export Zod schemas for validation
+import * as schemas from './schemas';
+import { validate, validateSafe, validateWithResult } from './validation';
+
+export { aim, process, createStateManager, baseEnvVars, defaultRuntimeOptions, schemas, validate, validateSafe, validateWithResult };
 
 export const renderers = {
   html,
@@ -25,4 +29,8 @@ export type {
   AIMResult,
   AIMOutput,
   RuntimeOptions,
+  RuntimeContext,
+  RuntimeState,
+  StackFrame,
+  StateBlock,
 } from './types';
