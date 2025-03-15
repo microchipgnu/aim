@@ -72,7 +72,7 @@ aim/
 
 ## **Getting Started**
 
-To get started with AIM, please refer to the [Getting Started](./start-here/README.md) guide.
+To get started with AIM, please refer to the [Getting Started](./examples/start-here/) guide.
 
 ## **Documentation**
 
