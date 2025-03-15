@@ -1,6 +1,6 @@
 ![](aim-social-card.png)
 
-**AI M**arkup Language (AIM) is a markup language designed to create interactive, intelligent, and multimodal documents. 
+**AI M**arkup Language (AIM) is an markup language designed to create interactive, intelligent, and multimodal documents. 
 
 By merging the simplicity of Markdown with advanced programming constructs and multimedia capabilities, AIM enables users to build dynamic workflows, integrate AI tasks, and deliver rich, interactive content. 
 
